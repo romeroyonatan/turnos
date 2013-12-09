@@ -1,0 +1,92 @@
+{% extends "application.html" %}
+{% block title %}Reservar turno{% endblock %}
+
+{% block content %}
+<form action="." method="post" class="pure-form pure-form-aligned pure-g-r">
+	<fieldset title="Datos personales" class="pure-u-1-2">
+		<legend>Datos personales</legend>
+	
+		<div class="pure-control-group">
+			{{ form.dni.errors }}
+			<label for="id_dni">DNI</label>
+			{{ form.dni }}
+		</div>
+	
+		<div class="pure-control-group">
+			{{ form.numero.errors }}
+			<label for="id_numero">Numero afiliado</label>
+			{{ form.numero }}
+		</div>	
+	
+		<div class="pure-control-group">
+			{{ form.telefono.errors }}
+			<label for="id_telefono">Teléfono</label>
+			{{ form.telefono }}
+		</div>
+		
+	</fieldset>
+
+	<fieldset title="Datos de turno" class="pure-u-1-2">
+		<legend>Datos de turno</legend>
+		
+		<div class="pure-control-group">
+			{{ form.especialidad.errors }}
+			<label for="id_especialidad">Especialidad</label>
+			{{ form.especialidad }}
+		</div>
+		
+		<div class="pure-control-group">
+			{{ form.especialista.errors }}	
+			<label for="id_especialista">Especialista</label>
+			{{ form.especialista }}
+		</div>
+	
+		<div class="pure-control-group">
+			{{ form.dia.errors }}
+			<label for="id_dia">Dia</label>
+			{{ form.dia }}
+		</div>
+		
+		<div class="pure-control-group">
+			{{ form.hora.errors }}	
+			<label for="id_hora">Hora</label>
+			{{ form.hora }}
+		</div>
+		
+		<div class="pure-controls">		
+			<input type="button" value="Agregar" class="pure-button pure-button-primary"/>
+		</div>
+	</fieldset>
+
+
+	<fieldset title="Lista de turnos" class="pure-u-1">
+		{{ form.turnos }}
+		<legend>Lista de turnos</legend>
+		<table class="pure-table">
+		<thead>
+			<th>Especialidad</th>
+			<th>Especialista</th>
+			<th>Dia</th>
+			<th>Horario</th>
+			<th>Sobreturno</th>
+		</thead>
+		<tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+		</table>
+	</fieldset>
+	
+	<div class="pure-u-1-2">
+	</div>
+	<div class="pure-u-1-2">
+		<div class="pure-controls">
+		<input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
+		<input type="submit" value="Reservar" class="pure-button pure-button-primary"/>
+		</div>
+	</div>
+</form>
+{% endblock %}
