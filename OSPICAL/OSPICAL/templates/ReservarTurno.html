@@ -1,5 +1,12 @@
 {% extends "application.html" %}
+{% load static %}
+
 {% block title %}Reservar turno{% endblock %}
+
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/reservaturno.js' %}"></script>
+{% endblock %}
 
 {% block content %}
 <form action="." method="post" class="pure-form pure-form-aligned pure-g-r">

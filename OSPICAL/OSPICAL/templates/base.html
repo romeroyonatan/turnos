@@ -12,12 +12,12 @@
 	<link rel="stylesheet" href="{% static 'css/bootstrap.alert.css' %}" />
 	{% endblock %}
 	{% block js %}
+	<script src="{% static 'js/jquery.min.js' %}"></script>
 	{% endblock %}
 </head>
 <body>
 
 <div id="layout">
-{% block menu %}{% endblock %}
 {% block main %}{% endblock %}
 </div>
 </body>

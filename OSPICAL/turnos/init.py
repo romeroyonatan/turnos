@@ -28,4 +28,8 @@ _fecha=datetime.datetime.now() + datetime.timedelta(days=3)
 t=Turno(fecha=_fecha,estado=Turno.DISPONIBLE,sobreturno=False,consultorio=c,especialista=es)
 t.save()
 
+r=Reserva(fecha=datetime.datetime.now(),telefono='41234345',afiliado=a)
+r.save()
 
+lr=LineaDeReserva(estado=Turno.CANCELADO,reserva=r,turno=t)
+lr.save()

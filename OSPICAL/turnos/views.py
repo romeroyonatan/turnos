@@ -43,7 +43,7 @@ def getDiaTurnos(request, especialista_id):
 
 def getTurnosDisponibles(request, especialista_id, year, month, day):
     bussiness = Bussiness()
-    fecha = datetime.datetime(year,month,day)
+    fecha = datetime.datetime(int(year),int(month),int(day))
     data = bussiness.getTurnosDisponibles(especialista_id, fecha)
     return JSONResponse(data)
 
@@ -53,6 +53,8 @@ def verificarPresentismo(request, afiliado_id):
     data = dict([('presentismo_ok', True)])
     return JSONResponse(data)
 
-def getTelefono():
-    pass
+def getTelefono(request, afiliado_id):
+    queryset = Reserva.objects.filter(afiliado__id=afiliado_id).order_by('-fecha')
+    data = [item for item in queryset.values('telefono')]
+    return JSONResponse(data)
 
