@@ -19,6 +19,17 @@
 		</div>	
 	
 		<div class="pure-control-group">
+			<label for="nombre">Nombre</label>
+			{{ form.nombre }}
+		</div>	
+	
+		<div class="pure-control-group">
+			{{ form.numero.errors }}
+			<label for="apellido">Apellido</label>
+			{{ form.apellido }}
+		</div>	
+	
+		<div class="pure-control-group">
 			{{ form.telefono.errors }}
 			<label for="id_telefono">Teléfono</label>
 			{{ form.telefono }}
@@ -66,7 +77,7 @@
 		<thead>
 			<th>Especialidad</th>
 			<th>Especialista</th>
-			<th>Dia</th>
+			<th>Día</th>
 			<th>Horario</th>
 			<th>Sobreturno</th>
 		</thead>

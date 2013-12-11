@@ -1,26 +1,58 @@
 # Create your views here.
-from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
-from turnos.forms import ReservarTurnoForm
 import datetime
+import json
+from time import mktime
 
+from django.http import HttpResponseRedirect,HttpResponse
+from django.shortcuts import render_to_response
+from django.core import serializers
 
-def current_datetime(request):
-    now = datetime.datetime.now()
-    return render_to_response('current_datetime.html', {'ahora': now})
+from turnos.forms import *
+from turnos.models import *
+from turnos.bussiness import Bussiness
 
-def hours_ahead(request, offset):
-    offset = int(offset)
-    dt = datetime.datetime.now() + datetime.timedelta(hours=offset)
-    return render_to_response('hours_ahead.html',locals())
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return int(mktime(obj.timetuple()))
+        return json.JSONEncoder.default(self, obj)
+
+def JSONResponse(response):
+    return HttpResponse(json.dumps(response, cls = MyEncoder), content_type="application/json")
 
 def reservar(request):
     if request.method == 'POST':
         form = ReservarTurnoForm(request.POST)
         if form.is_valid():
-            return HttpResponseRedirect('/horarios/dia/')
-        return HttpResponseRedirect('/horarios/dia/')
+            pass
+        return HttpResponseRedirect('/reservar/')
     else:
         form = ReservarTurnoForm()
-    error="Para reservar un turno debe llenar este formulario"
     return render_to_response('ReservarTurno.html', locals())
+
+def get(request, model, parametro, valor):
+    filtro = dict([(parametro, valor)])
+    queryset = model.objects.filter(**filtro)
+    data = [item for item in queryset.values()]
+    return JSONResponse(data)
+
+def getDiaTurnos(request, especialista_id):
+    queryset = Turno.objects.filter(especialista__id=especialista_id, fecha__gte=datetime.datetime.now())
+    data = [item for item in queryset.values()]
+    return JSONResponse(data)
+
+def getTurnosDisponibles(request, especialista_id, year, month, day):
+    bussiness = Bussiness()
+    fecha = datetime.datetime(year,month,day)
+    data = bussiness.getTurnosDisponibles(especialista_id, fecha)
+    return JSONResponse(data)
+
+def verificarPresentismo(request, afiliado_id):
+    # Contar cantidad de veces ausente en el plazo configurado
+    # presentismo_ok si es menor a la cantidad tolerable
+    data = dict([('presentismo_ok', True)])
+    return JSONResponse(data)
+
+def getTelefono():
+    pass
+

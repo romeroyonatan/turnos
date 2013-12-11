@@ -11,12 +11,14 @@ class Afiliado(models.Model):
 class Especialidad(models.Model):
     descripcion = models.CharField(max_length=50)
     fecha_baja = models.DateField(null=True)
+    def __str__(self):
+        return self.descripcion
     
 class Consultorio (models.Model):
     numero = models.CharField(max_length=1)
-    ubicacion = models.CharField(max_length=50)
-    descripcion = models.CharField(max_length=100)
     disponible = models.BooleanField()
+    ubicacion = models.CharField(max_length=50, null=True)
+    descripcion = models.CharField(max_length=100, null=True)
 
 class Empleado (models.Model):
     nombre = models.CharField(max_length=50)
@@ -52,8 +54,8 @@ class Disponibilidad(models.Model):
            )
     # Atributos ~
     dia = models.CharField(max_length=1, choices=DIA)
-    horaDesde = models.CharField(max_length=1)
-    horaHasta = models.CharField(max_length=1)
+    horaDesde = models.PositiveSmallIntegerField()
+    horaHasta = models.PositiveSmallIntegerField()
     consultorio = models.ForeignKey(Consultorio, null=True)
     
 class Especialista(models.Model):
@@ -94,7 +96,7 @@ class LineaDeReserva (models.Model):
 
 class HistorialTurno(models.Model):
     fecha = models.DateTimeField()
-    estadoAnterior = models.CharField(max_length=1)
+    estadoAnterior = models.CharField(max_length=1, null=True)
     estadoNuevo = models.CharField(max_length=1)
     descripcion = models.CharField(max_length=100, null=True)
     turno = models.ForeignKey(Turno)

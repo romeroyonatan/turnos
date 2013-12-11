@@ -1,15 +1,16 @@
 from django.conf.urls import patterns, include, url
-from turnos.views import current_datetime, hours_ahead, reservar;
+from turnos.models import Afiliado, Especialista
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
-    (r'^reservar/$', reservar),
-    (r'^afiliado/dni/(\d{1,2})$', hours_ahead),
-    (r'^afiliado/nro/(\d{1,2})$', hours_ahead),
-    (r'^especialistas/especialidad$', hours_ahead),
-    (r'^turnos/especialista/$', hours_ahead),
-    (r'^horarios/dia/$', current_datetime),
+urlpatterns = patterns('turnos.views',
+    (r'^reservar/$', 'reservar'),
+    (r'^afiliado/(?P<parametro>(id|numero|dni))/(?P<valor>\w+)$', 'get', {'model':Afiliado}),
+    (r'^json/afiliado/id/telefono$', 'getTelefono'),
+    (r'^json/presentismo/(?P<afiliado_id>\w+)$', 'verificarPresentismo'),
+    (r'^json/especialistas/(?P<parametro>\w+)/(?P<valor>\w+)$', 'get', {'model':Especialista}),
+    (r'^json/turnos/(?P<especialista_id>\d+)/$', 'getDiaTurnos'),
+    (r'^json/turnos/(?P<especialista_id>\d+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$', 'getTurnosDisponibles'),
 )
