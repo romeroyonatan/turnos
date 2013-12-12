@@ -12,6 +12,49 @@ String.prototype.format = function () {
 function n(n){
     return n > 9 ? n: "0" + n;
 }
+//TODO Agrupar estas funciones en una clase Turno
+/**
+ * Obtiene la lista de turnos a reservar
+ */
+function getTurnos(){
+	var json = $("#id_turnos").val();
+	// Reconstruyendo JSON
+	return json ? eval(json) : new Array();
+}
+
+/**
+ * Guarda la lista de turnos
+ * @param turnos Lista de turnos a guardar
+ */
+function guardarTurnos(turnos) {
+	// Creando JSON
+	var json = JSON.stringify(turnos);
+	$("#id_turnos").val(json);
+}
+
+/**
+ * Agrega un turno a la lista
+ * @param turno_id id de turno a agregar
+ */
+function agregar(turno_id) {
+	var turnos = getTurnos();
+	if(turnos.indexOf(turno_id) == -1) {
+		turnos.push(turno_id);
+		guardarTurnos(turnos);
+	}
+}
+
+/**
+ * Elimina un turno a la lista
+ * @param turno_id id de turno a eliminar
+ */
+function eliminar(turno_id) {
+	var turnos = getTurnos();
+	var index = turnos.indexOf(turno_id);
+	turnos.splice(index, 1);
+	guardarTurnos(turnos);
+}
+
 $(document).ready(function(){
 	$("#id_dni").blur(function() {
 		dni = $("#id_dni").val();
@@ -117,27 +160,9 @@ $(document).ready(function(){
 	});
 	
 	$("#id_agregar").click(function() {
-		var id_turno = $("#id_hora").val();
-		var id_afiliado = $("#id_afiliado").val();
-		var id = $("#id_especialidad").val();
-		if(!id)
+		var turno_id = $("#id_especialidad").val();
+		if(!turno_id)
 			return;
-		var d = new Date(milis);
-		var url = '/json/turnos/{0}/{1}/{2}/{3}/'.format(id, d.getFullYear(),d.getMonth()+1,d.getDate());
-		var destino = $('#id_hora');
-		$.getJSON(url, function(data) {
-			if(data.length > 0) {
-				destino.removeAttr('disabled');
-				var options = "<option value='{0}'>{1}</option>".format(0,defaultMessage);
-				$.each(data,function(index, value){
-					fecha = new Date(value.fecha * 1000)
-					options += '<option value="{0}">{1}:{2}</option>'.format(value.id, 
-																			 n(fecha.getHours()),
-																			 n(fecha.getMinutes()));
-				});
-				destino.empty().append(options);
-			}
-		});
+		agregar(turno_id);
 	});
-	
 });
