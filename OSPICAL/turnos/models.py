@@ -63,8 +63,12 @@ class Especialista(models.Model):
     apellido = models.CharField(max_length=50)
     dni = models.IntegerField()
     fecha_baja = models.DateField(null=True)
-    especialidades = models.ManyToManyField(Especialidad)
     disponibilidad = models.ManyToManyField(Disponibilidad, null=True)
+
+class EspecialistaEspecialidad(models.Model):
+    especialista = models.ForeignKey(Especialista)
+    especialidad = models.ForeignKey(Especialidad)
+    fechaBaja = models.DateField(null=True)
 
 class Turno (models.Model):
     # Constantes ~
@@ -87,7 +91,7 @@ class Turno (models.Model):
     estado = models.CharField(max_length=1, choices=ESTADO)
     sobreturno = models.BooleanField()
     consultorio = models.ForeignKey(Consultorio, null=True)
-    especialista = models.ForeignKey(Especialista)
+    ee = models.ForeignKey(EspecialistaEspecialidad)
     
 class LineaDeReserva (models.Model):
     estado = models.CharField(max_length=1, choices=Turno.ESTADO)

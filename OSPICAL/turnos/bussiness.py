@@ -19,18 +19,17 @@ class Bussiness():
             disponibles=self.crearSobreturnos()
         return disponibles
     
-    def buscarTurnosDisponibles(self, especialista_id, fecha):
-        queryset = Turno.objects.filter(especialista=especialista_id, 
+    def buscarTurnosDisponibles(self, especialista, fecha):
+        queryset = Turno.objects.filter(ee__especialista=especialista, 
                                         fecha__year=fecha.year,
                                         fecha__month=fecha.month,
                                         fecha__day=fecha.day,
                                         estado=Turno.DISPONIBLE,
                                         )
-        print(queryset.query.__str__())
         return [item for item in queryset.values()]
     
-    def haySobreturnos(self, Especialista, fecha):
-        queryset = Turno.objects.filter(especialista=Especialista, 
+    def haySobreturnos(self, especialista, fecha):
+        queryset = Turno.objects.filter(ee__especialista=especialista, 
                                         fecha__year=fecha.year,
                                         fecha__month=fecha.month,
                                         fecha__day=fecha.day,

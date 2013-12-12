@@ -6,6 +6,7 @@ from time import mktime
 from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import render_to_response
 from django.core import serializers
+from django.forms.models import model_to_dict
 
 from turnos.forms import *
 from turnos.models import *
@@ -37,8 +38,14 @@ def get(request, model, parametro, valor):
     return JSONResponse(data)
 
 def getDiaTurnos(request, especialista_id):
-    queryset = Turno.objects.filter(especialista__id=especialista_id, fecha__gte=datetime.datetime.now())
+    # TODO Solo devolver una lista de dias y el estado (Completo, Sobreturno)
+    queryset = Turno.objects.filter(ee__especialista__id=especialista_id, fecha__gte=datetime.datetime.now())
     data = [item for item in queryset.values()]
+    return JSONResponse(data)
+
+def getEspecialistas(request, especialidad_id):
+    queryset = EspecialistaEspecialidad.objects.filter(especialidad__id = especialidad_id)
+    data = [model_to_dict(item.especialista) for item in queryset]
     return JSONResponse(data)
 
 def getTurnosDisponibles(request, especialista_id, year, month, day):

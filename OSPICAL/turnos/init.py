@@ -7,7 +7,7 @@ a.save()
 b = Afiliado(nombre='Un duplicado',apellido='Perez',dni=12345678,numero='000100020033')
 b.save()
 
-e=Especialidad(descripcion="Odontologia")
+e=Especialidad(descripcion="Odontología")
 e.save()
 
 c=Consultorio(numero='1',disponible=True)
@@ -20,12 +20,14 @@ d=Disponibilidad(dia='0',horaDesde=1230,horaHasta=1900,consultorio=c)
 d.save()
 
 es=Especialista(nombre='María de los ángeles', apellido='Fernández',dni=11559977)
-es.especialidades.add(e)
-es.disponibilidad.add(d)
 es.save()
+es.disponibilidad.add(d)
+
+ee=EspecialistaEspecialidad(especialista=es, especialidad=e)
+ee.save()
 
 _fecha=datetime.datetime.now() + datetime.timedelta(days=3)
-t=Turno(fecha=_fecha,estado=Turno.DISPONIBLE,sobreturno=False,consultorio=c,especialista=es)
+t=Turno(fecha=_fecha,estado=Turno.DISPONIBLE,sobreturno=False,consultorio=c,ee=ee)
 t.save()
 
 r=Reserva(fecha=datetime.datetime.now(),telefono='41234345',afiliado=a)

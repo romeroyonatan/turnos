@@ -12,7 +12,7 @@
 <form action="." method="post" class="pure-form pure-form-aligned pure-g-r">
 	<fieldset title="Datos personales" class="pure-u-1-2">
 		<legend>Datos personales</legend>
-	
+		{{ form.afiliado }}
 		<div class="pure-control-group">
 			{{ form.dni.errors }}
 			<label for="id_dni">DNI</label>
@@ -72,7 +72,7 @@
 		</div>
 		
 		<div class="pure-controls">		
-			<input type="button" value="Agregar" class="pure-button pure-button-primary"/>
+			<input id="id_agregar" type="button" value="Agregar" class="pure-button pure-button-primary"/>
 		</div>
 	</fieldset>
 
