@@ -30,6 +30,11 @@ _fecha=datetime.datetime.now() + datetime.timedelta(days=3)
 t=Turno(fecha=_fecha,estado=Turno.DISPONIBLE,sobreturno=False,consultorio=c,ee=ee)
 t.save()
 
+_fecha=_fecha + datetime.timedelta(minutes=15)
+t2=Turno(fecha=_fecha,estado=Turno.DISPONIBLE,sobreturno=False,consultorio=c,ee=ee)
+t2.save()
+
+
 r=Reserva(fecha=datetime.datetime.now(),telefono='41234345',afiliado=a)
 r.save()
 

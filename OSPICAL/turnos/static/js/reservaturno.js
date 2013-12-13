@@ -1,3 +1,6 @@
+/**
+ * Permite formatear una cadena como en C# mediante ubicadores posicionales {0}{1}
+ */
 String.prototype.format = function () {
     var literal = this;
     for (var i = 0; i < arguments.length; i++) {
@@ -8,17 +11,51 @@ String.prototype.format = function () {
 };
 /**
  * Devuelve el numero con 2 digitos significativos
+ * @param n Numero a convertir
  */
 function n(n){
     return n > 9 ? n: "0" + n;
 }
-//TODO Agrupar estas funciones en una clase Turno
+
+function mostrarMensaje(mensaje,titulo='Alerta') {
+	if($('#message'))
+		$('#message').remove();
+	var message = "<div id='message'>{0}</div>".format(mensaje); 
+	$(message).dialog({modal:true,
+						title:titulo,
+						resizable:false,
+						buttons: {
+				            "Ok": function() 
+				            {
+				                $( this ).dialog( "close" );
+				            }
+				        }});
+}
+
+function agregarFilaTurno(id, especialidad, especialista, dia, horario){
+	var rowtemplate = '<tr id="tr{0}"><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td>\
+				   <td><a id="{0}"class="boton_eliminar" href="#">\
+				   <img src="/static/img/cancel.png" width="24" height="24" alt="Eliminar" title="Eliminar"/>\
+				   </a></td></tr>';
+	var table = $('#tabla_turnos > tbody:last');
+	var row = rowtemplate.format(id, especialidad, especialista, dia, horario);
+	table.append(row);
+	
+	$('.boton_eliminar#'+id).click(
+			function(e){e.preventDefault();
+			var id = parseInt(this.id);
+			eliminar(id)
+			$("#tr" + id).remove();
+	});
+}
+
+//TODO Agrupar estas funciones en una clase Lista
+
 /**
  * Obtiene la lista de turnos a reservar
  */
 function getTurnos(){
-	var json = $("#id_turnos").val();
-	// Reconstruyendo JSON
+	var json = $("#id_turnos").val();	// Reconstruyendo JSON
 	return json ? eval(json) : new Array();
 }
 
@@ -27,9 +64,9 @@ function getTurnos(){
  * @param turnos Lista de turnos a guardar
  */
 function guardarTurnos(turnos) {
-	// Creando JSON
-	var json = JSON.stringify(turnos);
+	var json = JSON.stringify(turnos);	// Creando JSON
 	$("#id_turnos").val(json);
+	return true;
 }
 
 /**
@@ -41,7 +78,16 @@ function agregar(turno_id) {
 	if(turnos.indexOf(turno_id) == -1) {
 		turnos.push(turno_id);
 		guardarTurnos(turnos);
+		especialidad = $("#id_especialidad option:selected").text();
+		especialista = $("#id_especialista option:selected").text();
+		dia= $("#id_dia option:selected").text();
+		hora= $("#id_hora option:selected").text();
+		agregarFilaTurno(turno_id,especialidad, especialista, dia, hora);
+		return true;
+	} else {
+		mostrarMensaje("Ya agregó este turno");
 	}
+	return false;
 }
 
 /**
@@ -54,6 +100,8 @@ function eliminar(turno_id) {
 	turnos.splice(index, 1);
 	guardarTurnos(turnos);
 }
+
+
 
 $(document).ready(function(){
 	$("#id_dni").blur(function() {
@@ -83,6 +131,7 @@ $(document).ready(function(){
 			});
 		}
 	});
+
 	
 	defaultMessage = "Seleccionar"
 	dia=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"]
@@ -100,7 +149,7 @@ $(document).ready(function(){
 				destino.removeAttr('disabled');
 				var options = "<option value='{0}'>{1}</option>".format(0,defaultMessage);
 				$.each(data,function(index, value){
-					options += '<option value="{0}">{1} {2}</option>'.format(value.id,
+					options += '<option value="{0}">{1}, {2}</option>'.format(value.id,
 																			 value.apellido,
 																			 value.nombre);
 				});
@@ -160,9 +209,13 @@ $(document).ready(function(){
 	});
 	
 	$("#id_agregar").click(function() {
-		var turno_id = $("#id_especialidad").val();
-		if(!turno_id)
-			return;
-		agregar(turno_id);
+		var turno_id = parseInt($("#id_hora").val());
+		return turno_id ? agregar(turno_id):false;
 	});
+	
+	$(':reset').click(function(){
+		$('#tabla_turnos > tbody > tr').remove();
+		$(':hidden').val('');
+	});
+	
 });
