@@ -1,3 +1,11 @@
+DEFAULT_MESSAGE = "Seleccionar";
+MESSAGE_NO_TURNOS = "No hay turnos disponibles este día";
+MESSAGE_TURNO_YA_AGREGADO = "Ya agregó este turno";
+MESSAGE_DNI_DUPLICADO = "DNI duplicado"
+DIA=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"];
+MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
+ESTADOS={C:"Completo",S:"Sobreturno"};
+
 /**
  * Permite formatear una cadena como en C# mediante ubicadores posicionales {0}{1}
  */
@@ -31,11 +39,18 @@ function mostrarMensaje(mensaje,titulo='Alerta') {
 				        }});
 }
 
+/**
+ * Obtiene un template para crear una fila de la tabla
+ */
+function __getRowTemplate() {
+	var template = $.ajax({
+			url:"/static/js/templates/row_reservarturno.template",
+			async: false});
+	return template.responseText;
+}
+
 function agregarFilaTurno(id, especialidad, especialista, dia, horario){
-	var rowtemplate = '<tr id="tr{0}"><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td>\
-				   <td><a id="{0}"class="boton_eliminar" href="#">\
-				   <img src="/static/img/cancel.png" width="24" height="24" alt="Eliminar" title="Eliminar"/>\
-				   </a></td></tr>';
+	var rowtemplate = __getRowTemplate();
 	var table = $('#tabla_turnos > tbody:last');
 	var row = rowtemplate.format(id, especialidad, especialista, dia, horario);
 	table.append(row);
@@ -82,7 +97,7 @@ function agregar(turno_id) {
 		var hora= $("#id_hora option:selected").text();
 		agregarFilaTurno(turno_id,especialidad, especialista, dia, hora);
 	} else {
-		mostrarMensaje("Ya agregó este turno");
+		mostrarMensaje(MESSAGE_TURNO_YA_AGREGADO);
 	}
 }
 
@@ -109,7 +124,7 @@ $(document).ready(function(){
 				if(data.length > 0) {
 					//TODO Caso DNI Duplicado
 					if (data.length > 1)
-						console.log('DNI Duplicado');
+						console.log(MESSAGE_DNI_DUPLICADO);
 					
 					$("#id_afiliado").val(data[0].id);
 					$("#id_numero").val(data[0].numero);
@@ -128,12 +143,6 @@ $(document).ready(function(){
 		}
 	});
 
-	
-	DEFAULT_MESSAGE = "Seleccionar";
-	DIA=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"];
-	MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
-	ESTADOS={C:"Completo",S:"Sobreturno"};
-		
 	$("#id_especialidad").change(function() {
 		$("#id_especialista, #id_dia, #id_hora").prop({disabled: true});
 		var id = $("#id_especialidad").val();
@@ -168,7 +177,7 @@ $(document).ready(function(){
 				destino.removeAttr('disabled');
 				var options = "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE);
 				$.each(data,function(index, value){
-					var estado = ESTADOS[value.estado] ? ESTADOS[value.estado] : "";
+					var estado = ESTADOS[value.estado] ? "["+ESTADOS[value.estado]+"] " : "";
 					var milis = value.fecha * 1000;
 					var fecha = new Date(milis)
 					options += '<option value="{0}">{4}{1}, {2} de {3}</option>'.format(milis, 
@@ -204,6 +213,8 @@ $(document).ready(function(){
 				});
 				destino.empty().append(options);
 				destino.focus();
+			} else {
+				mostrarMensaje(MESSAGE_NO_TURNOS);
 			}
 		});
 	});
