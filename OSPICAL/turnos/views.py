@@ -38,10 +38,9 @@ def get(request, model, parametro, valor):
     return JSONResponse(data)
 
 def getDiaTurnos(request, especialista_id):
-    # TODO Solo devolver una lista de dias y el estado (Completo, Sobreturno)
-    queryset = Turno.objects.filter(ee__especialista__id=especialista_id, fecha__gte=datetime.datetime.now())
-    data = [item for item in queryset.values()]
-    return JSONResponse(data)
+    bussiness = Bussiness()
+    data = bussiness.getDiaTurnos(especialista_id)
+    return JSONResponse(data)    
 
 def getEspecialistas(request, especialidad_id):
     queryset = EspecialistaEspecialidad.objects.filter(especialidad__id = especialidad_id)

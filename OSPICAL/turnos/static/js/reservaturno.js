@@ -25,8 +25,7 @@ function mostrarMensaje(mensaje,titulo='Alerta') {
 						title:titulo,
 						resizable:false,
 						buttons: {
-				            "Ok": function() 
-				            {
+				            "Ok": function() {
 				                $( this ).dialog( "close" );
 				            }
 				        }});
@@ -45,7 +44,7 @@ function agregarFilaTurno(id, especialidad, especialista, dia, horario){
 			function(e){e.preventDefault();
 			var id = parseInt(this.id);
 			eliminar(id)
-			$("#tr" + id).remove();
+			$("#tr"+id).remove();
 	});
 }
 
@@ -66,7 +65,6 @@ function getTurnos(){
 function guardarTurnos(turnos) {
 	var json = JSON.stringify(turnos);	// Creando JSON
 	$("#id_turnos").val(json);
-	return true;
 }
 
 /**
@@ -78,16 +76,14 @@ function agregar(turno_id) {
 	if(turnos.indexOf(turno_id) == -1) {
 		turnos.push(turno_id);
 		guardarTurnos(turnos);
-		especialidad = $("#id_especialidad option:selected").text();
-		especialista = $("#id_especialista option:selected").text();
-		dia= $("#id_dia option:selected").text();
-		hora= $("#id_hora option:selected").text();
+		var especialidad = $("#id_especialidad option:selected").text();
+		var especialista = $("#id_especialista option:selected").text();
+		var dia= $("#id_dia option:selected").text();
+		var hora= $("#id_hora option:selected").text();
 		agregarFilaTurno(turno_id,especialidad, especialista, dia, hora);
-		return true;
 	} else {
 		mostrarMensaje("Ya agregó este turno");
 	}
-	return false;
 }
 
 /**
@@ -100,7 +96,6 @@ function eliminar(turno_id) {
 	turnos.splice(index, 1);
 	guardarTurnos(turnos);
 }
-
 
 
 $(document).ready(function(){
@@ -125,6 +120,7 @@ $(document).ready(function(){
 					url = '/json/afiliado/id/{0}/telefono/'.format(data[0].id);
 					$.getJSON(url, function(data) {
 						$("#id_telefono").val(data[0].telefono);
+						$("#id_especialidad").focus();
 					});
 					//TODO Verificar presentismo
 				}
@@ -133,9 +129,10 @@ $(document).ready(function(){
 	});
 
 	
-	defaultMessage = "Seleccionar"
-	dia=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"]
-	mes=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
+	DEFAULT_MESSAGE = "Seleccionar";
+	DIA=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"];
+	MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
+	ESTADOS={C:"Completo",S:"Sobreturno"};
 		
 	$("#id_especialidad").change(function() {
 		$("#id_especialista, #id_dia, #id_hora").prop({disabled: true});
@@ -147,17 +144,17 @@ $(document).ready(function(){
 		$.getJSON(url, function(data) {
 			if(data.length > 0) {
 				destino.removeAttr('disabled');
-				var options = "<option value='{0}'>{1}</option>".format(0,defaultMessage);
+				var options = "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE);
 				$.each(data,function(index, value){
 					options += '<option value="{0}">{1}, {2}</option>'.format(value.id,
 																			 value.apellido,
 																			 value.nombre);
 				});
 				destino.empty().append(options);
+				destino.focus();
 			}
 		});
 	});
-	
 	
 	$("#id_especialista").change(function() {
 		$("#id_dia, #id_hora").prop({disabled: true});
@@ -169,20 +166,22 @@ $(document).ready(function(){
 		$.getJSON(url, function(data) {
 			if(data.length > 0) {
 				destino.removeAttr('disabled');
-				var options = "<option value='{0}'>{1}</option>".format(0,defaultMessage);
+				var options = "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE);
 				$.each(data,function(index, value){
+					var estado = ESTADOS[value.estado] ? ESTADOS[value.estado] : "";
 					var milis = value.fecha * 1000;
 					var fecha = new Date(milis)
-					options += '<option value="{0}">{1}, {2} de {3}</option>'.format(milis, 
-																					 dia[fecha.getDay()],
+					options += '<option value="{0}">{4}{1}, {2} de {3}</option>'.format(milis, 
+																					 DIA[fecha.getDay()],
 																					 fecha.getDate(),
-																					 mes[fecha.getMonth()]);
+																					 MES[fecha.getMonth()],
+																					 estado);
 				});
 				destino.empty().append(options);
+				destino.focus();
 			}
 		});
 	});
-	
 	
 	$("#id_dia").change(function() {
 		$("#id_hora").prop({disabled: true});
@@ -196,7 +195,7 @@ $(document).ready(function(){
 		$.getJSON(url, function(data) {
 			if(data.length > 0) {
 				destino.removeAttr('disabled');
-				var options = "<option value='{0}'>{1}</option>".format(0,defaultMessage);
+				var options = "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE);
 				$.each(data,function(index, value){
 					fecha = new Date(value.fecha * 1000)
 					options += '<option value="{0}">{1}:{2}</option>'.format(value.id, 
@@ -204,18 +203,36 @@ $(document).ready(function(){
 																			 n(fecha.getMinutes()));
 				});
 				destino.empty().append(options);
+				destino.focus();
 			}
 		});
 	});
 	
+	$("#id_hora").change(function(e) {
+		var destino = $('#id_agregar');
+		destino.focus();
+	});
+	
 	$("#id_agregar").click(function() {
 		var turno_id = parseInt($("#id_hora").val());
-		return turno_id ? agregar(turno_id):false;
+		// TODO Validar
+		if(turno_id) {
+			agregar(turno_id);
+			$(":submit").focus();
+		}
 	});
 	
 	$(':reset').click(function(){
 		$('#tabla_turnos > tbody > tr').remove();
 		$(':hidden').val('');
+		$("#id_especialista, #id_dia, #id_hora").prop({disabled: true});
 	});
 	
+	$("#id_dni, #id_numero").keypress(function(e) {
+		if(e.which == 13) {
+	    	e.preventDefault()
+	    	$("#id_telefono").focus();
+	    }
+	});
+
 });
