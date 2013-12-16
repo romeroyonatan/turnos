@@ -25,8 +25,13 @@ def reservar(request):
     if request.method == 'POST':
         form = ReservarTurnoForm(request.POST)
         if form.is_valid():
-            pass
-        return HttpResponseRedirect('/reservar/')
+            bussiness = Bussiness()
+            turnos = form.cleaned_data['turnos']
+            afiliado = form.cleaned_data['afiliado']
+            turnos = [int(id) for id in json.loads(turnos)]
+            print (turnos)
+            #exito = bussiness.reservarTurnos(afiliado, turnos)
+            return HttpResponseRedirect('/reservar/')
     else:
         form = ReservarTurnoForm()
     return render_to_response('ReservarTurno.html', locals())

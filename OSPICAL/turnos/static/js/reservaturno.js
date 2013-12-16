@@ -218,4 +218,9 @@ $(document).ready(function(){
 		$(':hidden').val('');
 	});
 	
+	$('#id_dni').number(true, 0, ',', '.');
+	
+	$('form').submit(function(){
+		$('#id_dni').val($('#id_dni').val());
+	});
 });
