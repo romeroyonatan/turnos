@@ -1,7 +1,9 @@
 DEFAULT_MESSAGE = "Seleccionar";
+MESSAGE_NO_DIAS = "El especialista no posee días disponibles para reservar turnos";
 MESSAGE_NO_TURNOS = "No hay turnos disponibles este día";
 MESSAGE_TURNO_YA_AGREGADO = "Ya agregó este turno";
 MESSAGE_DNI_DUPLICADO = "DNI duplicado"
+MESSAGE_DNI_INEXISTENTE = "DNI Inexistente"
 DIA=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"];
 MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
 ESTADOS={C:"Completo",S:"Sobreturno"};
@@ -28,18 +30,13 @@ function n(n){
     return n > 9 ? n: "0" + n;
 }
 
-function mostrarMensaje(mensaje,titulo='Alerta') {
-	if($('#message'))
-		$('#message').remove();
-	var message = "<div id='message'>{0}</div>".format(mensaje); 
-	$(message).dialog({modal:true,
-						title:titulo,
-						resizable:false,
-						buttons: {
-				            "Ok": function() {
-				                $( this ).dialog( "close" );
-				            }
-				        }});
+function mostrarMensaje(mensaje,options) {
+	if(options.element) {
+		options.element.addClass('alert-danger');
+		options.element.attr({'title':mensaje});
+	}
+	tipo = options.type ? options.type : "error";
+	noty({text: mensaje, type:tipo, layout:'top'});
 }
 
 /**
@@ -104,7 +101,7 @@ function agregar(turno_id) {
 		var hora= $("#id_hora option:selected").text();
 		agregarFilaTurno(turno_id,especialidad, especialista, dia, hora);
 	} else {
-		mostrarMensaje(MESSAGE_TURNO_YA_AGREGADO);
+		mostrarMensaje(MESSAGE_TURNO_YA_AGREGADO, 'danger');
 	}
 }
 
@@ -124,7 +121,8 @@ function eliminar(turno_id) {
 
 $(document).ready(function(){
 	$("#id_dni").blur(function() {
-		dni = $("#id_dni").val();
+		var container = $("#id_dni");
+		var dni = container.val();
 		// TODO Validacion DNI
 		if(dni) {
 			url = '/json/afiliado/dni/{0}/'.format(dni);
@@ -136,7 +134,7 @@ $(document).ready(function(){
 						console.log(MESSAGE_DNI_DUPLICADO);
 					
 					$("#id_afiliado").val(data[0].id);
-					$("#id_numero").val(data[0].numero);
+					$("#id_numero").val(data[0].numero).mask('0000 0000 0000');
 					$("#id_nombre").val(data[0].nombre);
 					$("#id_apellido").val(data[0].apellido);
 					
@@ -147,6 +145,8 @@ $(document).ready(function(){
 						$("#id_especialidad").focus();
 					});
 					// TODO Verificar presentismo
+				} else {
+					mostrarMensaje(MESSAGE_DNI_INEXISTENTE,{element:container});
 				}
 			});
 		}
@@ -197,6 +197,8 @@ $(document).ready(function(){
 				});
 				destino.empty().append(options);
 				destino.focus();
+			} else {
+				mostrarMensaje(MESSAGE_NO_DIAS);
 			}
 		});
 	});
@@ -255,9 +257,11 @@ $(document).ready(function(){
 	    }
 	});
 	
-	$('#id_dni').number(true, 0, ',', '.');
+	$('#id_dni').number(true, 0,',','.');
+	$('#id_numero').mask('0000 0000 0000');
 	
-	$('form').submit(function(){
-		$('#id_dni').val($('#id_dni').val());
+	$('form').submit(function() {
+		$('#id_dni').number(true,0,'','');
+		$('#id_numero').unmask();
 	});
 });
