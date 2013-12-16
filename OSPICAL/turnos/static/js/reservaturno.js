@@ -239,6 +239,7 @@ $(document).ready(function(){
 		$("#id_especialista, #id_dia, #id_hora").prop({disabled: true});
 	});
 	
+<<<<<<< HEAD
 	$("#id_dni, #id_numero").keypress(function(e) {
 		if(e.which == 13) {
 	    	e.preventDefault()
@@ -252,4 +253,11 @@ $(document).ready(function(){
 		$('#id_dni').val($('#id_dni').val());
 	});
 
+=======
+	$('#id_dni').number(true, 0, ',', '.');
+	
+	$('form').submit(function(){
+		$('#id_dni').val($('#id_dni').val());
+	});
+>>>>>>> branch 'master' of https://github.com/romeroyonatan/turnos.git
 });
