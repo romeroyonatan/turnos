@@ -22,5 +22,5 @@
 .alert-warning{background-color:#fcf8e3;border-color:#FFD324;color:#c09853;}.alert-warning hr{border-top-color:#f7e1b5;}
 .alert-warning .alert-link{color:#a47e3c;}
 .alert-danger{background-color:#f2dede;border-color:#ebccd1;color:#b94a48;}.alert-danger hr{border-top-color:#e4b9c0;}
-.alert-danger .alert-link{color:#953b39;}
-.errorlist{background-color:#f2dede;border-color:#ebccd1;color:#b94a48;border-style: solid;border-width: 1px}.alert-danger hr{border-top-color:#e4b9c0;}
+.alert-danger .alert-link{color:#953b39;}.alert-danger hr{border-top-color:#e4b9c0;}
+.errorlist{background-color:#f2dede;border-color:#ebccd1;color:#b94a48;border-style: solid;border-width: 1px; list-style: none}

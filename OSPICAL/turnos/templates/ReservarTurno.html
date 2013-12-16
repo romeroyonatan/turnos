@@ -1,11 +1,18 @@
 {% extends "application.html" %}
+{% load static %}
+
 {% block title %}Reservar turno{% endblock %}
+
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/reservaturno.js' %}"></script>
+{% endblock %}
 
 {% block content %}
 <form action="." method="post" class="pure-form pure-form-aligned pure-g-r">
 	<fieldset title="Datos personales" class="pure-u-1-2">
 		<legend>Datos personales</legend>
-	
+		{{ form.afiliado }}
 		<div class="pure-control-group">
 			{{ form.dni.errors }}
 			<label for="id_dni">DNI</label>
@@ -16,6 +23,17 @@
 			{{ form.numero.errors }}
 			<label for="id_numero">Numero afiliado</label>
 			{{ form.numero }}
+		</div>	
+	
+		<div class="pure-control-group">
+			<label for="nombre">Nombre</label>
+			{{ form.nombre }}
+		</div>	
+	
+		<div class="pure-control-group">
+			{{ form.numero.errors }}
+			<label for="apellido">Apellido</label>
+			{{ form.apellido }}
 		</div>	
 	
 		<div class="pure-control-group">
@@ -54,7 +72,7 @@
 		</div>
 		
 		<div class="pure-controls">		
-			<input type="button" value="Agregar" class="pure-button pure-button-primary"/>
+			<input id="id_agregar" type="button" value="Agregar" class="pure-button pure-button-primary"/>
 		</div>
 	</fieldset>
 
@@ -62,21 +80,16 @@
 	<fieldset title="Lista de turnos" class="pure-u-1">
 		{{ form.turnos }}
 		<legend>Lista de turnos</legend>
-		<table class="pure-table">
+		<table id='tabla_turnos' class="pure-table">
 		<thead>
 			<th>Especialidad</th>
 			<th>Especialista</th>
-			<th>Dia</th>
+			<th>Día</th>
 			<th>Horario</th>
-			<th>Sobreturno</th>
+			<th>Eliminar</th>
 		</thead>
-		<tr>
-			<td>...</td>
-			<td>...</td>
-			<td>...</td>
-			<td>...</td>
-			<td>...</td>
-		</tr>
+		<tbody>
+		</tbody>
 		</table>
 	</fieldset>
 	

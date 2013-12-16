@@ -1,0 +1,13 @@
+[16/Dec/2013 14:36:52] INFO [turnos.bussiness:90] Reservando turno
+[16/Dec/2013 14:36:52] DEBUG [turnos.bussiness:91] afiliado:1, telefono:41234345, turnos:[5]
+[16/Dec/2013 14:50:17] DEBUG [turnos.bussiness:56] Obteniendo dias de turnos 1 
+[16/Dec/2013 14:51:07] DEBUG [turnos.bussiness:24] Obteniendo turnos disponibles especialista:1 fecha:2013-12-20 00:00:00
+[16/Dec/2013 14:51:07] DEBUG [turnos.bussiness:26] Turnos disponibles para el dia 2013-12-20 00:00:00: [{'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 20, 17, 31, 37, 320110, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 6, 'ee_id': 1}]
+[16/Dec/2013 14:51:12] DEBUG [turnos.bussiness:24] Obteniendo turnos disponibles especialista:1 fecha:1969-12-31 00:00:00
+[16/Dec/2013 14:51:12] DEBUG [turnos.bussiness:26] Turnos disponibles para el dia 1969-12-31 00:00:00: []
+[16/Dec/2013 14:51:12] DEBUG [turnos.bussiness:24] Obteniendo turnos disponibles especialista:1 fecha:2013-12-20 00:00:00
+[16/Dec/2013 14:51:12] DEBUG [turnos.bussiness:26] Turnos disponibles para el dia 2013-12-20 00:00:00: [{'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 20, 17, 31, 37, 320110, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 6, 'ee_id': 1}]
+[16/Dec/2013 14:51:16] INFO [turnos.bussiness:98] Reservando turnos
+[16/Dec/2013 14:51:16] DEBUG [turnos.bussiness:99] afiliado:1, telefono:41234345, turnos:[6]
+[16/Dec/2013 14:51:16] DEBUG [turnos.bussiness:105] Reserva id:9
+[16/Dec/2013 14:51:16] DEBUG [turnos.bussiness:114] Linea de reserva id:7

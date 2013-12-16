@@ -7,17 +7,22 @@
 	<link rel="shortcut icon" href="{% static 'img/logo.png' %}" type="image/png" />
 	<title>{% block title %}{% endblock %}</title>
 	{% block css %}
-	<link rel="stylesheet" href="{% static 'css/pure-min.css' %}"/>
-	<link rel="stylesheet" href="{% static 'css/side-menu.css' %}" />
-	<link rel="stylesheet" href="{% static 'css/bootstrap.alert.css' %}" />
+		<link rel="stylesheet" href="{% static 'css/pure-min.css' %}"/>
+		<link rel="stylesheet" href="{% static 'css/side-menu.css' %}" />
+		<link rel="stylesheet" href="{% static 'css/bootstrap.alert.css' %}" />
+		<link rel="stylesheet" href="{% static 'css/redmond/jquery-ui.min.css' %}" />
 	{% endblock %}
 	{% block js %}
+		<script src="{% static 'js/jquery.min.js' %}"></script>
+		<script src="{% static 'js/jquery.mask.min.js' %}"></script>
+		<script src="{% static 'js/jquery-ui.min.js' %}"></script>
+		<script src="{% static 'js/jquery.number.min.js' %}"></script>
+		<script src="{% static 'js/noty/packaged/jquery.noty.packaged.min.js' %}"></script>
 	{% endblock %}
 </head>
 <body>
 
 <div id="layout">
-{% block menu %}{% endblock %}
 {% block main %}{% endblock %}
 </div>
 </body>

@@ -1,0 +1,11 @@
+<tr id="tr{0}">
+	<td>{1}</td>
+	<td>{2}</td>
+	<td>{3}</td>
+	<td>{4}</td>
+	<td>
+		<a id="{0}" class="boton_eliminar" href="#">
+			<img src="/static/img/cancel.png" width="24" height="24" alt="Eliminar"	title="Eliminar" />
+		</a>
+	</td>
+</tr>

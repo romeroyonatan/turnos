@@ -2,6 +2,8 @@
 {% load staticfiles %}
 
 <!-- **********MENU********************* -->
+{% block main %}
+
 {% block menu %}
 <a id="menuLink" class="pure-menu-link" href="#menu">
 <span></span>
@@ -17,7 +19,6 @@
 </div>
 {% endblock %}
 
-{% block main %}
 <div id="main">
 	<div class="header">
 		<h1>{% block title %}{% endblock %}</h1>
@@ -48,5 +49,4 @@
 			</div>
 	{% endblock %}
 </div>
-<script src="{% static 'js/menu.js' %}"></script>
 {% endblock %}
