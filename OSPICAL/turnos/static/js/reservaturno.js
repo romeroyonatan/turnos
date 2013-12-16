@@ -7,7 +7,8 @@ MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septi
 ESTADOS={C:"Completo",S:"Sobreturno"};
 
 /**
- * Permite formatear una cadena como en C# mediante ubicadores posicionales {0}{1}
+ * Permite formatear una cadena como en C# mediante ubicadores posicionales
+ * {0}{1}
  */
 String.prototype.format = function () {
     var literal = this;
@@ -19,7 +20,9 @@ String.prototype.format = function () {
 };
 /**
  * Devuelve el numero con 2 digitos significativos
- * @param n Numero a convertir
+ * 
+ * @param n
+ *            Numero a convertir
  */
 function n(n){
     return n > 9 ? n: "0" + n;
@@ -63,7 +66,7 @@ function agregarFilaTurno(id, especialidad, especialista, dia, horario){
 	});
 }
 
-//TODO Agrupar estas funciones en una clase Lista
+// TODO Agrupar estas funciones en una clase Lista
 
 /**
  * Obtiene la lista de turnos a reservar
@@ -75,7 +78,9 @@ function getTurnos(){
 
 /**
  * Guarda la lista de turnos
- * @param turnos Lista de turnos a guardar
+ * 
+ * @param turnos
+ *            Lista de turnos a guardar
  */
 function guardarTurnos(turnos) {
 	var json = JSON.stringify(turnos);	// Creando JSON
@@ -84,7 +89,9 @@ function guardarTurnos(turnos) {
 
 /**
  * Agrega un turno a la lista
- * @param turno_id id de turno a agregar
+ * 
+ * @param turno_id
+ *            id de turno a agregar
  */
 function agregar(turno_id) {
 	var turnos = getTurnos();
@@ -103,7 +110,9 @@ function agregar(turno_id) {
 
 /**
  * Elimina un turno a la lista
- * @param turno_id id de turno a eliminar
+ * 
+ * @param turno_id
+ *            id de turno a eliminar
  */
 function eliminar(turno_id) {
 	var turnos = getTurnos();
@@ -122,7 +131,7 @@ $(document).ready(function(){
 			$.getJSON(url, function(data) {
 				// TODO Caso DNI Inexistente
 				if(data.length > 0) {
-					//TODO Caso DNI Duplicado
+					// TODO Caso DNI Duplicado
 					if (data.length > 1)
 						console.log(MESSAGE_DNI_DUPLICADO);
 					
@@ -137,7 +146,7 @@ $(document).ready(function(){
 						$("#id_telefono").val(data[0].telefono);
 						$("#id_especialidad").focus();
 					});
-					//TODO Verificar presentismo
+					// TODO Verificar presentismo
 				}
 			});
 		}
@@ -239,7 +248,6 @@ $(document).ready(function(){
 		$("#id_especialista, #id_dia, #id_hora").prop({disabled: true});
 	});
 	
-<<<<<<< HEAD
 	$("#id_dni, #id_numero").keypress(function(e) {
 		if(e.which == 13) {
 	    	e.preventDefault()
@@ -252,12 +260,4 @@ $(document).ready(function(){
 	$('form').submit(function(){
 		$('#id_dni').val($('#id_dni').val());
 	});
-
-=======
-	$('#id_dni').number(true, 0, ',', '.');
-	
-	$('form').submit(function(){
-		$('#id_dni').val($('#id_dni').val());
-	});
->>>>>>> branch 'master' of https://github.com/romeroyonatan/turnos.git
 });
