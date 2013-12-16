@@ -245,5 +245,11 @@ $(document).ready(function(){
 	    	$("#id_telefono").focus();
 	    }
 	});
+	
+	$('#id_dni').number(true, 0, ',', '.');
+	
+	$('form').submit(function(){
+		$('#id_dni').val($('#id_dni').val());
+	});
 
 });
