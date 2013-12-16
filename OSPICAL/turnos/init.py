@@ -49,6 +49,6 @@ from datetime import datetime
 from datetime import timedelta
 ee = EspecialistaEspecialidad.objects.get(id=1)
 consultorio = Consultorio.objects.get(id=1)
-fecha = datetime.now() + timedelta(days=5)
+fecha = datetime.now() + timedelta(days=4)
 turno = Turno(fecha=fecha, estado=Turno.DISPONIBLE,sobreturno=False,consultorio=consultorio, ee=ee)
 turno.save()

@@ -31,11 +31,11 @@ function n(n){
 }
 
 function mostrarMensaje(mensaje,options) {
-	if(options.element) {
+	if(options && options.element) {
 		options.element.addClass('alert-danger');
 		options.element.attr({'title':mensaje});
 	}
-	tipo = options.type ? options.type : "error";
+	tipo = options && options.type ? options.type : "error";
 	noty({text: mensaje, type:tipo, layout:'top'});
 }
 
@@ -129,9 +129,11 @@ $(document).ready(function(){
 			$.getJSON(url, function(data) {
 				// TODO Caso DNI Inexistente
 				if(data.length > 0) {
-					// TODO Caso DNI Duplicado
-					if (data.length > 1)
+					//TODO DNI Duplicado
+					if (data.length > 1){
+						mostrarMensaje(MESSAGE_DNI_DUPLICADO,{type:'information'});
 						console.log(MESSAGE_DNI_DUPLICADO);
+					}
 					
 					$("#id_afiliado").val(data[0].id);
 					$("#id_numero").val(data[0].numero).mask('0000 0000 0000');

@@ -28,9 +28,10 @@ def reservar(request):
             bussiness = Bussiness()
             turnos = form.cleaned_data['turnos']
             afiliado = form.cleaned_data['afiliado']
-            turnos = [int(id) for id in json.loads(turnos)]
+            telefono = form.cleaned_data['telefono']
+            turnos = json.loads(turnos)
             print (turnos)
-            #exito = bussiness.reservarTurnos(afiliado, turnos)
+            exito = bussiness.reservarTurnos(afiliado, telefono, turnos)
             return HttpResponseRedirect('/reservar/')
     else:
         form = ReservarTurnoForm()
