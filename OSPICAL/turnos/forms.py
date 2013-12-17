@@ -1,6 +1,6 @@
 from django import forms
 from turnos.models import Especialidad
-from django.core.validators import validate_comma_separated_integer_list
+
 class ReservarTurnoForm(forms.Form):
     dni = forms.IntegerField()
     numero = forms.IntegerField()

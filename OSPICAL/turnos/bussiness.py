@@ -17,7 +17,7 @@ class Bussiness():
         if not data:
             logger.debug("Afiliado %s %s no encontrado. Buscando en \
             interfaz de usuarios" % (parametro, valor))
-            # TODO Buscar en la interfaz de consulta de afiliados
+            # TODO: Buscar en la interfaz de consulta de afiliados
             pass
         return data
     
@@ -47,7 +47,7 @@ class Bussiness():
     
     def crearSobreturnos(self, especialista, fecha):
         logger.info("Creando sobreturnos para el dia:%s" % fecha)
-        # TODO Crear sobreturnos
+        # TODO: Crear sobreturnos
         return {}
     
     def getDiaTurnos(self, especialista):
@@ -86,7 +86,7 @@ class Bussiness():
     
     def reservarTurnos(self, afiliado, telefono, turnos):
         """ Reserva turnos a afiliado"""
-        # TODO Verificar excepciones, historial de turnos
+        # TODO: Verificar excepciones, historial de turnos
         logger.info("Reservando turnos")
         logger.debug("afiliado:%s, telefono:%s, turnos:%s" % (afiliado, telefono, turnos))
         reserva = Reserva()
@@ -107,6 +107,6 @@ class Bussiness():
         return True
     
     def verificarPresentismo(self, afiliado_id):
-        # Contar cantidad de veces ausente en el plazo configurado
-        # presentismo_ok si es menor a la cantidad tolerable
+        # TODO: Contar cantidad de veces ausente en el plazo configurado
+        # TODO: presentismo_ok si es menor a la cantidad tolerable
         return True

@@ -5,10 +5,9 @@ from time import mktime
 
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
-from django.core import serializers
 from django.forms.models import model_to_dict
 
-from turnos.forms import *
+from turnos.forms import ReservarTurnoForm
 from turnos.models import *
 from turnos.bussiness import Bussiness
 
@@ -29,9 +28,15 @@ def reservar(request):
             turnos = form.cleaned_data['turnos']
             afiliado = form.cleaned_data['afiliado']
             telefono = form.cleaned_data['telefono']
-            #TODO: "Tomar campos del formulario"
-            turnos = json.loads(turnos) if turnos else []
-            print (turnos)
+            if turnos:
+                turnos = json.loads(turnos)
+            else:
+                hora = form.cleaned_data['hora']
+                if hora:
+                    turnos = [hora]
+                else:
+                    error = "Debe ingresar al menos un turno a reservar"
+                    return render_to_response('ReservarTurno.html', locals())
             exito = bussiness.reservarTurnos(afiliado, telefono, turnos)
             return HttpResponseRedirect('/reservar/')
     else:
@@ -61,9 +66,8 @@ def getTurnosDisponibles(request, especialista_id, year, month, day):
     return JSONResponse(data)
 
 def verificarPresentismo(request, afiliado_id):
-    # Contar cantidad de veces ausente en el plazo configurado
-    # presentismo_ok si es menor a la cantidad tolerable
-    data = dict([('presentismo_ok', True)])
+    bussiness = Bussiness()
+    data = {'presentismo_ok': bussiness.verificarPresentismo(afiliado_id)}
     return JSONResponse(data)
 
 def getTelefono(request, afiliado_id):
