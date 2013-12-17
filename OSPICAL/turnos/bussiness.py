@@ -30,12 +30,8 @@ class Bussiness():
     
     def __buscarTurnosDisponibles(self, especialista, fecha):
         logger.debug("Obteniendo turnos disponibles especialista_id:%s fecha:%s" % (especialista, fecha))
-        queryset = Turno.objects.filter(ee__especialista=especialista,
-                                        fecha__year=fecha.year,
-                                        fecha__month=fecha.month,
-                                        fecha__day=fecha.day,
-                                        estado=Turno.DISPONIBLE,
-                                        )
+        filtro = self.__getFiltroFecha(especialista, fecha)
+        queryset = Turno.objects.filter(**filtro)
         return [item for item in queryset.values()]
     
     def __haySobreturnos(self, especialista, fecha):
@@ -89,22 +85,24 @@ class Bussiness():
         # TODO: Verificar excepciones, historial de turnos
         logger.info("Reservando turnos")
         logger.debug("afiliado:%s, telefono:%s, turnos:%s" % (afiliado, telefono, turnos))
-        reserva = Reserva()
-        reserva.afiliado = Afiliado.objects.get(id=afiliado)
-        reserva.telefono = telefono
-        reserva.fecha = datetime.datetime.now()
-        reserva.save()
-        logger.debug("Reserva id:%s" % reserva.id)
-        for turno in turnos:
-            lr = LineaDeReserva()
-            t = Turno.objects.get(id=turno)
-            lr.turno = t
-            lr.reserva = reserva
-            lr.estado = lr.turno.estado = Turno.RESERVADO
-            lr.save()
-            t.save()
-            logger.debug("Linea de reserva id:%s" % lr.id)
-        return True
+        if turnos:
+            reserva = Reserva()
+            reserva.afiliado = Afiliado.objects.get(id=afiliado)
+            reserva.telefono = telefono
+            reserva.fecha = datetime.datetime.now()
+            reserva.save()
+            logger.debug("Reserva id:%s" % reserva.id)
+            for turno in turnos:
+                lr = LineaDeReserva()
+                t = Turno.objects.get(id=turno)
+                lr.turno = t
+                lr.reserva = reserva
+                lr.estado = lr.turno.estado = Turno.RESERVADO
+                lr.save()
+                t.save()
+                logger.debug("Linea de reserva id:%s" % lr.id)
+            return True
+        return False
     
     def verificarPresentismo(self, afiliado_id):
         # TODO: Contar cantidad de veces ausente en el plazo configurado

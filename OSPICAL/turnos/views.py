@@ -10,6 +10,9 @@ from django.forms.models import model_to_dict
 from turnos.forms import ReservarTurnoForm
 from turnos.models import *
 from turnos.bussiness import Bussiness
+import logging
+
+logger = logging.getLogger(__name__)
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -33,6 +36,7 @@ def reservar(request):
             else:
                 hora = form.cleaned_data['hora']
                 if hora:
+                    logger.debug("Hora: %s" % hora)
                     turnos = [hora]
                 else:
                     error = "Debe ingresar al menos un turno a reservar"
@@ -71,7 +75,7 @@ def verificarPresentismo(request, afiliado_id):
     return JSONResponse(data)
 
 def getTelefono(request, afiliado_id):
-    queryset = Reserva.objects.filter(afiliado__id=afiliado_id).order_by('-fecha')
+    queryset = Reserva.objects.filter(afiliado__id=afiliado_id).order_by('-fecha')[:1]
     data = [item for item in queryset.values('telefono')]
     return JSONResponse(data)
 
