@@ -1,11 +1,13 @@
 from django.conf.urls import patterns, include, url
 from turnos.models import Afiliado, Especialista
+from django.views.generic import RedirectView
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
 urlpatterns = patterns('turnos.views',
+    (r'^$', RedirectView.as_view(url='/reservar/')),
     (r'^reservar/$', 'reservar'),
     (r'^json/afiliado/(?P<parametro>(id|numero|dni))/(?P<valor>\w+)/$', 'get', {'model':Afiliado}),
     (r'^json/afiliado/id/(?P<afiliado_id>\w+)/telefono/$', 'getTelefono'),

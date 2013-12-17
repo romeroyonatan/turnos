@@ -32,7 +32,7 @@ function n(n){
 
 function mostrarMensaje(mensaje,options) {
 	if(options && options.element) {
-		options.element.addClass('alert-danger');
+		options.element.addClass('error');
 		options.element.attr({'title':mensaje});
 	}
 	tipo = options && options.type ? options.type : "error";
@@ -209,7 +209,7 @@ $(document).ready(function(){
 		$("#id_hora").prop({disabled: true});
 		var milis = parseInt($("#id_dia").val());
 		var id = $("#id_especialidad").val();
-		if(!id)
+		if(!id || !milis)
 			return;
 		var d = new Date(milis);
 		var url = '/json/turnos/{0}/{1}/{2}/{3}/'.format(id, d.getFullYear(),d.getMonth()+1,d.getDate());
@@ -265,5 +265,20 @@ $(document).ready(function(){
 	$('form').submit(function() {
 		$('#id_dni').number(true,0,'','');
 		$('#id_numero').unmask();
+	});
+	
+	$('form').validate({
+		rules: {
+			numero: "required",
+			dni: "required",
+			telefono: "required",
+			turnos: "required",
+		},
+		messages: {
+			numero: "Debe ingresar el número de afiliado",
+			dni: "Debe ingresar el DNI",
+			telefono: "Debe ingresar un telefono",
+			turnos: "Debe ingresar al menos un turno",
+		}
 	});
 });

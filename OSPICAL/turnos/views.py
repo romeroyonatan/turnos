@@ -3,7 +3,7 @@ import datetime
 import json
 from time import mktime
 
-from django.http import HttpResponseRedirect,HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.core import serializers
 from django.forms.models import model_to_dict
@@ -19,7 +19,7 @@ class MyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 def JSONResponse(response):
-    return HttpResponse(json.dumps(response, cls = MyEncoder), content_type="application/json")
+    return HttpResponse(json.dumps(response, cls=MyEncoder), content_type="application/json")
 
 def reservar(request):
     if request.method == 'POST':
@@ -29,7 +29,8 @@ def reservar(request):
             turnos = form.cleaned_data['turnos']
             afiliado = form.cleaned_data['afiliado']
             telefono = form.cleaned_data['telefono']
-            turnos = json.loads(turnos)
+            #TODO: "Tomar campos del formulario"
+            turnos = json.loads(turnos) if turnos else []
             print (turnos)
             exito = bussiness.reservarTurnos(afiliado, telefono, turnos)
             return HttpResponseRedirect('/reservar/')
@@ -49,13 +50,13 @@ def getDiaTurnos(request, especialista_id):
     return JSONResponse(data)    
 
 def getEspecialistas(request, especialidad_id):
-    queryset = EspecialistaEspecialidad.objects.filter(especialidad__id = especialidad_id)
+    queryset = EspecialistaEspecialidad.objects.filter(especialidad__id=especialidad_id)
     data = [model_to_dict(item.especialista) for item in queryset]
     return JSONResponse(data)
 
 def getTurnosDisponibles(request, especialista_id, year, month, day):
     bussiness = Bussiness()
-    fecha = datetime.datetime(int(year),int(month),int(day))
+    fecha = datetime.datetime(int(year), int(month), int(day))
     data = bussiness.getTurnosDisponibles(especialista_id, fecha)
     return JSONResponse(data)
 

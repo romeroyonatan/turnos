@@ -24,3 +24,4 @@
 .alert-danger{background-color:#f2dede;border-color:#ebccd1;color:#b94a48;}.alert-danger hr{border-top-color:#e4b9c0;}
 .alert-danger .alert-link{color:#953b39;}.alert-danger hr{border-top-color:#e4b9c0;}
 .errorlist{background-color:#f2dede;border-color:#ebccd1;color:#b94a48;border-style: solid;border-width: 1px; list-style: none}
+.error{border-color:#E9322D !important; color: #B94A48}
