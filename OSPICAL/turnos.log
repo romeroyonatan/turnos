@@ -128,3 +128,11 @@
 [17/Dec/2013 20:27:18] DEBUG [turnos.bussiness:89] afiliado:1, telefono:12345678, turnos:[20]
 [17/Dec/2013 20:27:18] DEBUG [turnos.bussiness:96] Reserva id:18
 [17/Dec/2013 20:27:18] DEBUG [turnos.bussiness:105] Linea de reserva id:13
+[18/Dec/2013 09:20:24] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 09:20:24] INFO [turnos.bussiness:88] Reservando turnos
+[18/Dec/2013 09:20:24] DEBUG [turnos.bussiness:89] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 09:24:54] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 09:24:54] INFO [turnos.bussiness:88] Reservando turnos
+[18/Dec/2013 09:24:54] DEBUG [turnos.bussiness:89] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 09:24:54] DEBUG [turnos.bussiness:96] Reserva id:18
+[18/Dec/2013 09:24:54] DEBUG [turnos.bussiness:105] Linea de reserva id:13
