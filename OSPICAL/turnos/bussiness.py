@@ -83,6 +83,8 @@ class Bussiness():
     def reservarTurnos(self, afiliado, telefono, turnos):
         """ Reserva turnos a afiliado"""
         # TODO: Verificar excepciones, historial de turnos
+        # FIXME: Envolver todo en una Transaccion
+        # TODO: Devolver numero de reserva
         logger.info("Reservando turnos")
         logger.debug("afiliado:%s, telefono:%s, turnos:%s" % (afiliado, telefono, turnos))
         if turnos:

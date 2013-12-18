@@ -116,3 +116,15 @@
 [17/Dec/2013 14:57:16] DEBUG [turnos.bussiness:32] Obteniendo turnos disponibles especialista_id:1 fecha:2013-12-20 00:00:00
 [17/Dec/2013 14:57:16] DEBUG [turnos.bussiness:26] Turnos disponibles para el dia 2013-12-20 00:00:00: []
 [17/Dec/2013 14:57:16] INFO [turnos.bussiness:45] Creando sobreturnos para el dia:2013-12-20 00:00:00
+[17/Dec/2013 20:20:21] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[17/Dec/2013 20:26:25] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[17/Dec/2013 20:26:36] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[17/Dec/2013 20:26:36] INFO [turnos.bussiness:88] Reservando turnos
+[17/Dec/2013 20:26:36] DEBUG [turnos.bussiness:89] afiliado:1, telefono:12345678, turnos:[20]
+[17/Dec/2013 20:26:36] DEBUG [turnos.bussiness:96] Reserva id:18
+[17/Dec/2013 20:26:36] DEBUG [turnos.bussiness:105] Linea de reserva id:13
+[17/Dec/2013 20:27:17] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[17/Dec/2013 20:27:18] INFO [turnos.bussiness:88] Reservando turnos
+[17/Dec/2013 20:27:18] DEBUG [turnos.bussiness:89] afiliado:1, telefono:12345678, turnos:[20]
+[17/Dec/2013 20:27:18] DEBUG [turnos.bussiness:96] Reserva id:18
+[17/Dec/2013 20:27:18] DEBUG [turnos.bussiness:105] Linea de reserva id:13

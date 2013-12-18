@@ -49,7 +49,7 @@ from datetime import datetime
 from datetime import timedelta
 ee = EspecialistaEspecialidad.objects.get(id=1)
 consultorio = Consultorio.objects.get(id=1)
-fecha = datetime.now() + timedelta(days=4)
+fecha = datetime.now() + timedelta(years=4)
 for i in range (1,20):
     fecha = fecha + timedelta(minutes=15)
     turno = Turno(fecha=fecha, estado=Turno.DISPONIBLE,sobreturno=False,consultorio=consultorio, ee=ee)
