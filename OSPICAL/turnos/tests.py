@@ -54,18 +54,24 @@ class ReservarTurnoTest(TestCase):
         listaTurnos = []
         reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         self.assertIsNone(reserva)
+
+    def testSinTelefono(self):
+        afiliado_id = 1
+        listaTurnos = [20]
+        reserva = self.b.reservarTurnos(afiliado_id, '', listaTurnos)
+        self.assertIsNone(reserva)
         
     def testTurnoReservado(self):
         afiliado_id = 1
         listaTurnos = [20, 3]
         with self.assertRaises(TurnoReservadoException):
-            self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+            self.b.reservarTurnos(afiliado_id, None, listaTurnos)
         turno = Turno.objects.get(id=20)
         self.assertEqual(turno.estado, Turno.DISPONIBLE)
         
     def testFatiga(self):
         afiliado_id = 1
-        listaTurnos = range(1000,2000)
+        listaTurnos = range(1000,1100)
         for i in listaTurnos:
             Turno.objects.create(fecha=timezone.now(),
                                  estado=Turno.DISPONIBLE,
