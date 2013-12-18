@@ -167,7 +167,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'turnos.log',
+            'filename': 'turnos/log/turnos.log',
             'formatter': 'verbose'
         },
     },

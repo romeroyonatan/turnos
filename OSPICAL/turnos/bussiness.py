@@ -1,5 +1,5 @@
-import datetime
 import logging
+from django.utils import timezone
 from turnos.models import *
 
 
@@ -51,7 +51,7 @@ class Bussiness():
         logger.debug("Obteniendo dias de turnos para el especialista_id:%s " % especialista)
         data = []
         queryset = Turno.objects.filter(ee__especialista__id=especialista,
-                                        fecha__gte=datetime.datetime.now()).dates('fecha', 'day')
+                                        fecha__gte=timezone.now()).dates('fecha', 'day')
         for fecha in queryset:
             estado = None
             if self.__isCompleto(especialista, fecha):
@@ -80,32 +80,42 @@ class Bussiness():
         filtro['estado'] = Turno.DISPONIBLE
         return filtro
     
-    def reservarTurnos(self, afiliado, telefono, turnos):
+    def reservarTurnos(self, afiliado, telefono, turnos, empleado=None):
         """ Reserva turnos a afiliado"""
         # TODO: Verificar excepciones, historial de turnos
         # FIXME: Envolver todo en una Transaccion
-        # TODO: Devolver numero de reserva
         logger.info("Reservando turnos")
         logger.debug("afiliado:%s, telefono:%s, turnos:%s" % (afiliado, telefono, turnos))
         if turnos:
-            reserva = Reserva()
-            reserva.afiliado = Afiliado.objects.get(id=afiliado)
-            reserva.telefono = telefono
-            reserva.fecha = datetime.datetime.now()
-            reserva.save()
+            reserva = self.__crearReserva(afiliado, telefono)
             logger.debug("Reserva id:%s" % reserva.id)
-            for turno in turnos:
-                lr = LineaDeReserva()
-                t = Turno.objects.get(id=turno)
-                lr.turno = t
-                lr.reserva = reserva
-                lr.estado = lr.turno.estado = Turno.RESERVADO
-                lr.save()
-                t.save()
+            for turno_id in turnos:
+                turno = self.__reservarTurno(reserva, turno_id, empleado);
+                lr = LineaDeReserva.objects.create(turno=turno,
+                                                   reserva=reserva)
                 logger.debug("Linea de reserva id:%s" % lr.id)
-            return True
+            return reserva.id
         return False
     
+    def __crearReserva(self, afiliado, telefono):
+        reserva = Reserva()
+        reserva.afiliado = Afiliado.objects.get(id=afiliado)
+        reserva.telefono = telefono
+        reserva.fecha = timezone.now()
+        reserva.save()
+        return reserva
+    
+    def __reservarTurno(self, reserva, turno_id, empleado):
+        turno = Turno.objects.get(id=turno_id)
+        HistorialTurno.objects.create(fecha=timezone.now(),
+                                   estadoAnterior=turno.estado,
+                                   estadoNuevo=Turno.RESERVADO,
+                                   turno=turno,
+                                   empleado=empleado)
+        turno.estado = Turno.RESERVADO
+        turno.save()
+        return turno
+        
     def verificarPresentismo(self, afiliado_id):
         # TODO: Contar cantidad de veces ausente en el plazo configurado
         # TODO: presentismo_ok si es menor a la cantidad tolerable
