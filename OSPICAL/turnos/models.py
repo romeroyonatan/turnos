@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms.models import model_to_dict
 
 # Create your models here.
 class Afiliado(models.Model):
@@ -6,6 +7,8 @@ class Afiliado(models.Model):
     dni = models.IntegerField()
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
+    def __str__(self):
+        return "%s" % model_to_dict(self)
 
 class Especialidad(models.Model):
     descripcion = models.CharField(max_length=50)
@@ -18,7 +21,8 @@ class Consultorio (models.Model):
     disponible = models.BooleanField()
     ubicacion = models.CharField(max_length=50, null=True)
     descripcion = models.CharField(max_length=100, null=True)
-
+    def __str__(self):
+        return "%s" % model_to_dict(self)
 class Empleado (models.Model):
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
@@ -27,12 +31,14 @@ class Empleado (models.Model):
     usuario = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
     fecha_baja = models.DateField(null=True)
-
+    def __str__(self):
+        return "%s" % model_to_dict(self)
 class Reserva(models.Model):
     fecha = models.DateTimeField()
     telefono = models.CharField(max_length=20)
     afiliado = models.ForeignKey(Afiliado)
-       
+    def __str__(self):
+        return "%s" % model_to_dict(self)
 class Disponibilidad(models.Model):
     # Constantes ~
     LUNES = '0'
@@ -56,19 +62,22 @@ class Disponibilidad(models.Model):
     horaDesde = models.PositiveSmallIntegerField()
     horaHasta = models.PositiveSmallIntegerField()
     consultorio = models.ForeignKey(Consultorio, null=True)
-    
+    def __str__(self):
+        return "%s" % model_to_dict(self)
 class Especialista(models.Model):
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
     dni = models.IntegerField()
     fecha_baja = models.DateField(null=True)
     disponibilidad = models.ManyToManyField(Disponibilidad, null=True)
-
+    def __str__(self):
+        return "%s" % model_to_dict(self)
 class EspecialistaEspecialidad(models.Model):
     especialista = models.ForeignKey(Especialista)
     especialidad = models.ForeignKey(Especialidad)
     fechaBaja = models.DateField(null=True)
-
+    def __str__(self):
+        return "%s" % model_to_dict(self)
 class Turno (models.Model):
     # Constantes ~
     DISPONIBLE = 'D'
@@ -91,12 +100,14 @@ class Turno (models.Model):
     sobreturno = models.BooleanField()
     consultorio = models.ForeignKey(Consultorio, null=True)
     ee = models.ForeignKey(EspecialistaEspecialidad)
-    
+    def __str__(self):
+        return "%s" % model_to_dict(self)
 class LineaDeReserva (models.Model):
     estado = models.CharField(max_length=1, choices=Turno.ESTADO)
     reserva = models.ForeignKey(Reserva)
     turno = models.ForeignKey(Turno)
-
+    def __str__(self):
+        return "%s" % model_to_dict(self)
 class HistorialTurno(models.Model):
     fecha = models.DateTimeField()
     estadoAnterior = models.CharField(max_length=1, null=True)
@@ -104,3 +115,5 @@ class HistorialTurno(models.Model):
     descripcion = models.CharField(max_length=100, null=True)
     turno = models.ForeignKey(Turno)
     empleado = models.ForeignKey(Empleado, null=True)
+    def __str__(self):
+        return "%s" % model_to_dict(self)

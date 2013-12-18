@@ -1,7 +1,7 @@
 import logging
 from django.utils import timezone
 from turnos.models import *
-from django.forms.models import model_to_dict
+from django.db import transaction
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -80,22 +80,22 @@ class Bussiness():
         filtro['estado'] = Turno.DISPONIBLE
         return filtro
     
+    @transaction.atomic
     def reservarTurnos(self, afiliado, telefono, turnos, empleado=None):
         """ Reserva turnos a afiliado"""
-        # TODO: Verificar excepciones, historial de turnos
-        # FIXME: Envolver todo en una Transaccion
-        logger.info("Reservando turnos")
-        logger.debug("afiliado:%s, telefono:%s, turnos:%s" % (afiliado, telefono, turnos))
+        # TODO: Verificar excepciones
+        logger.debug("Reservando turnos - afiliado:%s, telefono:%s, turnos:%s" % (afiliado, telefono, turnos))
         if turnos:
             reserva = self.__crearReserva(afiliado, telefono)
             logger.debug("Reserva id:%s" % reserva.id)
             for turno_id in turnos:
                 turno = self.__reservarTurno(reserva, turno_id, empleado);
                 lr = LineaDeReserva.objects.create(turno=turno,
-                                                   reserva=reserva)
+                                                   reserva=reserva,
+                                                   estado=Turno.RESERVADO)
                 logger.debug("Linea de reserva id:%s" % lr.id)
-            return reserva.id
-        return False
+            return reserva
+        return None
     
     def __crearReserva(self, afiliado, telefono):
         reserva = Reserva()
@@ -106,18 +106,30 @@ class Bussiness():
         return reserva
     
     def __reservarTurno(self, reserva, turno_id, empleado):
+        logger.info("Reservando turno %s" % turno_id)
+        if not Turno.objects.filter(id=turno_id).exists():
+            e = TurnoNotExistsException("Turno ID '%s' inexistente" % turno_id)
+            logger.error(e)
+            raise e
         turno = Turno.objects.get(id=turno_id)
         historial = HistorialTurno.objects.create(fecha=timezone.now(),
                                    estadoAnterior=turno.estado,
                                    estadoNuevo=Turno.RESERVADO,
                                    turno=turno,
-                                   empleado=empleado)
+                                   empleado=empleado,
+                                   descripcion="ID de reserva %s" % reserva.id)
         turno.estado = Turno.RESERVADO
         turno.save()
-        logger.debug("Modificacion de turno: %s" % model_to_dict(historial))
+        logger.debug("Modificacion de turno: %s" % historial)
         return turno
         
     def verificarPresentismo(self, afiliado_id):
         # TODO: Contar cantidad de veces ausente en el plazo configurado
         # TODO: presentismo_ok si es menor a la cantidad tolerable
         return True
+
+class TurnoNotExistsException(Exception):
+    def __init__(self, mensaje=None):
+        self.mensaje = mensaje
+    def __str__(self):
+        return repr(self.mensaje)
