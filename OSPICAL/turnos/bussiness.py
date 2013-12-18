@@ -101,9 +101,7 @@ class Bussiness():
     
     def __crearReserva(self, afiliado, telefono):
         if not Afiliado.objects.filter(id=afiliado).exists():
-            e = AfiliadoNotExistsException("Afiliado ID '%s' inexistente" % afiliado)
-            logger.error(e)
-            raise e
+            self.__lanzar(AfiliadoNotExistsException, "Afiliado ID '%s' inexistente" % afiliado)
         reserva = Reserva()
         reserva.afiliado = Afiliado.objects.get(id=afiliado)
         reserva.telefono = telefono
@@ -114,14 +112,10 @@ class Bussiness():
     def __reservarTurno(self, reserva, turno_id, empleado):
         logger.info("Reservando turno %s" % turno_id)
         if not Turno.objects.filter(id=turno_id).exists():
-            e = TurnoNotExistsException("Turno ID '%s' inexistente" % turno_id)
-            logger.error(e)
-            raise e
+            self.__lanzar(TurnoNotExistsException, "Turno ID '%s' inexistente" % turno_id)
         turno = Turno.objects.get(id=turno_id)
         if turno.estado == Turno.RESERVADO:
-            e = TurnoReservadoException("Turno ID '%s' ya se encuentra reservado" % turno_id)
-            logger.error(e)
-            raise e
+            self.__lanzar(TurnoReservadoException, "Turno ID '%s' ya se encuentra reservado" % turno_id)
         historial = HistorialTurno.objects.create(fecha=timezone.now(),
                                    estadoAnterior=turno.estado,
                                    estadoNuevo=Turno.RESERVADO,
@@ -137,7 +131,12 @@ class Bussiness():
         # TODO: Contar cantidad de veces ausente en el plazo configurado
         # TODO: presentismo_ok si es menor a la cantidad tolerable
         return True
-
+    def __lanzar(self, excepcion, mensaje):
+        """Lanza una excepcion y loguea la misma"""
+        e = excepcion(mensaje)
+        logger.error(e)
+        raise e
+        
 class TurnoNotExistsException(Exception):
     def __init__(self, mensaje=None):
         self.mensaje = mensaje
