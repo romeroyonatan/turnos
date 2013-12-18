@@ -95,9 +95,15 @@ class Bussiness():
                                                    estado=Turno.RESERVADO)
                 logger.debug("Linea de reserva id:%s" % lr.id)
             return reserva
+        else:
+            logger.warning("La lista de turnos a reservar esta vacia")
         return None
     
     def __crearReserva(self, afiliado, telefono):
+        if not Afiliado.objects.filter(id=afiliado).exists():
+            e = AfiliadoNotExistsException("Afiliado ID '%s' inexistente" % afiliado)
+            logger.error(e)
+            raise e
         reserva = Reserva()
         reserva.afiliado = Afiliado.objects.get(id=afiliado)
         reserva.telefono = telefono
@@ -112,6 +118,10 @@ class Bussiness():
             logger.error(e)
             raise e
         turno = Turno.objects.get(id=turno_id)
+        if turno.estado == Turno.RESERVADO:
+            e = TurnoReservadoException("Turno ID '%s' ya se encuentra reservado" % turno_id)
+            logger.error(e)
+            raise e
         historial = HistorialTurno.objects.create(fecha=timezone.now(),
                                    estadoAnterior=turno.estado,
                                    estadoNuevo=Turno.RESERVADO,
@@ -132,4 +142,16 @@ class TurnoNotExistsException(Exception):
     def __init__(self, mensaje=None):
         self.mensaje = mensaje
     def __str__(self):
-        return repr(self.mensaje)
+        return self.mensaje
+
+class AfiliadoNotExistsException(Exception):
+    def __init__(self, mensaje=None):
+        self.mensaje = mensaje
+    def __str__(self):
+        return self.mensaje
+
+class TurnoReservadoException(Exception):
+    def __init__(self, mensaje=None):
+        self.mensaje = mensaje
+    def __str__(self):
+        return self.mensaje

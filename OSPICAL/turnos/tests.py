@@ -1,6 +1,6 @@
 from django.test import TestCase
 from turnos.models import *
-from turnos.bussiness import Bussiness, TurnoNotExistsException
+from turnos.bussiness import *
 
 class ReservarTurnoTest(TestCase):
     fixtures = ['turnos.json']
@@ -23,7 +23,7 @@ class ReservarTurnoTest(TestCase):
         self.assertEqual(lineas.count(), len(listaTurnos))
         for turno_id in listaTurnos:
             turno = Turno.objects.get(id=turno_id)
-            historial = HistorialTurno.objects.get(turno=turno)
+            historial = HistorialTurno.objects.latest('id')
             self.assertEqual(turno.estado, Turno.RESERVADO)
             self.assertIsNotNone(historial)
             self.assertEqual(historial.estadoNuevo, turno.estado)
@@ -32,17 +32,32 @@ class ReservarTurnoTest(TestCase):
             self.assertIn(lr.turno.id, listaTurnos)
             self.assertEqual(lr.estado, Turno.RESERVADO)
     
-    def testReservarTurnoInexistente(self):
+    def testTurnoInexistente(self):
         afiliado_id = 1
-        listaTurnos = [4000]
-#         self.assertRaises(TurnoNotExistsException, Bussiness.reservarTurnos, (self.b, afiliado_id, '12345678', listaTurnos))
+        listaTurnos = [20, 4000]
         with self.assertRaises(TurnoNotExistsException):
             self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        turno = Turno.objects.get(id=20)
+        self.assertEqual(turno.estado, Turno.DISPONIBLE)
+        
+    def testAfiliadoInexistente(self):
+        afiliado_id = 4000
+        listaTurnos = [20,21,22,23]
+        with self.assertRaises(AfiliadoNotExistsException):
+            self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        last = LineaDeReserva.objects.latest('id')
+        self.assertNotIn(last.turno, listaTurnos)
 
-    def testReservarTurnoVacio(self):
+    def testTurnoVacio(self):
         afiliado_id = 1
         listaTurnos = []
         reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         self.assertIsNone(reserva)
-
         
+    def testTurnoReservado(self):
+        afiliado_id = 1
+        listaTurnos = [20, 3]
+        with self.assertRaises(TurnoReservadoException):
+            self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        turno = Turno.objects.get(id=20)
+        self.assertEqual(turno.estado, Turno.DISPONIBLE)
