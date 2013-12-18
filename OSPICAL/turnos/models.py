@@ -104,4 +104,3 @@ class HistorialTurno(models.Model):
     descripcion = models.CharField(max_length=100, null=True)
     turno = models.ForeignKey(Turno)
     empleado = models.ForeignKey(Empleado, null=True)
-    

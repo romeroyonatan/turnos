@@ -168,3 +168,72 @@
 [18/Dec/2013 09:56:07] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
 [18/Dec/2013 09:56:07] DEBUG [turnos.bussiness:91] Reserva id:18
 [18/Dec/2013 09:56:07] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 10:00:24] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 10:00:24] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 10:00:24] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 10:00:24] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 10:00:24] DEBUG [turnos.bussiness:117] Modificacion de turno: HistorialTurno object
+[18/Dec/2013 10:00:24] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 10:01:58] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 10:01:58] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 10:01:58] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 10:01:58] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 10:05:45] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 10:05:45] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 10:05:45] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 10:05:45] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 10:05:45] DEBUG [turnos.bussiness:117] Modificacion de turno: <HistorialTurno: HistorialTurno object>
+[18/Dec/2013 10:05:45] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 10:08:37] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 10:08:37] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 10:08:37] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 10:08:37] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 10:08:37] DEBUG [turnos.bussiness:117] Modificacion de turno: HistorialTurno object
+[18/Dec/2013 10:08:37] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 10:10:53] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 10:10:53] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 10:10:53] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 10:10:53] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 10:17:15] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 10:17:15] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 10:17:15] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 10:17:15] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 10:17:15] DEBUG [turnos.bussiness:117] Modificacion de turno: {'empleado': None, 'fecha': datetime.datetime(2013, 12, 18, 13, 17, 15, 811301, tzinfo=<UTC>), 'estadoNuevo': 'R', 'turno': 20, 'descripcion': None, 'estadoAnterior': 'R', u'id': 1}
+[18/Dec/2013 10:17:15] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 10:17:58] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 10:17:59] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 10:17:59] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 10:17:59] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 10:17:59] DEBUG [turnos.bussiness:117] Modificacion de turno: {'empleado': None, 'fecha': datetime.datetime(2013, 12, 18, 13, 17, 59, 69303, tzinfo=<UTC>), 'estadoNuevo': 'R', 'turno': 20, 'descripcion': None, 'estadoAnterior': u'D', u'id': 1}
+[18/Dec/2013 10:17:59] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 11:00:59] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 11:00:59] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 11:00:59] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 11:00:59] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 11:00:59] DEBUG [turnos.bussiness:117] Modificacion de turno: {'empleado': None, 'fecha': datetime.datetime(2013, 12, 18, 14, 0, 59, 504348, tzinfo=<UTC>), 'estadoNuevo': 'R', 'turno': 20, 'descripcion': None, 'estadoAnterior': u'D', u'id': 1}
+[18/Dec/2013 11:00:59] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 11:05:52] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 11:06:03] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 11:08:35] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 11:08:35] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 11:08:35] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 11:08:35] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 11:08:35] DEBUG [turnos.bussiness:117] Modificacion de turno: {'empleado': None, 'fecha': datetime.datetime(2013, 12, 18, 14, 8, 35, 761779, tzinfo=<UTC>), 'estadoNuevo': 'R', 'turno': 20, 'descripcion': None, 'estadoAnterior': u'D', u'id': 1}
+[18/Dec/2013 11:08:35] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 11:09:03] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 11:09:03] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 11:09:03] DEBUG [turnos.bussiness:88] afiliado:1, telefono:12345678, turnos:[20]
+[18/Dec/2013 11:09:03] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 11:09:03] DEBUG [turnos.bussiness:117] Modificacion de turno: {'empleado': None, 'fecha': datetime.datetime(2013, 12, 18, 14, 9, 3, 240562, tzinfo=<UTC>), 'estadoNuevo': 'R', 'turno': 20, 'descripcion': None, 'estadoAnterior': u'D', u'id': 1}
+[18/Dec/2013 11:09:03] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 11:09:28] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 11:09:29] DEBUG [turnos.bussiness:32] Obteniendo turnos disponibles especialista_id:1 fecha:2013-12-21 00:00:00
+[18/Dec/2013 11:09:29] DEBUG [turnos.bussiness:26] Turnos disponibles para el dia 2013-12-21 00:00:00: [{'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 13, 10, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 12, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 13, 25, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 13, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 13, 40, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 14, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 13, 55, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 15, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 14, 10, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 16, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 14, 25, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 17, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 14, 40, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 18, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 14, 55, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 19, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 15, 10, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 20, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 15, 25, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 21, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 15, 40, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 22, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 15, 55, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 23, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 16, 10, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 24, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 16, 25, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 25, 'ee_id': 1}]
+[18/Dec/2013 11:09:38] INFO [turnos.bussiness:87] Reservando turnos
+[18/Dec/2013 11:09:38] DEBUG [turnos.bussiness:88] afiliado:1, telefono:41234345, turnos:[12]
+[18/Dec/2013 11:09:38] DEBUG [turnos.bussiness:91] Reserva id:18
+[18/Dec/2013 11:09:38] DEBUG [turnos.bussiness:117] Modificacion de turno: {'empleado': None, 'fecha': datetime.datetime(2013, 12, 18, 14, 9, 38, 177137, tzinfo=<UTC>), 'estadoNuevo': 'R', 'turno': 12, 'descripcion': None, 'estadoAnterior': u'D', u'id': 1}
+[18/Dec/2013 11:09:38] DEBUG [turnos.bussiness:96] Linea de reserva id:13
+[18/Dec/2013 11:09:41] DEBUG [turnos.bussiness:51] Obteniendo dias de turnos para el especialista_id:1 
+[18/Dec/2013 11:09:42] DEBUG [turnos.bussiness:32] Obteniendo turnos disponibles especialista_id:1 fecha:2013-12-21 00:00:00
+[18/Dec/2013 11:09:42] DEBUG [turnos.bussiness:26] Turnos disponibles para el dia 2013-12-21 00:00:00: [{'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 13, 25, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 13, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 13, 40, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 14, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 13, 55, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 15, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 14, 10, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 16, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 14, 25, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 17, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 14, 40, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 18, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 14, 55, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 19, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 15, 10, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 20, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 15, 25, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 21, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 15, 40, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 22, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 15, 55, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 23, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 16, 10, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 24, 'ee_id': 1}, {'sobreturno': False, 'fecha': datetime.datetime(2013, 12, 21, 16, 25, 6, 672910, tzinfo=<UTC>), 'consultorio_id': 1, 'estado': u'D', u'id': 25, 'ee_id': 1}]

@@ -1,7 +1,7 @@
 import logging
 from django.utils import timezone
 from turnos.models import *
-
+from django.forms.models import model_to_dict
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class Bussiness():
         logger.debug("Obteniendo dias de turnos para el especialista_id:%s " % especialista)
         data = []
         queryset = Turno.objects.filter(ee__especialista__id=especialista,
-                                        fecha__gte=timezone.now()).dates('fecha', 'day')
+                                        fecha__gte=timezone.now()).datetimes('fecha', 'day')
         for fecha in queryset:
             estado = None
             if self.__isCompleto(especialista, fecha):
@@ -107,13 +107,14 @@ class Bussiness():
     
     def __reservarTurno(self, reserva, turno_id, empleado):
         turno = Turno.objects.get(id=turno_id)
-        HistorialTurno.objects.create(fecha=timezone.now(),
+        historial = HistorialTurno.objects.create(fecha=timezone.now(),
                                    estadoAnterior=turno.estado,
                                    estadoNuevo=Turno.RESERVADO,
                                    turno=turno,
                                    empleado=empleado)
         turno.estado = Turno.RESERVADO
         turno.save()
+        logger.debug("Modificacion de turno: %s" % model_to_dict(historial))
         return turno
         
     def verificarPresentismo(self, afiliado_id):
