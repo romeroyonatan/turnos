@@ -79,12 +79,12 @@ class Bussiness():
     def __getFiltroFecha(self, especialista, fecha):
         """Devuelve un filtro para buscar los turnos disponibles del especialista 
         en una fecha determinada"""
-        filtro = {}
-        filtro['ee__especialista__id'] = especialista
-        filtro['fecha__day'] = fecha.day
-        filtro['fecha__month'] = fecha.month
-        filtro['fecha__year'] = fecha.year
-        filtro['estado'] = Turno.DISPONIBLE
+        filtro = {'ee__especialista__id':especialista,
+                  'fecha__day':fecha.day,
+                  'fecha__month':fecha.month,
+                  'fecha__year':fecha.year,
+                  'estado':Turno.DISPONIBLE,
+                  }
         return filtro
     
     @transaction.atomic
@@ -133,15 +133,19 @@ class Bussiness():
         turno.save()
         logger.debug("Modificacion de turno: %s" % historial)
         return turno
-        
-    def verificarPresentismo(self, afiliado_id):
-        """ Verifica si un afiliado se ausenta concurrentemente a los turnos"""
-        logger.debug("Verificando presentismo del afiliado %s" % afiliado_id)
-        fecha = timezone.now() + relativedelta(months=-1)
+    
+    def contarFaltas(self, afiliado_id):
+        logger.debug("Contando faltas del afiliado %s" % afiliado_id)
+        fecha = timezone.now() + relativedelta(months=-self.AUSENTES_MESES)
         queryset = LineaDeReserva.objects.filter(reserva__fecha__gte=fecha,
                                                  reserva__afiliado__id=afiliado_id,
                                                  estado=Turno.AUSENTE)
-        return queryset.count() > self.AUSENTES_CANTIDAD
+        return queryset.count()
+    
+    def verificarPresentismo(self, afiliado_id):
+        """ Verifica si un afiliado se ausenta concurrentemente a los turnos"""
+        faltas = self.contarFaltas(afiliado_id);
+        return faltas <= self.AUSENTES_CANTIDAD
     
     def __lanzar(self, excepcion, mensaje):
         """Lanza una excepcion y loguea la misma"""

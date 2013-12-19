@@ -7,6 +7,7 @@ MESSAGE_DNI_DUPLICADO_DESCRIPCION = "Deberá ingresar el número de afiliado par
 MESSAGE_DNI_INEXISTENTE = "DNI Inexistente";
 MESSAGE_NUMERO_DUPLICADO = "Número de afiliado duplicado";
 MESSAGE_NUMERO_INEXISTENTE = "Número de afiliado Inexistente";
+MESSAGE_PRESENTISMO = "El afiliado ha faltado a muchos turnos en los ultimos meses";
 DIA=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"];
 MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
 ESTADOS={C:"Completo",S:"Sobreturno"};
@@ -138,6 +139,11 @@ function cargarAfiliado(afiliado) {
 		$("#id_especialidad").focus();
 	});
 	// TODO Verificar presentismo
+	url = '/json/presentismo/{0}/'.format(afiliado.id);
+	$.getJSON(url, function(data) {
+		if(!data.presentismo)
+			mostrarMensaje(MESSAGE_PRESENTISMO, {type:'warning'});
+	});
 }
 
 function dniDuplicado() {
