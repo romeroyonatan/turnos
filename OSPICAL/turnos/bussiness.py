@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 
 class Bussiness():
     def __init__(self):
-        self.SETTINGS = getattr(settings, 'TURNOS', {'ausente_meses':6, 'ausente_cantidad':6})
-        self.AUSENTES_CANTIDAD = self.SETTINGS['ausente_cantidad']
-        self.AUSENTES_MESES = self.SETTINGS['ausente_meses']
+        s = getattr(settings, 'TURNOS', {})
+        self.AUSENTES_CANTIDAD = s.get('ausente_cantidad', 6)
+        self.AUSENTES_MESES = s.get('ausente_meses', 6)
     
     def getAfiliados(self, parametro, valor):
         # Buscar en la base de datos local
