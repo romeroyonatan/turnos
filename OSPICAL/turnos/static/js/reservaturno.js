@@ -125,26 +125,30 @@ function eliminar(turno_id) {
 	guardarTurnos(turnos);
 }
 
+function cargarTelefono(afiliado) {
+	url = '/json/afiliado/id/{0}/telefono/'.format(afiliado.id);
+	$.getJSON(url, function(data) {
+		$("#id_telefono").val(data[0].telefono);
+		$("#id_especialidad").focus();
+	});
+}
+
+function verificarPresentismo(afiliado) {
+	url = '/json/presentismo/{0}/'.format(afiliado.id);
+	$.getJSON(url, function(data) {
+		if(!data.presentismo_ok)
+			mostrarMensaje(MESSAGE_PRESENTISMO, {type:'warning'});
+	});
+}
+
 function cargarAfiliado(afiliado) {
 	$("#id_afiliado").val(afiliado.id);
 	$("#id_dni").val(afiliado.dni);
 	$("#id_numero").val(afiliado.numero).mask('0000 0000 0000');
 	$("#id_nombre").val(afiliado.nombre);
 	$("#id_apellido").val(afiliado.apellido);
-	
-	// Cargar telefono
-	url = '/json/afiliado/id/{0}/telefono/'.format(afiliado.id);
-	$.getJSON(url, function(data) {
-		$("#id_telefono").val(data[0].telefono);
-		$("#id_especialidad").focus();
-	});
-	
-	// Verificar presentismo
-	url = '/json/presentismo/{0}/'.format(afiliado.id);
-	$.getJSON(url, function(data) {
-		if(!data.presentismo_ok)
-			mostrarMensaje(MESSAGE_PRESENTISMO, {type:'warning'});
-	});
+	cargarTelefono(afiliado);
+	verificarPresentismo(afiliado);
 }
 
 function dniDuplicado() {
