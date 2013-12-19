@@ -58,17 +58,40 @@ class ReservarTurnoTest(TestCase):
     def testSinTelefono(self):
         afiliado_id = 1
         listaTurnos = [20]
-        reserva = self.b.reservarTurnos(afiliado_id, '', listaTurnos)
-        self.assertIsNone(reserva)
+        with self.assertRaises(Exception):
+            self.b.reservarTurnos(afiliado_id, None, listaTurnos)
         
     def testTurnoReservado(self):
         afiliado_id = 1
         listaTurnos = [20, 3]
         with self.assertRaises(TurnoReservadoException):
-            self.b.reservarTurnos(afiliado_id, None, listaTurnos)
+            self.b.reservarTurnos(afiliado_id, '41234345', listaTurnos)
         turno = Turno.objects.get(id=20)
         self.assertEqual(turno.estado, Turno.DISPONIBLE)
-        
+    
+    def testPresentismo(self):
+        afiliado_id = 1
+        p = self.b.verificarPresentismo(afiliado_id)
+        self.assertFalse(p)
+    
+    def testPresentismoVerdadero(self):
+        afiliado_id = 1
+        listaTurnos = range(1000,1100)
+        for i in listaTurnos:
+            Turno.objects.create(fecha=timezone.now(),
+                                 estado=Turno.DISPONIBLE,
+                                 sobreturno=False,
+                                 consultorio=Consultorio.objects.get(id=1),
+                                 ee=EspecialistaEspecialidad.objects.get(id=1),
+                                 id = i,)
+        reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        lineas = LineaDeReserva.objects.filter(reserva = reserva)
+        for lr in lineas:
+            lr.estado = Turno.AUSENTE
+            lr.save()
+        p = self.b.verificarPresentismo(afiliado_id)
+        self.assertTrue(p)
+    
     def testFatiga(self):
         afiliado_id = 1
         listaTurnos = range(1000,1100)
@@ -78,8 +101,7 @@ class ReservarTurnoTest(TestCase):
                                  sobreturno=False,
                                  consultorio=Consultorio.objects.get(id=1),
                                  ee=EspecialistaEspecialidad.objects.get(id=1),
-                                 id = i,
-                                 )
+                                 id = i,)
         reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         lineas = LineaDeReserva.objects.filter(reserva = reserva)
         self.assertIsNotNone(reserva)

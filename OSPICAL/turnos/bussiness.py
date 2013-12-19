@@ -1,12 +1,19 @@
 import logging
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.utils import timezone
-from turnos.models import *
 from django.db import transaction
+
+from turnos.models import *
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 class Bussiness():
+    def __init__(self):
+        self.SETTINGS = getattr(settings, 'TURNOS', {'ausente_meses':6, 'ausente_cantidad':6})
+        self.AUSENTES_CANTIDAD = self.SETTINGS['ausente_cantidad']
+        self.AUSENTES_MESES = self.SETTINGS['ausente_meses']
     
     def getAfiliados(self, parametro, valor):
         # Buscar en la base de datos local
@@ -128,9 +135,13 @@ class Bussiness():
         return turno
         
     def verificarPresentismo(self, afiliado_id):
-        # TODO: Contar cantidad de veces ausente en el plazo configurado
-        # TODO: presentismo_ok si es menor a la cantidad tolerable
-        return True
+        """ Verifica si un afiliado se ausenta concurrentemente a los turnos"""
+        fecha = timezone.now() + relativedelta(months=-1)
+        queryset = LineaDeReserva.objects.filter(reserva__fecha__gte=fecha,
+                                                 reserva__afiliado__id=afiliado_id,
+                                                 estado=Turno.AUSENTE)
+        return queryset.count() > self.AUSENTES_CANTIDAD
+    
     def __lanzar(self, excepcion, mensaje):
         """Lanza una excepcion y loguea la misma"""
         e = excepcion(mensaje)

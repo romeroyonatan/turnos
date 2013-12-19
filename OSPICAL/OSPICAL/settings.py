@@ -183,3 +183,15 @@ LOGGING = {
         },
     }
 }
+
+#########################################################
+#        Configuracion de aplicacion: Turnos            #
+#########################################################
+TURNOS = {
+          # Cantidad de meses que se tendran en cuenta para el calculo de presentismo
+          'ausente_meses' : 6,
+          # Cantidad de ausentes maximos que se tendran en cuenta para no declarar al 
+          # afiliado como ausente recurrente 
+          'ausente_cantidad' : 3,
+          }
+
