@@ -3,10 +3,12 @@ MESSAGE_NO_DIAS = "El especialista no posee días disponibles para reservar turn
 MESSAGE_NO_TURNOS = "No hay turnos disponibles este día";
 MESSAGE_TURNO_YA_AGREGADO = "Ya agregó este turno";
 MESSAGE_DNI_DUPLICADO_TITLE = "DNI duplicado";
-MESSAGE_DNI_DUPLICADO_DESCRIPCION = "Deberá ingresar el número de afiliado para realizar la reserva"
-MESSAGE_DNI_INEXISTENTE = "DNI Inexistente";
+MESSAGE_DNI_DUPLICADO_DESCRIPCION = "Deberá ingresar el número de afiliado para realizar la reserva";
+MESSAGE_DNI_INEXISTENTE_TITLE = "DNI Inexistente";
+MESSAGE_DNI_INEXISTENTE_DESCRIPCION = "Verifique que el número de DNI ingresado sea correcto";
 MESSAGE_NUMERO_DUPLICADO = "Número de afiliado duplicado";
-MESSAGE_NUMERO_INEXISTENTE = "Número de afiliado Inexistente";
+MESSAGE_NUMERO_INEXISTENTE_TITLE = "Número de afiliado Inexistente";
+MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION = "Verifique que el número de número de afiliado ingresado sea correcto";
 MESSAGE_PRESENTISMO = "El afiliado ha faltado a muchos turnos en los ultimos meses";
 DIA=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"];
 MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
@@ -43,7 +45,7 @@ function mostrarMensaje(mensaje,options) {
 	template = "<div><h1>{0}</h1><p>{1}</p></div>";
 	text = template.format(title, mensaje);
 	tipo = options && options.type ? options.type : "error";
-	noty({text: text, type:tipo, layout:'top'});
+	noty({text: text, type:tipo, layout:'bottom'});
 }
 
 /**
@@ -137,7 +139,7 @@ function verificarPresentismo(afiliado) {
 	url = '/json/presentismo/{0}/'.format(afiliado.id);
 	$.getJSON(url, function(data) {
 		if(!data.presentismo_ok)
-			mostrarMensaje(MESSAGE_PRESENTISMO, {type:'warning'});
+			mostrarMensaje(MESSAGE_PRESENTISMO, {type:'information'});
 	});
 }
 
@@ -168,7 +170,8 @@ $(document).ready(function(){
 				} else if (data.length > 1) {
 					dniDuplicado();
 				} else {
-					mostrarMensaje(MESSAGE_DNI_INEXISTENTE,{element:container});
+					mostrarMensaje(MESSAGE_DNI_INEXISTENTE_DESCRIPCION,
+							{title:MESSAGE_DNI_INEXISTENTE_TITLE, element:container});
 				}
 			});
 		}
@@ -185,7 +188,8 @@ $(document).ready(function(){
 				} else if (data.length > 1){
 					mostrarMensaje(MESSAGE_NUMERO_DUPLICADO,{type:'warning'});
 				} else {
-					mostrarMensaje(MESSAGE_NUMERO_INEXISTENTE,{element:container});
+					mostrarMensaje(MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION,
+							{title:MESSAGE_NUMERO_INEXISTENTE_TITLE, element:container});
 				}
 			});
 		}
