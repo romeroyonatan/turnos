@@ -33,15 +33,15 @@ def reservar(request):
             telefono = form.cleaned_data['telefono']
             if turnos:
                 turnos = json.loads(turnos)
-            else:
+            if not turnos or len(turnos) == 0:
                 hora = form.cleaned_data['hora']
                 if hora:
-                    logger.debug("Hora: %s" % hora)
                     turnos = [hora]
                 else:
                     error = "Debe ingresar al menos un turno a reservar"
                     return render_to_response('ReservarTurno.html', locals())
-            exito = bussiness.reservarTurnos(afiliado, telefono, turnos)
+            reserva = bussiness.reservarTurnos(afiliado, telefono, turnos)
+            #TODO: Mostrar mensaje de exito
             return HttpResponseRedirect('/reservar/')
     else:
         form = ReservarTurnoForm()

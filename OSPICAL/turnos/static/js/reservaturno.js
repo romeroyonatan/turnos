@@ -2,10 +2,11 @@ DEFAULT_MESSAGE = "Seleccionar";
 MESSAGE_NO_DIAS = "El especialista no posee días disponibles para reservar turnos";
 MESSAGE_NO_TURNOS = "No hay turnos disponibles este día";
 MESSAGE_TURNO_YA_AGREGADO = "Ya agregó este turno";
-MESSAGE_DNI_DUPLICADO = "DNI duplicado"
-MESSAGE_DNI_INEXISTENTE = "DNI Inexistente"
-MESSAGE_NUMERO_DUPLICADO = "Número de afiliado duplicado"
-MESSAGE_NUMERO_INEXISTENTE = "Número de afiliado Inexistente"
+MESSAGE_DNI_DUPLICADO_TITLE = "DNI duplicado";
+MESSAGE_DNI_DUPLICADO_DESCRIPCION = "Deberá ingresar el número de afiliado para realizar la reserva"
+MESSAGE_DNI_INEXISTENTE = "DNI Inexistente";
+MESSAGE_NUMERO_DUPLICADO = "Número de afiliado duplicado";
+MESSAGE_NUMERO_INEXISTENTE = "Número de afiliado Inexistente";
 DIA=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"];
 MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
 ESTADOS={C:"Completo",S:"Sobreturno"};
@@ -37,8 +38,11 @@ function mostrarMensaje(mensaje,options) {
 		options.element.addClass('error');
 		options.element.attr({'title':mensaje});
 	}
+	title = options && options.title ? options.title : "";
+	template = "<div><h1>{0}</h1><p>{1}</p></div>";
+	text = template.format(title, mensaje);
 	tipo = options && options.type ? options.type : "error";
-	noty({text: mensaje, type:tipo, layout:'top'});
+	noty({text: text, type:tipo, layout:'top'});
 }
 
 /**
@@ -136,21 +140,22 @@ function cargarAfiliado(afiliado) {
 	// TODO Verificar presentismo
 }
 
+function dniDuplicado() {
+	mostrarMensaje(MESSAGE_DNI_DUPLICADO_DESCRIPCION, 
+				   {title:MESSAGE_DNI_DUPLICADO_TITLE, type:'warning'});
+}
+
 $(document).ready(function(){
 	$("#id_dni").blur(function() {
 		var container = $("#id_dni");
 		var dni = container.val();
-		// TODO Validacion DNI
-		if(dni) {
+		if(/\d+/.test(dni)) {
 			url = '/json/afiliado/dni/{0}/'.format(dni);
 			$.getJSON(url, function(data) {
-				if(data.length > 0) {
-					if (data.length > 1){
-						//TODO DNI Duplicado. Debe ingresar el numero de afiliado
-						mostrarMensaje(MESSAGE_DNI_DUPLICADO,{type:'information'});
-					}
-					// FIXME Hardcodeado el [0]
+				if (data.length == 1) {
 					cargarAfiliado(data[0])
+				} else if (data.length > 1) {
+					dniDuplicado();
 				} else {
 					mostrarMensaje(MESSAGE_DNI_INEXISTENTE,{element:container});
 				}
@@ -161,16 +166,13 @@ $(document).ready(function(){
 	$("#id_numero").blur(function() {
 		var container = $("#id_numero");
 		var value = container.data('mask').getCleanVal();;
-		// TODO Validacion DNI
-		if(value) {
+		if(/\d+/.test(value)) {
 			url = '/json/afiliado/numero/{0}/'.format(value);
 			$.getJSON(url, function(data) {
-				if(data.length > 0) {
-					if (data.length > 1){
-						mostrarMensaje(MESSAGE_NUMERO_DUPLICADO,{type:'warning'});
-					}
-					// FIXME Hardcodeado el [0]
+				if (data.length == 1){
 					cargarAfiliado(data[0])
+				} else if (data.length > 1){
+					mostrarMensaje(MESSAGE_NUMERO_DUPLICADO,{type:'warning'});
 				} else {
 					mostrarMensaje(MESSAGE_NUMERO_INEXISTENTE,{element:container});
 				}
@@ -263,16 +265,18 @@ $(document).ready(function(){
 	
 	$("#id_agregar").click(function() {
 		var turno_id = parseInt($("#id_hora").val());
-		// TODO Validar
 		if(turno_id) {
 			agregar(turno_id);
 			$(":submit").focus();
+		} else {
+			mostrarMensaje("Debe seleccionar un horario de un turno disponible",
+							{element:$('#id_hora')});
 		}
 	});
 	
 	$(':reset').click(function(){
 		$('#tabla_turnos > tbody > tr').remove();
-		$(':hidden').val('');
+		$('#id_turnos, #id_afiliado').val('');
 		$("#id_especialista, #id_dia, #id_hora").prop({disabled: true});
 	});
 	

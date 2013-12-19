@@ -136,6 +136,7 @@ class Bussiness():
         
     def verificarPresentismo(self, afiliado_id):
         """ Verifica si un afiliado se ausenta concurrentemente a los turnos"""
+        logger.debug("Verificando presentismo del afiliado %s" % afiliado_id)
         fecha = timezone.now() + relativedelta(months=-1)
         queryset = LineaDeReserva.objects.filter(reserva__fecha__gte=fecha,
                                                  reserva__afiliado__id=afiliado_id,

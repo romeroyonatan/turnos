@@ -2,8 +2,8 @@ from django import forms
 from turnos.models import Especialidad
 
 class ReservarTurnoForm(forms.Form):
-    dni = forms.IntegerField()
-    numero = forms.IntegerField()
+    dni = forms.IntegerField(widget=forms.TextInput())
+    numero = forms.IntegerField(widget=forms.TextInput())
     nombre = forms.CharField(widget=forms.TextInput(attrs={'disabled':'disabled'}),
                              required=False)
     apellido = forms.CharField(widget=forms.TextInput(attrs={'disabled':'disabled'}),
