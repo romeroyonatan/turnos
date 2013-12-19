@@ -132,16 +132,17 @@ function cargarAfiliado(afiliado) {
 	$("#id_nombre").val(afiliado.nombre);
 	$("#id_apellido").val(afiliado.apellido);
 	
-	// Verificar telefono
+	// Cargar telefono
 	url = '/json/afiliado/id/{0}/telefono/'.format(afiliado.id);
 	$.getJSON(url, function(data) {
 		$("#id_telefono").val(data[0].telefono);
 		$("#id_especialidad").focus();
 	});
-	// TODO Verificar presentismo
+	
+	// Verificar presentismo
 	url = '/json/presentismo/{0}/'.format(afiliado.id);
 	$.getJSON(url, function(data) {
-		if(!data.presentismo)
+		if(!data.presentismo_ok)
 			mostrarMensaje(MESSAGE_PRESENTISMO, {type:'warning'});
 	});
 }
