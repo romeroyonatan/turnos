@@ -37,9 +37,13 @@ def reservar(request):
             if not turnos:
                 messages.error(request, 'Debe ingresar al menos un turno a reservar')
             else:
-                reserva = bussiness.reservarTurnos(afiliado, telefono, turnos)
-                messages.success(request, u'Turno reservado con éxito')
-                return HttpResponseRedirect('/reservar/')
+                try:
+                    reserva = bussiness.reservarTurnos(afiliado, telefono, turnos)
+                except Exception, e:
+                    messages.error(request, __getExceptionMessage(e))
+                else:
+                    messages.success(request, u'Turno reservado con éxito')
+                    return HttpResponseRedirect('/reservar/')
     else:
         form = ReservarTurnoForm()
     return render_to_response('ReservarTurno.html', locals(), context_instance=RequestContext(request))
@@ -52,6 +56,9 @@ def __getTurnos(form):
         hora = form.cleaned_data['hora']
         lista = [hora] if hora else None
     return lista
+    
+def __getExceptionMessage(exception):
+    return exception.message
 
 def get(request, model, parametro, valor):
     filtro = dict([(parametro, valor)])
