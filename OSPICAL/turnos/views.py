@@ -30,15 +30,13 @@ def reservar(request):
     if request.method == 'POST':
         form = ReservarTurnoForm(request.POST)
         if form.is_valid():
+            p = __getParametrosReserva(form)
             bussiness = Bussiness()
-            turnos = __getTurnos(form)
-            afiliado = form.cleaned_data['afiliado']
-            telefono = form.cleaned_data['telefono']
-            if not turnos:
+            if not p.turnos:
                 messages.error(request, 'Debe ingresar al menos un turno a reservar')
             else:
                 try:
-                    reserva = bussiness.reservarTurnos(afiliado, telefono, turnos)
+                    reserva = bussiness.reservarTurnos(p['afiliado'], p['telefono'], p['turnos'])
                 except Exception, e:
                     messages.error(request, __getExceptionMessage(e))
                 else:
@@ -56,6 +54,12 @@ def __getTurnos(form):
         hora = form.cleaned_data['hora']
         lista = [hora] if hora else None
     return lista
+    
+def __getParametrosReserva(form):
+    turnos = __getTurnos(form)
+    afiliado = form.cleaned_data['afiliado']
+    telefono = form.cleaned_data['telefono']
+    return {'turnos':turnos, 'afiliado':afiliado, 'telefono':telefono}
     
 def __getExceptionMessage(exception):
     return exception.message
