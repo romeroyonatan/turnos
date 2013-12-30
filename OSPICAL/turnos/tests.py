@@ -1,7 +1,13 @@
+from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 from django.test import TestCase
 from turnos.models import *
 from turnos.bussiness import *
 from django.utils import timezone
+from django.conf import settings
+
+import logging
+logger = logging.getLogger(__name__)
 
 class ReservarTurnoTest(TestCase):
     fixtures = ['turnos.json']
@@ -11,8 +17,15 @@ class ReservarTurnoTest(TestCase):
         TestCase.setUp(self)
     
     def testGetDiasTurnos(self):
+        # Creando turno
+        Turno.objects.create(fecha=timezone.now() + timedelta(days=1),
+                             estado=Turno.DISPONIBLE,
+                             sobreturno=False,
+                             consultorio=Consultorio.objects.get(id=1),
+                             ee=EspecialistaEspecialidad.objects.get(id=1),
+                             )
         test = self.b.getDiaTurnos(1)
-        self.assertGreater(len(test), 1)
+        self.assertGreaterEqual(len(test), 1)
     
     def testReservarTurno(self):
         afiliado_id = 1
@@ -71,12 +84,15 @@ class ReservarTurnoTest(TestCase):
     
     def testPresentismo(self):
         afiliado_id = 1
-        p = self.b.verificarPresentismo(afiliado_id)
-        self.assertFalse(p)
+        p = self.b.presentismoOK(afiliado_id)
+        self.assertTrue(p)
     
-    def testPresentismoVerdadero(self):
+    def testPresentismoNotOK(self):
+        s = getattr(settings, 'TURNOS', {})
+        cantidad = s.get('ausente_cantidad', 6)
         afiliado_id = 1
-        listaTurnos = range(1000,1100)
+        # Creando turnos
+        listaTurnos = range(1000,1000 + cantidad + 1)
         for i in listaTurnos:
             Turno.objects.create(fecha=timezone.now(),
                                  estado=Turno.DISPONIBLE,
@@ -85,11 +101,42 @@ class ReservarTurnoTest(TestCase):
                                  ee=EspecialistaEspecialidad.objects.get(id=1),
                                  id = i,)
         reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        # Reservando turnos
         lineas = LineaDeReserva.objects.filter(reserva = reserva)
+        # Marcando turnos como ausente
         for lr in lineas:
             lr.estado = Turno.AUSENTE
             lr.save()
-        p = self.b.verificarPresentismo(afiliado_id)
+        # Verificando presentismo
+        p = self.b.presentismoOK(afiliado_id)
+        self.assertFalse(p)
+        
+    def testPresentismoExpirado(self):
+        logger.debug("testPresentismoExpirado")
+        s = getattr(settings, 'TURNOS', {})
+        cantidad = s.get('ausente_cantidad', 6)
+        meses = s.get('ausente_meses', 6)
+        afiliado_id = 1
+        # Creando turnos
+        listaTurnos = range(1000,1000 + cantidad + 1)
+        for i in listaTurnos:
+            Turno.objects.create(fecha=timezone.now() + relativedelta(months=-meses, days=-1),
+                                 estado=Turno.DISPONIBLE,
+                                 sobreturno=False,
+                                 consultorio=Consultorio.objects.get(id=1),
+                                 ee=EspecialistaEspecialidad.objects.get(id=1),
+                                 id = i,)
+        reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reserva.fecha = timezone.now() + relativedelta(months=-meses, days=-1)
+        reserva.save()
+        # Reservando turnos
+        lineas = LineaDeReserva.objects.filter(reserva = reserva)
+        # Marcando turnos como ausente
+        for lr in lineas:
+            lr.estado = Turno.AUSENTE
+            lr.save()
+        # Verificando presentismo
+        p = self.b.presentismoOK(afiliado_id)
         self.assertTrue(p)
     
     def testFatiga(self):

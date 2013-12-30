@@ -71,7 +71,7 @@ def getTurnosDisponibles(request, especialista_id, year, month, day):
 
 def verificarPresentismo(request, afiliado_id):
     bussiness = Bussiness()
-    data = {'presentismo_ok': bussiness.verificarPresentismo(afiliado_id)}
+    data = {'presentismo_ok': bussiness.presentismoOK(afiliado_id)}
     return JSONResponse(data)
 
 def getTelefono(request, afiliado_id):

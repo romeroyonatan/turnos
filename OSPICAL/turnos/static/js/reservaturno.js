@@ -315,13 +315,11 @@ $(document).ready(function(){
 			numero: "required",
 			dni: "required",
 			telefono: "required",
-			turnos: "required",
 		},
 		messages: {
 			numero: "Debe ingresar el número de afiliado",
 			dni: "Debe ingresar el DNI",
 			telefono: "Debe ingresar un telefono",
-			turnos: "Debe ingresar al menos un turno",
 		}
 	});
 });

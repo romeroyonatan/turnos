@@ -1,4 +1,3 @@
-import logging
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.utils import timezone
@@ -6,7 +5,7 @@ from django.db import transaction
 
 from turnos.models import *
 
-# Get an instance of a logger
+import logging
 logger = logging.getLogger(__name__)
 
 class Bussiness():
@@ -142,9 +141,10 @@ class Bussiness():
                                                  estado=Turno.AUSENTE)
         return queryset.count()
     
-    def verificarPresentismo(self, afiliado_id):
+    def presentismoOK(self, afiliado_id):
         """ Verifica si un afiliado se ausenta concurrentemente a los turnos"""
         faltas = self.contarFaltas(afiliado_id);
+        logger.debug("Cantidad de faltas del afiliado %s: %s, %s" % (afiliado_id, faltas, faltas <= self.AUSENTES_CANTIDAD))
         return faltas <= self.AUSENTES_CANTIDAD
     
     def __lanzar(self, excepcion, mensaje):
