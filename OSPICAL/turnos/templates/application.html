@@ -25,20 +25,16 @@
 	</div>
 	
 	<div class="content">
-		{% if success %}   
-		   <div class="alert alert-success pure-u-1">{{ success }}</div>
-		{% endif %}
-		{% if info %} 
-		   <div class="alert alert-info pure-u-1">{{ info }}</div>
-		{% endif %}
-		{% if warning %}   
-		   <div class="alert alert-warning pure-u-1">{{ warning }}</div>
-		{% endif %}
-		{% if error %}   
-		   <div class="alert alert-danger pure-u-1">{{ error }}</div>
+		{% if messages %}
+		<ul class="messages pure-u-1">
+		    {% for message in messages %}
+		    <li{% if message.tags %} class="alert {{ message.tags }} "{% endif %}>{{ message }}</li>
+		    {% endfor %}
+		</ul>
 		{% endif %}
 		
-		{% block content %}{% endblock %}
+		{% block content %}
+		{% endblock %}
 	</div>
 	
 	{% block footer %}

@@ -1,5 +1,5 @@
-from django.conf.urls import patterns, include, url
-from turnos.models import Afiliado, Especialista
+from django.conf.urls import patterns
+from turnos.models import Afiliado
 from django.views.generic import RedirectView
 
 # Uncomment the next two lines to enable the admin:

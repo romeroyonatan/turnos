@@ -1,3 +1,4 @@
+# coding=utf-8
 # Create your views here.
 import datetime
 import json
@@ -6,6 +7,8 @@ from time import mktime
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.forms.models import model_to_dict
+from django.contrib import messages
+from django.template import RequestContext
 
 from turnos.forms import ReservarTurnoForm
 from turnos.models import *
@@ -28,24 +31,27 @@ def reservar(request):
         form = ReservarTurnoForm(request.POST)
         if form.is_valid():
             bussiness = Bussiness()
-            turnos = form.cleaned_data['turnos']
+            turnos = __getTurnos(form)
             afiliado = form.cleaned_data['afiliado']
             telefono = form.cleaned_data['telefono']
-            if turnos:
-                turnos = json.loads(turnos)
-            if not turnos or len(turnos) == 0:
-                hora = form.cleaned_data['hora']
-                if hora:
-                    turnos = [hora]
-                else:
-                    error = "Debe ingresar al menos un turno a reservar"
-                    return render_to_response('ReservarTurno.html', locals())
-            reserva = bussiness.reservarTurnos(afiliado, telefono, turnos)
-            #TODO: Mostrar mensaje de exito
-            return HttpResponseRedirect('/reservar/')
+            if not turnos:
+                messages.error(request, 'Debe ingresar al menos un turno a reservar')
+            else:
+                reserva = bussiness.reservarTurnos(afiliado, telefono, turnos)
+                messages.success(request, u'Turno reservado con éxito')
+                return HttpResponseRedirect('/reservar/')
     else:
         form = ReservarTurnoForm()
-    return render_to_response('ReservarTurno.html', locals())
+    return render_to_response('ReservarTurno.html', locals(), context_instance=RequestContext(request))
+
+def __getTurnos(form):
+    turnos = form.cleaned_data['turnos']
+    if turnos:
+        lista = json.loads(turnos)
+    if not lista:
+        hora = form.cleaned_data['hora']
+        lista = [hora] if hora else None
+    return lista
 
 def get(request, model, parametro, valor):
     filtro = dict([(parametro, valor)])

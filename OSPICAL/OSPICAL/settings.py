@@ -97,7 +97,11 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
 )
-
+TEMPLATE_CONTEXT_PROCESSORS = (
+   "django.core.context_processors.request",
+   "django.core.context_processors.media",
+   "django.contrib.messages.context_processors.messages"
+)
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
