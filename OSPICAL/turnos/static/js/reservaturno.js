@@ -60,9 +60,9 @@ function __getRowTemplate() {
 
 function agregarFilaTurno(id, especialidad, especialista, dia, horario){
 	var rowtemplate = __getRowTemplate();
-	var table = $('#tabla_turnos > tbody:last');
+	var container = $('#list-container');
 	var row = rowtemplate.format(id, especialidad, especialista, dia, horario);
-	table.append(row);
+	container.append(row);
 	
 	$('.boton_eliminar#'+id).click(
 			function(e){e.preventDefault();

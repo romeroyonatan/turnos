@@ -32,7 +32,7 @@ def reservar(request):
         if form.is_valid():
             p = __getParametrosReserva(form)
             bussiness = Bussiness()
-            if not p.turnos:
+            if not p['turnos']:
                 messages.error(request, 'Debe ingresar al menos un turno a reservar')
             else:
                 try:
@@ -48,6 +48,7 @@ def reservar(request):
 
 def __getTurnos(form):
     turnos = form.cleaned_data['turnos']
+    lista = []
     if turnos:
         lista = json.loads(turnos)
     if not lista:
@@ -95,4 +96,3 @@ def getTelefono(request, afiliado_id):
     queryset = Reserva.objects.filter(afiliado__id=afiliado_id).order_by('-fecha')[:1]
     data = [item for item in queryset.values('telefono')]
     return JSONResponse(data)
-
