@@ -9,7 +9,7 @@ from django.views.generic import RedirectView
 urlpatterns = patterns('turnos.views',
     (r'^$', RedirectView.as_view(url='/reservar/')),
     (r'^reservar/$', 'reservar'),
-    (r'^json/afiliado/(?P<parametro>(id|numero|dni))/(?P<valor>\w+)/$', 'get', {'model':Afiliado}),
+    (r'^json/afiliado/(?P<parametro>(id|numero|dni))/(?P<valor>\w+)/$', 'getAfiliado'),
     (r'^json/afiliado/id/(?P<afiliado_id>\w+)/telefono/$', 'getTelefono'),
     (r'^json/presentismo/(?P<afiliado_id>\w+)/$', 'verificarPresentismo'),
     (r'^json/especialistas/especialidad/(?P<especialidad_id>\d+)/$', 'getEspecialistas'),

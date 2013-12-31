@@ -71,6 +71,11 @@ def get(request, model, parametro, valor):
     data = [item for item in queryset.values()]
     return JSONResponse(data)
 
+def getAfiliado(request, parametro, valor):
+    bussiness = Bussiness()
+    data = bussiness.getAfiliados(parametro,valor)
+    return JSONResponse(data)
+
 def getDiaTurnos(request, especialista_id):
     bussiness = Bussiness()
     data = bussiness.getDiaTurnos(especialista_id)
@@ -94,5 +99,5 @@ def verificarPresentismo(request, afiliado_id):
 
 def getTelefono(request, afiliado_id):
     queryset = Reserva.objects.filter(afiliado__id=afiliado_id).order_by('-fecha')[:1]
-    data = [item for item in queryset.values('telefono')]
+    data = [item["telefono"] for item in queryset.values('telefono')]
     return JSONResponse(data)

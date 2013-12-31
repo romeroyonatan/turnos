@@ -2,6 +2,7 @@ DEFAULT_MESSAGE = "Seleccionar";
 MESSAGE_NO_DIAS = "El especialista no posee días disponibles para reservar turnos";
 MESSAGE_NO_TURNOS = "No hay turnos disponibles este día";
 MESSAGE_TURNO_YA_AGREGADO = "Ya agregó este turno";
+MESSAGE_TURNO_NO_SELECCIONADO = "Debe seleccionar un turno para agregar";
 MESSAGE_DNI_DUPLICADO_TITLE = "DNI duplicado";
 MESSAGE_DNI_DUPLICADO_DESCRIPCION = "Deberá ingresar el número de afiliado para realizar la reserva";
 MESSAGE_DNI_INEXISTENTE_TITLE = "DNI Inexistente";
@@ -14,6 +15,8 @@ DIA=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"];
 MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
 ESTADOS={C:"Completo",S:"Sobreturno"};
 
+
+//////////////////////////////////////////////////////////////////////////////////
 /**
  * Permite formatear una cadena como en C# mediante ubicadores posicionales
  * {0}{1}
@@ -55,6 +58,7 @@ function mostrarMensaje(mensaje,options) {
 	noty({text: text, type:tipo, layout:'bottom'});
 }
 
+////////////////////////////////////////////////////////////////////////////////////
 function Lista(contenedor, options) {
 	/** Este atributo hace referencia a un objecto del DOM que almacenará los
 	 * ID de los objetos seleccionados */
@@ -62,9 +66,10 @@ function Lista(contenedor, options) {
 	this.listContainer = options && options.listContainer ? 
 						 options.listContainer : 
 					     $('#list-container');
-	this.template = options && options.template ? this.__getTemplate();
+	this.template = options && options.template ? options.template : this.__getTemplate();
 	this.load();
 }
+
 /**
  * Obtiene la lista de objetos
  */
@@ -103,6 +108,7 @@ Lista.prototype.add = function(obj) {
 		this.objects.push(obj.id);
 		this.save();
 		this.addDOM(obj);
+		return true;
 	} else {
 		return false;
 	}
@@ -114,6 +120,11 @@ Lista.prototype.add = function(obj) {
 Lista.prototype.addDOM = function(obj) {
 	t = this.template.format(obj)
 	this.listContainer.append(t);
+	$('#rem-tr-{id}'.format(obj)).click(function() {
+		var id = /rem-tr-(\d+)/i.exec(this.id)[1];
+		$('#tr-{0}'.format(id)).remove();
+		l.remove(id);
+	})
 }
 
 /**
@@ -127,7 +138,9 @@ Lista.prototype.remove = function (id) {
 	this.objects.splice(index, 1);
 	this.save();
 }
+//////////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////////
 function Afiliado(obj) {
 	this.id = obj.id;
 	this.dni = obj.dni;
@@ -136,6 +149,7 @@ function Afiliado(obj) {
 	this.apellido = obj.apellido;
 	this.obtenerTelefono();
 	this.verificarPresentismo();
+	this.mostrar();
 }
 
 /**
@@ -147,7 +161,8 @@ Afiliado.prototype.obtenerTelefono = function () {
 	url = '/json/afiliado/id/{0}/telefono/'.format(this.id);
 	$.getJSON(url, function(data) {
 		if(data) {
-			this.telefono = data[0].telefono;
+			this.telefono = data[0];
+			$("#id_telefono").val(this.telefono);
 			$("#id_especialidad").focus();
 		} else {
 			$("#id_telefono").focus();
@@ -159,6 +174,8 @@ Afiliado.prototype.verificarPresentismo = function () {
 	url = '/json/presentismo/{0}/'.format(this.id);
 	$.getJSON(url, function(data) {
 		this.presentismo = data.presentismo_ok;
+		if(!this.presentismo)
+			mostrarMensaje(MESSAGE_PRESENTISMO, {type:'information'});
 	});
 }
 
@@ -168,16 +185,18 @@ Afiliado.prototype.mostrar = function () {
 	$("#id_numero").val(this.numero).mask('0000 0000 0000');
 	$("#id_nombre").val(this.nombre);
 	$("#id_apellido").val(this.apellido);
-	$("#id_telefono").val(this.telefono);
-	if(!this.presentismo)
-		mostrarMensaje(MESSAGE_PRESENTISMO, {type:'information'});
 }
+//////////////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////////////////////////////
 $(document).ready(function(){
 	var ajax = $.ajax({
 		url:"/static/js/templates/reservarturno.template.html",
 		async: false});
-	l = new Lista($('#id_turnos'),{template=ajax.responseText});
+	
+	// TODO: Reconstruir lista cuando tenga algo
+	l = new Lista($('#id_turnos'),{template:ajax.responseText});
 
 	$("#id_dni").blur(function() {
 		var container = $("#id_dni");
@@ -187,7 +206,6 @@ $(document).ready(function(){
 			$.getJSON(url, function(data) {
 				if (data.length == 1) {
 					var a = new Afiliado(data[0]);
-					a.mostrar();
 				} else if (data.length > 1) {
 					mostrarMensaje(MESSAGE_DNI_DUPLICADO_DESCRIPCION, 
 							   {title:MESSAGE_DNI_DUPLICADO_TITLE, type:'warning'});
@@ -206,8 +224,7 @@ $(document).ready(function(){
 			url = '/json/afiliado/numero/{0}/'.format(value);
 			$.getJSON(url, function(data) {
 				if (data.length == 1){
-					var a = new Afiliado(data[0]);
-					a.mostrar();
+					new Afiliado(data[0]);
 				} else if (data.length > 1){
 					mostrarMensaje(MESSAGE_NUMERO_DUPLICADO,{type:'warning'});
 				} else {
@@ -309,11 +326,12 @@ $(document).ready(function(){
 			turno['especialista'] = $("#id_especialista option:selected").text();
 			turno['dia'] = $("#id_dia option:selected").text();
 			turno['hora'] = $("#id_hora option:selected").text();
-			l.add(turno);
+			if(!l.add(turno)) {
+				mostrarMensaje(MESSAGE_TURNO_YA_AGREGADO);
+			}
 			$(":submit").focus();
 		} else {
-			mostrarMensaje("Debe seleccionar un horario de un turno disponible",
-							{element:$('#id_hora')});
+			mostrarMensaje(MESSAGE_TURNO_NO_SELECCIONADO,{element:$('#id_hora')});
 		}
 	});
 	
@@ -351,3 +369,4 @@ $(document).ready(function(){
 		}
 	});
 });
+//////////////////////////////////////////////////////////////////////////////////

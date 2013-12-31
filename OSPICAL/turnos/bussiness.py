@@ -16,15 +16,15 @@ class Bussiness():
     
     def getAfiliados(self, parametro, valor):
         # Buscar en la base de datos local
-        logger.debug("Obteniendo afiliado %s %s" % (parametro, valor))
+        logger.info("Buscando afiliado %s %s" % (parametro, valor))
         filtro = dict([(parametro, valor)])
         queryset = Afiliado.objects.filter(**filtro)
         data = [item for item in queryset.values()]
         if not data:
-            logger.debug("Afiliado %s %s no encontrado. Buscando en \
-            interfaz de usuarios" % (parametro, valor))
+            logger.warn("Afiliado %s %s no encontrado. Buscando en interfaz de usuarios" % (parametro, valor))
             # TODO: Buscar en la interfaz de consulta de afiliados
             pass
+        logger.info("Resultado de busqueda de afiliado %s %s: %s" % (parametro, valor, data))
         return data
     
     def getTurnosDisponibles(self, especialista, fecha):
@@ -90,10 +90,10 @@ class Bussiness():
     def reservarTurnos(self, afiliado, telefono, turnos, empleado=None):
         """ Reserva turnos a afiliado"""
         # TODO: Verificar excepciones
-        logger.debug("Reservando turnos - afiliado:%s, telefono:%s, turnos:%s" % (afiliado, telefono, turnos))
+        logger.info("Reservando turnos - afiliado:%s, telefono:%s, turnos:%s" % (afiliado, telefono, turnos))
         if turnos:
             reserva = self.__crearReserva(afiliado, telefono)
-            logger.debug("Reserva id:%s" % reserva.id)
+            logger.info("Reserva id:%s" % reserva.id)
             for turno_id in turnos:
                 turno = self.__reservarTurno(reserva, turno_id, empleado);
                 lr = LineaDeReserva.objects.create(turno=turno,
@@ -134,7 +134,6 @@ class Bussiness():
         return turno
     
     def contarFaltas(self, afiliado_id):
-        logger.debug("Contando faltas del afiliado %s" % afiliado_id)
         fecha = timezone.now() + relativedelta(months=-self.AUSENTES_MESES)
         queryset = LineaDeReserva.objects.filter(reserva__fecha__gte=fecha,
                                                  reserva__afiliado__id=afiliado_id,
@@ -144,7 +143,7 @@ class Bussiness():
     def presentismoOK(self, afiliado_id):
         """ Verifica si un afiliado se ausenta concurrentemente a los turnos"""
         faltas = self.contarFaltas(afiliado_id);
-        logger.debug("Cantidad de faltas del afiliado %s: %s, %s" % (afiliado_id, faltas, faltas <= self.AUSENTES_CANTIDAD))
+        logger.debug("Cantidad de faltas del afiliado %s: %s, Presentismo_ok %s" % (afiliado_id, faltas, faltas <= self.AUSENTES_CANTIDAD))
         return faltas <= self.AUSENTES_CANTIDAD
     
     def __lanzar(self, excepcion, mensaje):
