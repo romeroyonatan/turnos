@@ -20,9 +20,17 @@ ESTADOS={C:"Completo",S:"Sobreturno"};
  */
 String.prototype.format = function () {
     var literal = this;
-    for (var i = 0; i < arguments.length; i++) {
-        var regex = new RegExp('\\{' + i + '\\}', 'g');
-        literal = literal.replace(regex, arguments[i]);
+    if(arguments[0] instanceof Object) {
+    	var object = arguments[0];
+    	for (var i in object) {
+	        var regex = new RegExp('\\{' + i + '\\}', 'g');
+	        literal = literal.replace(regex, object[i]);
+	    }
+    } else {
+	    for (var i = 0; i < arguments.length; i++) {
+	        var regex = new RegExp('\\{' + i + '\\}', 'g');
+	        literal = literal.replace(regex, arguments[i]);
+	    }
     }
     return literal;
 };
@@ -48,16 +56,6 @@ function mostrarMensaje(mensaje,options) {
 	noty({text: text, type:tipo, layout:'bottom'});
 }
 
-/**
- * Obtiene un template para crear una fila de la tabla
- */
-function __getRowTemplate() {
-	var template = $.ajax({
-			url:"/static/js/templates/row_reservarturno.template",
-			async: false});
-	return template.responseText;
-}
-
 function agregarFilaTurno(id, especialidad, especialista, dia, horario){
 	var rowtemplate = __getRowTemplate();
 	var container = $('#list-container');
@@ -72,25 +70,75 @@ function agregarFilaTurno(id, especialidad, especialista, dia, horario){
 	});
 }
 
-// TODO Agrupar estas funciones en una clase Lista
-
+function Lista(contenedor, listContainer = "list-container") {
+	/** Este atributo hace referencia a un objecto del DOM que almacenará los
+	 * ID de los objetos seleccionados */
+	this.container = contenedor;
+	this.listContainer = $('#' + listContainer);
+	this.load();
+}
 /**
- * Obtiene la lista de turnos a reservar
+ * Obtiene la lista de objetos
  */
-function getTurnos(){
-	var json = $("#id_turnos").val();	// Reconstruyendo JSON
-	return json ? eval(json) : new Array();
+Lista.prototype.load = function(){
+	var json = this.container.val(); // Reconstruyendo JSON
+	this.objects = json ? eval(json) : new Array();
+	return this.objects;
 }
 
 /**
- * Guarda la lista de turnos
+ * Obtiene un template para crear una fila de la tabla
+ */
+Lista.prototype.__getRowTemplate = function() {
+	var template = $.ajax({
+			url:"/static/js/templates/row_reservarturno.template.html",
+			async: false});
+	return template.responseText;
+}
+
+/**
+ * Guarda la lista de objetos
  * 
  * @param turnos
  *            Lista de turnos a guardar
  */
-function guardarTurnos(turnos) {
-	var json = JSON.stringify(turnos);	// Creando JSON
-	$("#id_turnos").val(json);
+Lista.prototype.save = function (){
+	var json = JSON.stringify(this.objects);// Creando JSON
+	this.container.val(json);
+}
+
+/**
+ * Agrega un objeto a la lista
+ */
+Lista.prototype.add = function(obj) {
+	if(this.objects.indexOf(obj.id) == -1) {
+		this.objects.push(obj.id);
+		this.save();
+		this.addDOM(obj);
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Agrega un elemento al DOM
+ */
+Lista.prototype.addDOM = function(obj) {
+	var template = this.__getRowTemplate();
+	template = template.format(obj)
+	this.listContainer.append(template);
+}
+
+/**
+ * Elimina un elemento de la lista
+ * 
+ * @param id
+ *            id del objeto a eliminar
+ */
+Lista.prototype.remove = function (id) {
+	var index = this.objects.indexOf(id);
+	this.objects.splice(index, 1);
+	this.save();
 }
 
 /**
@@ -99,38 +147,10 @@ function guardarTurnos(turnos) {
  * @param turno_id
  *            id de turno a agregar
  */
-function agregar(turno_id) {
-	var turnos = getTurnos();
-	if(turnos.indexOf(turno_id) == -1) {
-		turnos.push(turno_id);
-		guardarTurnos(turnos);
-		var especialidad = $("#id_especialidad option:selected").text();
-		var especialista = $("#id_especialista option:selected").text();
-		var dia= $("#id_dia option:selected").text();
-		var hora= $("#id_hora option:selected").text();
-		agregarFilaTurno(turno_id,especialidad, especialista, dia, hora);
-	} else {
-		mostrarMensaje(MESSAGE_TURNO_YA_AGREGADO, 'danger');
-	}
-}
-
-/**
- * Elimina un turno a la lista
- * 
- * @param turno_id
- *            id de turno a eliminar
- */
-function eliminar(turno_id) {
-	var turnos = getTurnos();
-	var index = turnos.indexOf(turno_id);
-	turnos.splice(index, 1);
-	guardarTurnos(turnos);
-}
-
 function cargarTelefono(afiliado) {
 	url = '/json/afiliado/id/{0}/telefono/'.format(afiliado.id);
 	$.getJSON(url, function(data) {
-		$("#id_telefono").val(data[0].telefono);
+		$("#id_telefono").val(data[0].telefono); 
 		$("#id_especialidad").focus();
 	});
 }
@@ -159,6 +179,8 @@ function dniDuplicado() {
 }
 
 $(document).ready(function(){
+	l = new Lista($('#id_turnos'));
+
 	$("#id_dni").blur(function() {
 		var container = $("#id_dni");
 		var dni = container.val();
@@ -279,9 +301,14 @@ $(document).ready(function(){
 	});
 	
 	$("#id_agregar").click(function() {
-		var turno_id = parseInt($("#id_hora").val());
-		if(turno_id) {
-			agregar(turno_id);
+		var turno = {};
+		turno['id'] = $("#id_hora").val();
+		if(turno.id) {
+			turno['especialidad'] = $("#id_especialidad option:selected").text();
+			turno['especialista'] = $("#id_especialista option:selected").text();
+			turno['dia'] = $("#id_dia option:selected").text();
+			turno['hora'] = $("#id_hora option:selected").text();
+			l.add(turno);
 			$(":submit").focus();
 		} else {
 			mostrarMensaje("Debe seleccionar un horario de un turno disponible",
