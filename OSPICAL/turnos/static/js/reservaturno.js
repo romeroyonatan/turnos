@@ -50,24 +50,9 @@ function mostrarMensaje(mensaje,options) {
 		options.element.attr({'title':mensaje});
 	}
 	title = options && options.title ? options.title : "";
-	template = "<div><h1>{0}</h1><p>{1}</p></div>";
-	text = template.format(title, mensaje);
+	text = "<div><h1>{0}</h1><p>{1}</p></div>".format(title, mensaje);
 	tipo = options && options.type ? options.type : "error";
 	noty({text: text, type:tipo, layout:'bottom'});
-}
-
-function agregarFilaTurno(id, especialidad, especialista, dia, horario){
-	var rowtemplate = __getRowTemplate();
-	var container = $('#list-container');
-	var row = rowtemplate.format(id, especialidad, especialista, dia, horario);
-	container.append(row);
-	
-	$('.boton_eliminar#'+id).click(
-			function(e){e.preventDefault();
-			var id = parseInt(this.id);
-			eliminar(id)
-			$("#tr"+id).remove();
-	});
 }
 
 function Lista(contenedor, options) {
