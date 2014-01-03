@@ -10,6 +10,7 @@
 
 {% block content %}
 <form action="." method="post" class="pure-form pure-form-aligned pure-g-r">
+	{% csrf_token %}
 	<fieldset title="Datos personales" class="pure-u-1-2">
 		<legend>Datos personales</legend>
 		{{ form.afiliado }}

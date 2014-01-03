@@ -113,6 +113,8 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+AUTH_PROFILE_MODULE = "turnos.models.Empleado"
+
 ROOT_URLCONF = 'OSPICAL.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.

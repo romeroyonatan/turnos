@@ -1,5 +1,6 @@
 from django.db import models
 from django.forms.models import model_to_dict
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Afiliado(models.Model):
@@ -24,15 +25,11 @@ class Consultorio (models.Model):
     def __str__(self):
         return "%s" % model_to_dict(self)
 class Empleado (models.Model):
-    nombre = models.CharField(max_length=50)
-    apellido = models.CharField(max_length=50)
+    user = models.ForeignKey(User, unique=True)
     dni = models.IntegerField()
-    email = models.EmailField()
-    usuario = models.CharField(max_length=50)
-    password = models.CharField(max_length=50)
-    fecha_baja = models.DateField(null=True)
     def __str__(self):
         return "%s" % model_to_dict(self)
+
 class Reserva(models.Model):
     fecha = models.DateTimeField()
     telefono = models.CharField(max_length=20)

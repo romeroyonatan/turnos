@@ -50,7 +50,6 @@ def reservar(request):
                               locals(), 
                               context_instance=RequestContext(request))
 
-@login_required
 def __getTurnos(form):
     turnos = form.cleaned_data['turnos']
     lista = []
