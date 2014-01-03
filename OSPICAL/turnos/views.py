@@ -118,11 +118,13 @@ def getTelefono(request, afiliado_id):
 
 @login_required
 def register(request):
+    # TODO: loguear inicios de sesion
     # TODO: Verificar permisos de crear usuarios
     # TODO: Falta agregar el dni, nombre, apellido, email, etc
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
+            logger.info("Creando cuenta del usuario %s" % form.username)
             form.save()
             return HttpResponseRedirect("/")
     else:

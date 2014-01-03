@@ -17,7 +17,7 @@
 				</div>
 			</div>
 			{% endif %}
-			<form enctype="multipart/form-data" class="pure-form" action="." method="post">
+			<form class="pure-form" action="{% url 'django.contrib.auth.views.login' %}" method="post">
 				<fieldset title="Cancelar Turno">
 					<legend>Iniciar sesión</legend>
 					<label for="username">Nombre de usuario</label>
