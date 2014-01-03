@@ -72,7 +72,7 @@ function Lista(contenedor, options) {
 	this.load();
 	/* Si existen objetos cargados en la lista, llama a una funcion 
 	 * para que los reconstruya y los muestre en el DOM */
-	if(this.objects.length > 0 && typeof(options.rebuild) !== undefined)
+	if(this.objects.length > 0 && typeof(options.rebuild) !== 'undefined')
 		options.rebuild(this.objects);
 }
 
