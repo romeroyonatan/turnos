@@ -9,6 +9,10 @@ from django.forms.models import model_to_dict
 from django.contrib import messages
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render
+
 
 from turnos.forms import ReservarTurnoForm
 from turnos.models import *
@@ -112,3 +116,17 @@ def getTelefono(request, afiliado_id):
     queryset = Reserva.objects.filter(afiliado__id=afiliado_id).order_by('-fecha')[:1]
     data = [item["telefono"] for item in queryset.values('telefono')]
     return JSONResponse(data)
+
+@login_required
+def register(request):
+    # TODO: Verificar permisos de crear usuarios
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect("/")
+    else:
+        form = UserCreationForm()
+    return render(request, "registration/register.html", {
+        'form': form,
+    })

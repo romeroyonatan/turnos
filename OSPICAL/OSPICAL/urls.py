@@ -17,4 +17,5 @@ urlpatterns = patterns('turnos.views',
     (r'^json/turnos/(?P<especialista_id>\d+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$', 'getTurnosDisponibles'),
     (r'^accounts/login/$',  login),
     (r'^accounts/logout/$', logout),
+    (r'^accounts/register/$', 'register'),
 )
