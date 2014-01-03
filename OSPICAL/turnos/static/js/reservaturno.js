@@ -66,8 +66,14 @@ function Lista(contenedor, options) {
 	this.listContainer = options && options.listContainer ? 
 						 options.listContainer : 
 					     $('#list-container');
-	this.template = options && options.template ? options.template : this.__getTemplate();
+	this.template = options && options.template ? 
+					options.template : 
+					this.__getTemplate();
 	this.load();
+	/* Si existen objetos cargados en la lista, llama a una funcion 
+	 * para que los reconstruya y los muestre en el DOM */
+	if(this.objects.length > 0 && typeof(options.rebuild) !== undefined)
+		options.rebuild(this.objects);
 }
 
 /**
@@ -158,7 +164,7 @@ function Afiliado(obj) {
  *            id del afiliado
  */
 Afiliado.prototype.obtenerTelefono = function () {
-	url = '/json/afiliado/id/{0}/telefono/'.format(this.id);
+	var url = '/json/afiliado/id/{0}/telefono/'.format(this.id);
 	$.getJSON(url, function(data) {
 		if(data) {
 			this.telefono = data[0];
@@ -171,7 +177,7 @@ Afiliado.prototype.obtenerTelefono = function () {
 }
 
 Afiliado.prototype.verificarPresentismo = function () {
-	url = '/json/presentismo/{0}/'.format(this.id);
+	var url = '/json/presentismo/{0}/'.format(this.id);
 	$.getJSON(url, function(data) {
 		this.presentismo = data.presentismo_ok;
 		if(!this.presentismo)
