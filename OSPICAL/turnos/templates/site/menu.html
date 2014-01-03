@@ -6,7 +6,11 @@
 			<a class="pure-menu-heading" href="#" title="OSPICAL La Matanza">OSPICAL</a>
 			<ul>
 				<li class="menu-item-divided">
-					<a href="/reservar">Reservar turno</a>
+					<a href="{% url 'turnos.views.reservar' %}">Reservar turno</a>
+				</li>
+				<li class="menu-item-divided">
+					<a href="{% url 'django.contrib.auth.views.logout' %}">Cerrar sesión</a>
+				</li>
 			</ul>
 		</div>
 	</div>

@@ -1,13 +1,12 @@
 {% extends 'site/base.html' %}
-{% load staticfiles %}
 
-<!-- **********MENU********************* -->
 {% block main %}
 <div id="layout">
 
 	{% block menu %}
 		{% include "site/menu.html" %}
 	{% endblock %}
+	
 	<div id="main">
 		<div class="header">
 			<h1>{% block title %}{% endblock %}</h1>
