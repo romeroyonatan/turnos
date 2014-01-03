@@ -9,7 +9,6 @@ from django.forms.models import model_to_dict
 from django.contrib import messages
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render
 
@@ -120,6 +119,7 @@ def getTelefono(request, afiliado_id):
 @login_required
 def register(request):
     # TODO: Verificar permisos de crear usuarios
+    # TODO: Falta agregar el dni, nombre, apellido, email, etc
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
