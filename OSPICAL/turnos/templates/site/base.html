@@ -3,12 +3,14 @@
 <html lang="es" class="wf-omnespro-n2-active wf-omnespro-n3-active wf-proximanova-n1-active wf-proximanova-n4-active wf-proximanova-n7-active wf-active">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	{% block meta %}{% endblock %}
 	<link rel="shortcut icon" href="{% static 'img/logo.png' %}" type="image/png" />
 	<title>{% block title %}{% endblock %}</title>
 	{% block css %}
 		<link rel="stylesheet" href="{% static 'css/pure-min.css' %}"/>
 		<link rel="stylesheet" href="{% static 'css/side-menu.css' %}" />
 		<link rel="stylesheet" href="{% static 'css/bootstrap.alert.css' %}" />
+		<link rel="stylesheet" href="{% static 'css/babyblue.css' %}" />
 		<link rel="stylesheet" href="{% static 'css/redmond/jquery-ui.min.css' %}" />
 	{% endblock %}
 	{% block js %}
@@ -22,8 +24,8 @@
 </head>
 <body>
 
-<div id="layout">
+
 {% block main %}{% endblock %}
-</div>
+
 </body>
 </html>

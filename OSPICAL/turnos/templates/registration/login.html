@@ -1,0 +1,34 @@
+{% extends 'site/base.html' %}
+{% block title %}
+	Iniciar sesión
+{% endblock %}
+{% block main %}
+	<div class="hero">
+	    <div class="hero-titles">
+		<h1>OSPICAL</h1>
+		<h2>Seccional La Matanza</h2>
+		<h3>Sistema de reserva de turnos</h3>
+	    </div>
+	</div>
+	<div class="content">
+		{% if form.errors %}
+			<div class="alert alert-danger pure-g-r">
+				<p class="error pure-u-3-4">Nombre de usuario o contraseña incorrectos</p>
+				<p class="pure-u-1-4"><a class="pure-button pure-button-warning">Olvidé mi contraseña</a></p>
+			</div>
+		{% endif %}
+		<form enctype="multipart/form-data" class="pure-form" action="." method="post">
+			<fieldset title="Cancelar Turno">
+				<legend>Iniciar sesión</legend>
+				<label for="username">Nombre de usuario</label>
+				<input id="username" type="text" name="username" placeholder="Nombre de usuario" class="pure-input-rounded"/>
+
+				<label for="passwd">Contraseña</label>
+				<input id="passwd" type="password" name="password" placeholder="Contraseña" class="pure-input-rounded"/>
+				<input type="submit" value="Iniciar sesión" class="pure-button pure-button-primary"/>
+				<input type="hidden" name="next" value="{{ next|escape }}" />
+				{% csrf_token %}
+			</fieldset>
+		</form>
+	</div>
+{% endblock %}

@@ -8,6 +8,7 @@ from django.shortcuts import render_to_response
 from django.forms.models import model_to_dict
 from django.contrib import messages
 from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
 
 from turnos.forms import ReservarTurnoForm
 from turnos.models import *
@@ -17,6 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class MyEncoder(json.JSONEncoder):
+    ### Uso este encoder para codficar la fecha a JSON ###
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
             return int(mktime(obj.timetuple()))
@@ -25,6 +27,7 @@ class MyEncoder(json.JSONEncoder):
 def JSONResponse(response):
     return HttpResponse(json.dumps(response, cls=MyEncoder), content_type="application/json")
 
+@login_required
 def reservar(request):
     if request.method == 'POST':
         form = ReservarTurnoForm(request.POST)
@@ -43,8 +46,11 @@ def reservar(request):
                     return HttpResponseRedirect('/reservar/')
     else:
         form = ReservarTurnoForm()
-    return render_to_response('ReservarTurno.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('turno/reserva.html', 
+                              locals(), 
+                              context_instance=RequestContext(request))
 
+@login_required
 def __getTurnos(form):
     turnos = form.cleaned_data['turnos']
     lista = []
@@ -64,38 +70,45 @@ def __getParametrosReserva(form):
 def __getExceptionMessage(exception):
     return exception.message
 
+@login_required
 def get(request, model, parametro, valor):
     filtro = dict([(parametro, valor)])
     queryset = model.objects.filter(**filtro)
     data = [item for item in queryset.values()]
     return JSONResponse(data)
 
+@login_required
 def getAfiliado(request, parametro, valor):
     bussiness = Bussiness()
     data = bussiness.getAfiliados(parametro,valor)
     return JSONResponse(data)
 
+@login_required
 def getDiaTurnos(request, especialista_id):
     bussiness = Bussiness()
     data = bussiness.getDiaTurnos(especialista_id)
     return JSONResponse(data)    
 
+@login_required
 def getEspecialistas(request, especialidad_id):
     queryset = EspecialistaEspecialidad.objects.filter(especialidad__id=especialidad_id)
     data = [model_to_dict(item.especialista) for item in queryset]
     return JSONResponse(data)
 
+@login_required
 def getTurnosDisponibles(request, especialista_id, year, month, day):
     bussiness = Bussiness()
     fecha = datetime.datetime(int(year), int(month), int(day))
     data = bussiness.getTurnosDisponibles(especialista_id, fecha)
     return JSONResponse(data)
 
+@login_required
 def verificarPresentismo(request, afiliado_id):
     bussiness = Bussiness()
     data = {'presentismo_ok': bussiness.presentismoOK(afiliado_id)}
     return JSONResponse(data)
 
+@login_required
 def getTelefono(request, afiliado_id):
     queryset = Reserva.objects.filter(afiliado__id=afiliado_id).order_by('-fecha')[:1]
     data = [item["telefono"] for item in queryset.values('telefono')]

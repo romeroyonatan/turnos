@@ -1,0 +1,34 @@
+{% extends 'site/base.html' %}
+{% load staticfiles %}
+
+<!-- **********MENU********************* -->
+{% block main %}
+<div id="layout">
+
+	{% block menu %}
+		{% include "site/menu.html" %}
+	{% endblock %}
+	<div id="main">
+		<div class="header">
+			<h1>{% block title %}{% endblock %}</h1>
+		</div>
+		
+		<div class="content">
+			{% if messages %}
+			<ul class="messages pure-u-1">
+			    {% for message in messages %}
+			    <li{% if message.tags %} class="alert {{ message.tags }} "{% endif %}>{{ message }}</li>
+			    {% endfor %}
+			</ul>
+			{% endif %}
+			
+			{% block content %}
+			{% endblock %}
+		</div>
+		
+		{% block footer %}
+			{% include "site/footer.html" %}
+		{% endblock %}
+	</div>
+</div>
+{% endblock %}
