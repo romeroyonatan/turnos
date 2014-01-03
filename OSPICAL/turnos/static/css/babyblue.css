@@ -27,32 +27,32 @@ body,
 */
 
 
-h1, h2, h3, h4, h5, h6 {
-    font-weight: bold;
-    color: rgb(75, 75, 75);
-}
-h3 {
-    font-size: 1.25em;
-}
-h4 {
-    font-size: 1.125em;
-}
+/* h1, h2, h3, h4, h5, h6 { */
+/*     font-weight: bold; */
+/*     color: rgb(75, 75, 75); */
+/* } */
+/* h3 { */
+/*     font-size: 1.25em; */
+/* } */
+/* h4 { */
+/*     font-size: 1.125em; */
+/* } */
 
-a {
-    color: #3b8bba; /* block-background-text-normal */
-    text-decoration: none;
-}
+/* a { */
+/*     color: #3b8bba; block-background-text-normal */
+/*     text-decoration: none; */
+/* } */
 
-a:visited {
-    color: #265778; /* block-normal-text-normal */
-}
+/* a:visited { */
+/*     color: #265778; block-normal-text-normal */
+/* } */
 
-dt {
-    font-weight: bold;
-}
-dd {
-    margin: 0 0 10px 0;
-}
+/* dt { */
+/*     font-weight: bold; */
+/* } */
+/* dd { */
+/*     margin: 0 0 10px 0; */
+/* } */
 
 /* --------------------------
  * Layout Styles
@@ -125,59 +125,59 @@ aside {
  */
 
 /* The content div is placed as a wrapper around all the docs */
-/* .content { */
-/*     margin: 0 auto; */
-/*     padding: 0 2em; */
-/*     max-width: 800px; */
-/*     margin-bottom: 50px; */
-/* } */
-/*     .content p { */
-/*         line-height: 1.6em; */
-/*         font-size: 1.125em; */
-/*     } */
+.content800 {
+    margin: 0 auto;
+    padding: 0 2em;
+    max-width: 800px;
+    margin-bottom: 50px;
+}
+    .content p {
+        line-height: 1.6em;
+        font-size: 1.125em;
+    }
 
-/*     .content .content-subhead { */
-/*         margin: 50px 0 20px 0; */
-/*         font-weight: 300; */
-/*         color: #888; */
-/*         position: relative; */
-/*     } */
+    .content .content-subhead {
+        margin: 50px 0 20px 0;
+        font-weight: 300;
+        color: #888;
+        position: relative;
+    }
 
-/*     .content .content-spaced { */
-/*         line-height: 1.8em; */
-/*     } */
+    .content .content-spaced {
+        line-height: 1.8em;
+    }
 
-/*     A code snippet that has been syntax highlighted */
-/*     .content .snippet { */
-/*         margin: 1.3em 0 1em; */
-/*         padding: 1.3em; */
-/*     } */
+    A code snippet that has been syntax highlighted
+    .content .snippet {
+        margin: 1.3em 0 1em;
+        padding: 1.3em;
+    }
 
-/*     .content .content-quote { */
-/*         font-family: "Georgia", serif; */
-/*         color: #666; */
-/*         font-style: italic; */
-/*         line-height: 1.8em; */
-/*         border-left: 5px solid #ddd; */
-/*         padding-left: 1.5em; */
-/*     } */
+    .content .content-quote {
+        font-family: "Georgia", serif;
+        color: #666;
+        font-style: italic;
+        line-height: 1.8em;
+        border-left: 5px solid #ddd;
+        padding-left: 1.5em;
+    }
 
-/*     .content-link { */
-/*         position: absolute; */
-/*         top: 0; */
-/*         right: 0; */
-/*         display: block; */
-/*         height: 100%; */
-/*         width: 20px; */
-/*         background: transparent url('/img/link-icon.png') no-repeat center center; */
-/*         background-size: 20px 20px; */
-/*     } */
+    .content-link {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: block;
+        height: 100%;
+        width: 20px;
+        background: transparent url('/img/link-icon.png') no-repeat center center;
+        background-size: 20px 20px;
+    }
 
-/*     @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) { */
-/*         .content-link { */
-/*             background-image: url('/img/link-icon@2x.png'); */
-/*         } */
-/*     } */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .content-link {
+            background-image: url('/img/link-icon@2x.png');
+        }
+    }
 
 /* --------------------------
  * Footer Module Styles

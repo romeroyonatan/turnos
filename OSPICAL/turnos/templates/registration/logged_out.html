@@ -1,26 +1,26 @@
-{% extends 'site/base.html' %}
+{% extends 'site/base.html' %} 
 
-{% block title %}
-	Ha cerrado sesión
-{% endblock %}
+{% block title %} Ha cerrado sesión {% endblock %}
 
 {% block meta %}
-	<meta http-equiv="refresh" content="3; url=/" />
-{% endblock %}
+<meta http-equiv="refresh" content="3; url=/"/>
+{% endblock %} 
 
 {% block main %}
-	<div class="hero">
-	    <div class="hero-titles">
+<div class="hero">
+	<div class="hero-titles">
 		<h1>OSPICAL</h1>
 		<h2>Seccional La Matanza</h2>
 		<h3>Sistema de reserva de turnos</h3>
-	    </div>
 	</div>
-	
-	<div class="content">
-	<header>
-		<h1>Ha cerrado sesión correctamente</h1>
-		<h2>Será redireccionado en 3 segundos</h2>
-	</header>
-	</div>
+</div>
+
+<div class="content800">
+	<ul class="messages pure-u-1">
+	    <li class="alert info">
+			<h1>Ha cerrado sesión correctamente</h1>
+			<p>Será redireccionado en 3 segundos</p>
+		</li>
+	</ul>
+</div>
 {% endblock %}
