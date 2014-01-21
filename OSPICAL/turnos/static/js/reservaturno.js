@@ -11,7 +11,7 @@ MESSAGE_NUMERO_DUPLICADO = "Número de afiliado duplicado";
 MESSAGE_NUMERO_INEXISTENTE_TITLE = "Número de afiliado Inexistente";
 MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION = "Verifique que el número de número de afiliado ingresado sea correcto";
 MESSAGE_PRESENTISMO = "El afiliado ha faltado a muchos turnos en los ultimos meses";
-DIA=["Domingo", "Lunes", "Martes", "Miercoles", "Jueves","Viernes","Sabado"];
+DIA=["Domingo", "Lunes", "Martes", "Miércoles", "Jueves","Viernes","Sábado"];
 MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
 ESTADOS={C:"Completo",S:"Sobreturno"};
 
