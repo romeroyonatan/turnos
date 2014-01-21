@@ -36,6 +36,22 @@ class Reserva(models.Model):
     afiliado = models.ForeignKey(Afiliado)
     def __str__(self):
         return "%s" % model_to_dict(self)
+    
+class Especialista(models.Model):
+    nombre = models.CharField(max_length=50)
+    apellido = models.CharField(max_length=50)
+    dni = models.IntegerField()
+    fecha_baja = models.DateField(null=True)
+    def __str__(self):
+        return "%s" % model_to_dict(self)
+    
+class EspecialistaEspecialidad(models.Model):
+    especialista = models.ForeignKey(Especialista)
+    especialidad = models.ForeignKey(Especialidad)
+    fechaBaja = models.DateField(null=True)
+    def __str__(self):
+        return "%s" % model_to_dict(self)
+
 class Disponibilidad(models.Model):
     # Constantes ~
     LUNES = '0'
@@ -59,22 +75,10 @@ class Disponibilidad(models.Model):
     horaDesde = models.PositiveSmallIntegerField()
     horaHasta = models.PositiveSmallIntegerField()
     consultorio = models.ForeignKey(Consultorio, null=True)
+    ee = models.ForeignKey(EspecialistaEspecialidad)
     def __str__(self):
         return "%s" % model_to_dict(self)
-class Especialista(models.Model):
-    nombre = models.CharField(max_length=50)
-    apellido = models.CharField(max_length=50)
-    dni = models.IntegerField()
-    fecha_baja = models.DateField(null=True)
-    disponibilidad = models.ManyToManyField(Disponibilidad, null=True)
-    def __str__(self):
-        return "%s" % model_to_dict(self)
-class EspecialistaEspecialidad(models.Model):
-    especialista = models.ForeignKey(Especialista)
-    especialidad = models.ForeignKey(Especialidad)
-    fechaBaja = models.DateField(null=True)
-    def __str__(self):
-        return "%s" % model_to_dict(self)
+
 class Turno (models.Model):
     # Constantes ~
     DISPONIBLE = 'D'
