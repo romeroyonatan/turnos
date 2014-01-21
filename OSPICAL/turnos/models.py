@@ -2,7 +2,6 @@ from django.db import models
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 
-# Create your models here.
 class Afiliado(models.Model):
     numero = models.CharField(max_length=13)
     dni = models.IntegerField()
@@ -15,8 +14,9 @@ class Especialidad(models.Model):
     descripcion = models.CharField(max_length=50)
     fecha_baja = models.DateField(null=True)
     def __str__(self):
-        return self.descripcion
-    
+        return u'%s' % self.descripcion
+    def __unicode__(self):
+        return u'%s' % self.descripcion
 class Consultorio (models.Model):
     numero = models.CharField(max_length=1)
     disponible = models.BooleanField()
