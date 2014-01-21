@@ -156,10 +156,15 @@ class Bussiness():
     def crearTurnos(self, especialista_especialidad, cantidad_dias=7):
         turnos = []
         disponibilidades = Disponibilidad.objects.filter(ee=especialista_especialidad)
+        dia = timezone.now()
         for disponibilidad in disponibilidades:
-            dia = self.__proximoDia(int(disponibilidad.dia))
-            turnos += self.__crearTurnos(disponibilidad, dia)
+            # FIXME: No puedo ver la cantidad de dias de diferencia entre 2 fechas.
+            dia = self.__proximoDia(int(disponibilidad.dia), dia).replace(tzinfo=None)
+            now = datetime.datetime.now().replace(tzinfo=None)
+            if (dia - now) < cantidad_dias:
+                turnos += self.__crearTurnos(disponibilidad, dia)
         return turnos
+    
     def __crearTurnos(self, disponibilidad, dia, minutos=15):
         desde = datetime.datetime.combine(dia, disponibilidad.horaDesde)
         hasta = datetime.datetime.combine(dia, disponibilidad.horaHasta)
