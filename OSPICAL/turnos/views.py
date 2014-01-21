@@ -1,6 +1,7 @@
 # coding=utf-8
 import datetime
 import json
+import inspect
 from time import mktime
 
 from django.http import HttpResponseRedirect, HttpResponse
@@ -49,8 +50,8 @@ def reservar(request):
                     return HttpResponseRedirect('/reservar/')
     else:
         form = ReservarTurnoForm()
-    return render_to_response('turno/reserva.html', 
-                              locals(), 
+    return render_to_response('turno/reserva.html',
+                              locals(),
                               context_instance=RequestContext(request))
 
 def __getTurnos(form):
@@ -70,6 +71,9 @@ def __getParametrosReserva(form):
     return {'turnos':turnos, 'afiliado':afiliado, 'telefono':telefono}
     
 def __getExceptionMessage(exception):
+    logger.error("Ocurrio una excepcion en la vista '%s': %s - %s" % (inspect.stack()[1][3],
+                                                                    exception.__class__.__name__,
+                                                                    exception.message))
     return exception.message
 
 @login_required
@@ -82,7 +86,7 @@ def get(request, model, parametro, valor):
 @login_required
 def getAfiliado(request, parametro, valor):
     bussiness = Bussiness()
-    data = bussiness.getAfiliados(parametro,valor)
+    data = bussiness.getAfiliados(parametro, valor)
     return JSONResponse(data)
 
 @login_required

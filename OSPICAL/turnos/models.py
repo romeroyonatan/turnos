@@ -72,8 +72,8 @@ class Disponibilidad(models.Model):
            )
     # Atributos ~
     dia = models.CharField(max_length=1, choices=DIA)
-    horaDesde = models.PositiveSmallIntegerField()
-    horaHasta = models.PositiveSmallIntegerField()
+    horaDesde = models.TimeField()
+    horaHasta = models.TimeField()
     consultorio = models.ForeignKey(Consultorio, null=True)
     ee = models.ForeignKey(EspecialistaEspecialidad)
     def __str__(self):

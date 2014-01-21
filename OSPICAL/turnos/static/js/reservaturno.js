@@ -126,7 +126,8 @@ Lista.prototype.add = function(obj) {
 Lista.prototype.addDOM = function(obj) {
 	t = this.template.format(obj)
 	this.listContainer.append(t);
-	$('#rem-tr-{id}'.format(obj)).click(function() {
+	$('#rem-tr-{id}'.format(obj)).click(function(e) {
+		e.preventDefault();
 		var id = /rem-tr-(\d+)/i.exec(this.id)[1];
 		$('#tr-{0}'.format(id)).remove();
 		l.remove(id);

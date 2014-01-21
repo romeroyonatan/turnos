@@ -1,4 +1,5 @@
 from dateutil.relativedelta import relativedelta
+import datetime
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
@@ -149,9 +150,37 @@ class Bussiness():
     def __lanzar(self, excepcion, mensaje):
         """Lanza una excepcion y loguea la misma"""
         e = excepcion(mensaje)
-        logger.error(e)
+        logger.error("%s - %s" % (excepcion.__name__, mensaje))
         raise e
-        
+    
+    def crearTurnos(self, especialista_especialidad, cantidad_dias=7):
+        turnos = []
+        disponibilidades = Disponibilidad.objects.filter(ee=especialista_especialidad)
+        for disponibilidad in disponibilidades:
+            dia = self.__proximoDia(int(disponibilidad.dia))
+            turnos += self.__crearTurnos(disponibilidad, dia)
+        return turnos
+    def __crearTurnos(self, disponibilidad, dia, minutos=15):
+        desde = datetime.datetime.combine(dia, disponibilidad.horaDesde)
+        hasta = datetime.datetime.combine(dia, disponibilidad.horaHasta)
+        turnos = []
+        while desde < hasta:
+            turnos.append(Turno(fecha=desde,
+                                estado=Turno.DISPONIBLE,
+                                sobreturno=False,
+                                consultorio=disponibilidad.consultorio,
+                                ee=disponibilidad.ee)
+                          )
+            desde += datetime.timedelta(minutes=minutos)
+        return turnos
+    def __proximoDia(self, dia, desde = timezone.now()):
+        days_ahead = dia - desde.weekday()
+        if days_ahead <= 0: # El dia ya paso en esta semana
+            days_ahead += 7
+        return desde + datetime.timedelta(days_ahead)
+    def __guardarTurnos(self, turnos):
+        pass
+    
 class TurnoNotExistsException(Exception):
     def __init__(self, message=None):
         self.message = message

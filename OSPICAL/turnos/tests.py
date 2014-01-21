@@ -1,5 +1,5 @@
 from dateutil.relativedelta import relativedelta
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.test import TestCase
 from turnos.models import *
 from turnos.bussiness import *
@@ -8,10 +8,10 @@ from django.conf import settings
 
 import logging
 logger = logging.getLogger(__name__)
+b = Bussiness()
 
 class ReservarTurnoTest(TestCase):
     fixtures = ['turnos.json']
-    b = Bussiness()
         
     def setUp(self):
         TestCase.setUp(self)
@@ -24,13 +24,13 @@ class ReservarTurnoTest(TestCase):
                              consultorio=Consultorio.objects.get(id=1),
                              ee=EspecialistaEspecialidad.objects.get(id=1),
                              )
-        test = self.b.getDiaTurnos(1)
+        test = b.getDiaTurnos(1)
         self.assertGreaterEqual(len(test), 1)
     
     def testReservarTurno(self):
         afiliado_id = 1
         listaTurnos = [2,3,4]
-        reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         lineas = LineaDeReserva.objects.filter(reserva = reserva)
         self.assertIsNotNone(reserva)
         self.assertEqual(reserva.afiliado.id, afiliado_id)
@@ -50,7 +50,7 @@ class ReservarTurnoTest(TestCase):
         afiliado_id = 1
         listaTurnos = [2, 4000]
         with self.assertRaises(TurnoNotExistsException):
-            self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+            b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         turno = Turno.objects.get(id=2)
         self.assertEqual(turno.estado, Turno.DISPONIBLE)
         
@@ -58,34 +58,34 @@ class ReservarTurnoTest(TestCase):
         afiliado_id = 4000
         listaTurnos = [2,3,4]
         with self.assertRaises(AfiliadoNotExistsException):
-            self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+            b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         last = LineaDeReserva.objects.latest('id')
         self.assertNotIn(last.turno, listaTurnos)
 
     def testTurnoVacio(self):
         afiliado_id = 1
         listaTurnos = []
-        reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         self.assertIsNone(reserva)
 
     def testSinTelefono(self):
         afiliado_id = 1
         listaTurnos = [1]
         with self.assertRaises(Exception):
-            self.b.reservarTurnos(afiliado_id, None, listaTurnos)
+            b.reservarTurnos(afiliado_id, None, listaTurnos)
         
     def testTurnoReservado(self):
         afiliado_id = 1
         listaTurnos = [2, 3]
-        self.b.reservarTurnos(afiliado_id, '41234345', [3])
+        b.reservarTurnos(afiliado_id, '41234345', [3])
         with self.assertRaises(TurnoReservadoException):
-            self.b.reservarTurnos(afiliado_id, '41234345', listaTurnos)
+            b.reservarTurnos(afiliado_id, '41234345', listaTurnos)
         turno = Turno.objects.get(id=2)
         self.assertEqual(turno.estado, Turno.DISPONIBLE)
     
     def testPresentismo(self):
         afiliado_id = 1
-        p = self.b.presentismoOK(afiliado_id)
+        p = b.presentismoOK(afiliado_id)
         self.assertTrue(p)
     
     def testPresentismoNotOK(self):
@@ -101,7 +101,7 @@ class ReservarTurnoTest(TestCase):
                                  consultorio=Consultorio.objects.get(id=1),
                                  ee=EspecialistaEspecialidad.objects.get(id=1),
                                  id = i,)
-        reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         # Reservando turnos
         lineas = LineaDeReserva.objects.filter(reserva = reserva)
         # Marcando turnos como ausente
@@ -109,7 +109,7 @@ class ReservarTurnoTest(TestCase):
             lr.estado = Turno.AUSENTE
             lr.save()
         # Verificando presentismo
-        p = self.b.presentismoOK(afiliado_id)
+        p = b.presentismoOK(afiliado_id)
         self.assertFalse(p)
         
     def testPresentismoExpirado(self):
@@ -127,7 +127,7 @@ class ReservarTurnoTest(TestCase):
                                  consultorio=Consultorio.objects.get(id=1),
                                  ee=EspecialistaEspecialidad.objects.get(id=1),
                                  id = i,)
-        reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         reserva.fecha = timezone.now() + relativedelta(months=-meses, days=-1)
         reserva.save()
         # Reservando turnos
@@ -137,7 +137,7 @@ class ReservarTurnoTest(TestCase):
             lr.estado = Turno.AUSENTE
             lr.save()
         # Verificando presentismo
-        p = self.b.presentismoOK(afiliado_id)
+        p = b.presentismoOK(afiliado_id)
         self.assertTrue(p)
     
     def testFatiga(self):
@@ -150,7 +150,7 @@ class ReservarTurnoTest(TestCase):
                                  consultorio=Consultorio.objects.get(id=1),
                                  ee=EspecialistaEspecialidad.objects.get(id=1),
                                  id = i,)
-        reserva = self.b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         lineas = LineaDeReserva.objects.filter(reserva = reserva)
         self.assertIsNotNone(reserva)
         self.assertEqual(reserva.afiliado.id, afiliado_id)
@@ -166,9 +166,13 @@ class ReservarTurnoTest(TestCase):
             self.assertIn(lr.turno.id, listaTurnos)
             self.assertEqual(lr.estado, Turno.RESERVADO)
 
-# class CrearTurnoTest(TestCase):
-#     def testUnDia(self):
-#         self.assertTrue(False)
+class CrearTurnoTest(TestCase):
+    fixtures = ['turnos.json']
+    def testUnDia(self):
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        turnos = b.crearTurnos(ee, 1)
+        self.assertGreater(len(turnos), 1)
+        logger.debug(turnos)
 #     def test7Dias(self):
 #         self.assertTrue(False)
 #     def test365Dias(self):
@@ -185,8 +189,12 @@ class ReservarTurnoTest(TestCase):
 #         self.assertTrue(False)
 #     def testAlgunosExistentes(self):
 #         self.assertTrue(False)
-#     def testProximoDia(self):
-#         self.assertTrue(False)
+    def testProximoDia(self):
+        base = datetime.datetime(2014,01,01) # miercoles
+        target = datetime.datetime(2014,01,04) # sabado
+        dia = 5 # sabado
+        fecha = b._Bussiness__proximoDia(dia, base)
+        self.assertEquals(target, fecha)
 #     def testSinDisponibilidad(self):
 #         self.assertTrue(False)
 

@@ -42,23 +42,14 @@
     "model": "turnos.empleado", 
     "fields": {
         "dni": 44556677, 
-        "user": 2
+        "user": 1
     }
 },
 {
     "pk": 1, 
     "model": "turnos.reserva", 
     "fields": {
-        "fecha": "2014-01-21T14:33:43.405Z", 
-        "afiliado": 1, 
-        "telefono": "41234345"
-    }
-},
-{
-    "pk": 2, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-01-21T15:12:53.835Z", 
+        "fecha": "2014-01-21T17:02:44.094Z", 
         "afiliado": 1, 
         "telefono": "41234345"
     }
@@ -86,10 +77,10 @@
     "pk": 1, 
     "model": "turnos.disponibilidad", 
     "fields": {
-        "horaHasta": 1900, 
+        "horaHasta": "19:00:00", 
         "consultorio": 1, 
         "ee": 1, 
-        "horaDesde": 1230, 
+        "horaDesde": "12:30:00", 
         "dia": "0"
     }
 },
@@ -99,9 +90,9 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T14:48:36.869Z", 
+        "fecha": "2018-01-20T17:17:42.096Z", 
         "sobreturno": false, 
-        "estado": "R"
+        "estado": "D"
     }
 },
 {
@@ -110,7 +101,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T15:03:36.869Z", 
+        "fecha": "2018-01-20T17:32:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -121,7 +112,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T15:18:36.869Z", 
+        "fecha": "2018-01-20T17:47:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -132,7 +123,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T15:33:36.869Z", 
+        "fecha": "2018-01-20T18:02:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -143,7 +134,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T15:48:36.869Z", 
+        "fecha": "2018-01-20T18:17:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -154,7 +145,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T16:03:36.869Z", 
+        "fecha": "2018-01-20T18:32:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -165,7 +156,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T16:18:36.869Z", 
+        "fecha": "2018-01-20T18:47:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -176,7 +167,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T16:33:36.869Z", 
+        "fecha": "2018-01-20T19:02:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -187,7 +178,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T16:48:36.869Z", 
+        "fecha": "2018-01-20T19:17:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -198,7 +189,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T17:03:36.869Z", 
+        "fecha": "2018-01-20T19:32:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -209,7 +200,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T17:18:36.869Z", 
+        "fecha": "2018-01-20T19:47:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -220,7 +211,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T17:33:36.869Z", 
+        "fecha": "2018-01-20T20:02:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -231,7 +222,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T17:48:36.869Z", 
+        "fecha": "2018-01-20T20:17:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -242,7 +233,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T18:03:36.869Z", 
+        "fecha": "2018-01-20T20:32:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -253,7 +244,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T18:18:36.869Z", 
+        "fecha": "2018-01-20T20:47:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -264,7 +255,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T18:33:36.869Z", 
+        "fecha": "2018-01-20T21:02:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -275,7 +266,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T18:48:36.869Z", 
+        "fecha": "2018-01-20T21:17:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -286,7 +277,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T19:03:36.869Z", 
+        "fecha": "2018-01-20T21:32:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -297,7 +288,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-01-20T19:18:36.869Z", 
+        "fecha": "2018-01-20T21:47:42.096Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -309,27 +300,6 @@
         "reserva": 1, 
         "estado": "C", 
         "turno": 19
-    }
-},
-{
-    "pk": 2, 
-    "model": "turnos.lineadereserva", 
-    "fields": {
-        "reserva": 2, 
-        "estado": "R", 
-        "turno": 1
-    }
-},
-{
-    "pk": 1, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-01-21T15:12:53.838Z", 
-        "estadoNuevo": "R", 
-        "turno": 1, 
-        "descripcion": "ID de reserva 2", 
-        "estadoAnterior": "D"
     }
 }
 ]

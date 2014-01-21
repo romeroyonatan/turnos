@@ -24,15 +24,15 @@ user = User.objects.create_user(username='operador',
 em=Empleado(user=user,dni=44556677)
 em.save()
 
-d=Disponibilidad(dia='0',horaDesde=1230,horaHasta=1900,consultorio=c)
-d.save()
 
 es=Especialista(nombre=u'María de los ángeles', apellido=u'Fernández',dni=11559977)
 es.save()
-es.disponibilidad.add(d)
 
 ee=EspecialistaEspecialidad(especialista=es, especialidad=e)
 ee.save()
+
+d=Disponibilidad(dia='0',horaDesde='12:30',horaHasta='19:00', ee = ee, consultorio=c)
+d.save()
 
 fecha = datetime.now() + timedelta(days=4*365)
 for i in range (1,20):
