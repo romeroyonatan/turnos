@@ -88,6 +88,15 @@ class ReservarTurnoTest(TestCase):
         p = b.presentismoOK(afiliado_id)
         self.assertTrue(p)
     
+    def testCrearSobreturno(self):
+        #TODO: Hacer test crear sobreturno
+        #self.assertTrue(False)
+        pass
+    def testSinSobreturno(self):
+        #TODO: Hacer test sin sobreturno
+        #self.assertTrue(False)
+        pass
+    
     def testPresentismoNotOK(self):
         s = getattr(settings, 'TURNOS', {})
         cantidad = s.get('ausente_cantidad', 6)

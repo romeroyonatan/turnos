@@ -190,6 +190,7 @@ class Bussiness():
         return desde + datetime.timedelta(days_ahead)
     
     def __guardarTurnos(self, turnos):
+        #TODO: Guardar turnos
         pass
     
 class TurnoNotExistsException(Exception):

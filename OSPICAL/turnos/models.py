@@ -3,7 +3,7 @@ from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 
 class Afiliado(models.Model):
-    numero = models.CharField(max_length=13)
+    numero = models.CharField(max_length=13, unique=True)
     dni = models.IntegerField()
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
@@ -18,7 +18,7 @@ class Especialidad(models.Model):
     def __unicode__(self):
         return u'%s' % self.descripcion
 class Consultorio (models.Model):
-    numero = models.CharField(max_length=1)
+    numero = models.CharField(max_length=4)
     disponible = models.BooleanField()
     ubicacion = models.CharField(max_length=50, null=True)
     descripcion = models.CharField(max_length=100, null=True)
@@ -46,6 +46,7 @@ class Especialista(models.Model):
         return "%s" % model_to_dict(self)
     
 class EspecialistaEspecialidad(models.Model):
+    unique_together = ("especialista", "especialidad")
     especialista = models.ForeignKey(Especialista)
     especialidad = models.ForeignKey(Especialidad)
     fechaBaja = models.DateField(null=True)
@@ -111,8 +112,8 @@ class LineaDeReserva (models.Model):
         return "%s" % model_to_dict(self)
 class HistorialTurno(models.Model):
     fecha = models.DateTimeField()
-    estadoAnterior = models.CharField(max_length=1, null=True)
-    estadoNuevo = models.CharField(max_length=1)
+    estadoAnterior = models.CharField(max_length=1, null=True, choices=Turno.ESTADO)
+    estadoNuevo = models.CharField(max_length=1, choices=Turno.ESTADO)
     descripcion = models.CharField(max_length=100, null=True)
     turno = models.ForeignKey(Turno)
     empleado = models.ForeignKey(Empleado, null=True)
