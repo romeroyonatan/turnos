@@ -1,0 +1,305 @@
+[
+{
+    "pk": 1, 
+    "model": "turnos.afiliado", 
+    "fields": {
+        "nombre": "Yonatan", 
+        "dni": 12345678, 
+        "apellido": "Romero", 
+        "numero": "000100020003"
+    }
+},
+{
+    "pk": 2, 
+    "model": "turnos.afiliado", 
+    "fields": {
+        "nombre": "Un duplicado", 
+        "dni": 12345678, 
+        "apellido": "Perez", 
+        "numero": "000100020033"
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.especialidad", 
+    "fields": {
+        "descripcion": "Odontolog\u00eda", 
+        "fecha_baja": null
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.consultorio", 
+    "fields": {
+        "ubicacion": null, 
+        "descripcion": null, 
+        "disponible": true, 
+        "numero": "1"
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.empleado", 
+    "fields": {
+        "dni": 44556677, 
+        "user": 1
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.reserva", 
+    "fields": {
+        "fecha": "2014-01-21T17:02:44.094Z", 
+        "afiliado": 1, 
+        "telefono": "41234345"
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.especialista", 
+    "fields": {
+        "fecha_baja": null, 
+        "nombre": "Mar\u00eda de los \u00e1ngeles", 
+        "dni": 11559977, 
+        "apellido": "Fern\u00e1ndez"
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.especialistaespecialidad", 
+    "fields": {
+        "fechaBaja": null, 
+        "especialidad": 1, 
+        "especialista": 1
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.disponibilidad", 
+    "fields": {
+        "horaHasta": "19:00:00", 
+        "consultorio": 1, 
+        "ee": 1, 
+        "horaDesde": "12:30:00", 
+        "dia": "0"
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T17:17:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 2, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T17:32:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 3, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T17:47:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 4, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T18:02:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 5, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T18:17:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 6, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T18:32:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 7, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T18:47:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 8, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T19:02:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 9, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T19:17:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 10, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T19:32:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 11, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T19:47:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 12, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T20:02:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 13, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T20:17:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 14, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T20:32:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 15, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T20:47:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 16, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T21:02:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 17, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T21:17:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 18, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T21:32:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 19, 
+    "model": "turnos.turno", 
+    "fields": {
+        "consultorio": 1, 
+        "ee": 1, 
+        "fecha": "2018-01-20T21:47:42.096Z", 
+        "sobreturno": false, 
+        "estado": "D"
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.lineadereserva", 
+    "fields": {
+        "reserva": 1, 
+        "estado": "C", 
+        "turno": 19
+    }
+}
+]
