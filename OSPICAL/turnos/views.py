@@ -13,7 +13,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render
 
-
 from turnos.forms import ReservarTurnoForm
 from turnos.models import *
 from turnos.bussiness import Bussiness
@@ -122,7 +121,6 @@ def getTelefono(request, afiliado_id):
 
 @login_required
 def register(request):
-    # TODO: loguear inicios de sesion
     # TODO: Verificar permisos de crear usuarios
     # TODO: Falta agregar el dni, nombre, apellido, email, etc
     if request.method == 'POST':

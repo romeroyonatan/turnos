@@ -156,13 +156,17 @@ class Bussiness():
     def crearTurnos(self, especialista_especialidad, cantidad_dias=7):
         turnos = []
         disponibilidades = Disponibilidad.objects.filter(ee=especialista_especialidad)
-        dia = timezone.now()
-        for disponibilidad in disponibilidades:
-            # FIXME: No puedo ver la cantidad de dias de diferencia entre 2 fechas.
-            dia = self.__proximoDia(int(disponibilidad.dia), dia).replace(tzinfo=None)
-            now = datetime.datetime.now().replace(tzinfo=None)
-            if (dia - now) < cantidad_dias:
-                turnos += self.__crearTurnos(disponibilidad, dia)
+        base = timezone.now()
+        aux = cantidad_dias
+        while aux > 0:
+            for disponibilidad in disponibilidades:
+                dia = self.__proximoDia(int(disponibilidad.dia), base)
+                diff = dia.replace(tzinfo=None) - datetime.datetime.now().replace(tzinfo=None)
+                if diff.days <= cantidad_dias:
+                    turnos += self.__crearTurnos(disponibilidad, dia)
+            # Avanzamos de semana
+            aux -= 7
+            base += datetime.timedelta(days=7)
         return turnos
     
     def __crearTurnos(self, disponibilidad, dia, minutos=15):
@@ -178,11 +182,13 @@ class Bussiness():
                           )
             desde += datetime.timedelta(minutes=minutos)
         return turnos
+    
     def __proximoDia(self, dia, desde = timezone.now()):
         days_ahead = dia - desde.weekday()
-        if days_ahead <= 0: # El dia ya paso en esta semana
+        if days_ahead < 0: # El dia ya paso en esta semana
             days_ahead += 7
         return desde + datetime.timedelta(days_ahead)
+    
     def __guardarTurnos(self, turnos):
         pass
     

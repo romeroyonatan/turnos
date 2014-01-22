@@ -170,21 +170,64 @@ class CrearTurnoTest(TestCase):
     fixtures = ['turnos.json']
     def testUnDia(self):
         ee = EspecialistaEspecialidad.objects.get(id=1)
+        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
+                                          horaDesde="12:00",
+                                          horaHasta="13:00",
+                                          ee=ee)
         turnos = b.crearTurnos(ee, 1)
         self.assertGreater(len(turnos), 1)
-        logger.debug(turnos)
-#     def test7Dias(self):
-#         self.assertTrue(False)
-#     def test365Dias(self):
-#         self.assertTrue(False)
-#     def testDosAnos(self):
-#         self.assertTrue(False)
-#     def testFechaAnterior(self):
-#         self.assertTrue(False)
-#     def testDiasNegativos(self):
-#         self.assertTrue(False)
-#     def testSinDias(self):
-#         self.assertTrue(False)
+    def test8Dias(self):
+        DIAS = 8
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
+                                          horaDesde="12:00",
+                                          horaHasta="13:00",
+                                          ee=ee)
+        turnos = b.crearTurnos(ee, DIAS)
+        exito = False
+        for turno in turnos:
+            diff = turno.fecha - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
+            exito = exito or diff.days == 0
+        self.assertTrue(exito)
+    def test365Dias(self):
+        DIAS = 365
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
+                                          horaDesde="12:00",
+                                          horaHasta="13:00",
+                                          ee=ee)
+        turnos = b.crearTurnos(ee, DIAS)
+        exito = False
+        for turno in turnos:
+            diff = turno.fecha - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
+            exito = exito or diff.days == 0
+        self.assertTrue(exito)
+    def testDosAnos(self):
+        DIAS = 365 * 2
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
+                                          horaDesde="12:00",
+                                          horaHasta="13:00",
+                                          ee=ee)
+        turnos = b.crearTurnos(ee, DIAS)
+        self.assertTrue(turnos)
+    def testDiasNegativos(self):
+        DIAS = -7
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
+                                          horaDesde="12:00",
+                                          horaHasta="13:00",
+                                          ee=ee)
+        turnos = b.crearTurnos(ee, DIAS)
+        self.assertFalse(turnos)
+    def testSinDias(self):
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
+                                          horaDesde="12:00",
+                                          horaHasta="13:00",
+                                          ee=ee)
+        turnos = b.crearTurnos(ee)
+        self.assertTrue(turnos)
 #     def testTurnosExistentes(self):
 #         self.assertTrue(False)
 #     def testAlgunosExistentes(self):
@@ -195,6 +238,9 @@ class CrearTurnoTest(TestCase):
         dia = 5 # sabado
         fecha = b._Bussiness__proximoDia(dia, base)
         self.assertEquals(target, fecha)
-#     def testSinDisponibilidad(self):
-#         self.assertTrue(False)
-
+    def testSinDisponibilidad(self):
+        es=Especialidad.objects.get(id=1)
+        e=Especialista.objects.create(nombre='n',apellido='n',dni=1234)
+        ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es)
+        turnos = b.crearTurnos(ee)
+        self.assertFalse(turnos)
