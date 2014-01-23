@@ -10,6 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Bussiness():
+    """Esta clase encapsula toda la logica de negocios"""
     def __init__(self):
         s = getattr(settings, 'TURNOS', {})
         self.AUSENTES_CANTIDAD = s.get('ausente_cantidad', 6)
@@ -153,11 +154,12 @@ class Bussiness():
         logger.error("%s - %s" % (excepcion.__name__, mensaje))
         raise e
     
-    def crearTurnos(self, especialista_especialidad, cantidad_dias=7):
+    def crearTurnos(self, especialista_especialidad, cantidad_dias=7, a_partir_de = timezone.now()):
+        """Crea turnos para un especialista y una especialidad a partir del dia especificado"""
         turnos = []
         disponibilidades = Disponibilidad.objects.filter(ee=especialista_especialidad)
-        base = timezone.now()
         aux = cantidad_dias
+        base = a_partir_de
         while aux > 0:
             for disponibilidad in disponibilidades:
                 dia = self.__proximoDia(int(disponibilidad.dia), base)
@@ -167,14 +169,15 @@ class Bussiness():
             # Avanzamos de semana
             aux -= 7
             base += datetime.timedelta(days=7)
-        return turnos
+        return self.__guardarTurnos(especialista_especialidad, turnos, a_partir_de) if turnos else []
     
     def __crearTurnos(self, disponibilidad, dia, minutos=15):
+        """Crea turnos para una disponibilidad de un especialista en un dia determinado"""
         desde = datetime.datetime.combine(dia, disponibilidad.horaDesde)
         hasta = datetime.datetime.combine(dia, disponibilidad.horaHasta)
         turnos = []
         while desde < hasta:
-            turnos.append(Turno(fecha=desde,
+            turnos.append(Turno(fecha=desde.replace(tzinfo=timezone.get_default_timezone()),
                                 estado=Turno.DISPONIBLE,
                                 sobreturno=False,
                                 consultorio=disponibilidad.consultorio,
@@ -184,14 +187,18 @@ class Bussiness():
         return turnos
     
     def __proximoDia(self, dia, desde = timezone.now()):
+        """Obtiene el proximo dia de la semana a partir de otro dia"""
         days_ahead = dia - desde.weekday()
         if days_ahead < 0: # El dia ya paso en esta semana
             days_ahead += 7
         return desde + datetime.timedelta(days_ahead)
     
-    def __guardarTurnos(self, turnos):
-        #TODO: Guardar turnos
-        pass
+    def __guardarTurnos(self, ee, turnos, a_partir_de):
+        """Guarda los turnos creados en la base de datos cuidando que no se guarden repetidos"""
+        existentes = Turno.objects.filter(ee=ee, fecha__gte = a_partir_de)
+        lista = filter(lambda turno: turno not in existentes, turnos)
+        Turno.objects.bulk_create(lista)
+        return lista
     
 class TurnoNotExistsException(Exception):
     def __init__(self, message=None):

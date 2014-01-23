@@ -85,6 +85,72 @@
     }
 },
 {
+    "pk": 2, 
+    "model": "turnos.disponibilidad", 
+    "fields": {
+        "horaHasta": "13:00:00", 
+        "consultorio": null, 
+        "ee": 1, 
+        "horaDesde": "12:30:00", 
+        "dia": "1"
+    }
+},
+{
+    "pk": 3, 
+    "model": "turnos.disponibilidad", 
+    "fields": {
+        "horaHasta": "13:00:00", 
+        "consultorio": null, 
+        "ee": 1, 
+        "horaDesde": "12:30:00", 
+        "dia": "2"
+    }
+},
+{
+    "pk": 4, 
+    "model": "turnos.disponibilidad", 
+    "fields": {
+        "horaHasta": "13:00:00", 
+        "consultorio": null, 
+        "ee": 1, 
+        "horaDesde": "12:30:00", 
+        "dia": "3"
+    }
+},
+{
+    "pk": 5, 
+    "model": "turnos.disponibilidad", 
+    "fields": {
+        "horaHasta": "13:00:00", 
+        "consultorio": null, 
+        "ee": 1, 
+        "horaDesde": "12:30:00", 
+        "dia": "4"
+    }
+},
+{
+    "pk": 6, 
+    "model": "turnos.disponibilidad", 
+    "fields": {
+        "horaHasta": "13:00:00", 
+        "consultorio": null, 
+        "ee": 1, 
+        "horaDesde": "12:30:00", 
+        "dia": "5"
+    }
+},
+{
+    "pk": 7, 
+    "model": "turnos.disponibilidad", 
+    "fields": {
+        "horaHasta": "13:00:00", 
+        "consultorio": null, 
+        "ee": 1, 
+        "horaDesde": "12:30:00", 
+        "dia": "6"
+    }
+},
+{
     "pk": 1, 
     "model": "turnos.turno", 
     "fields": {

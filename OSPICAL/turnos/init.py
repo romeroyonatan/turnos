@@ -34,6 +34,13 @@ ee.save()
 d=Disponibilidad(dia='0',horaDesde='12:30',horaHasta='19:00', ee = ee, consultorio=c)
 d.save()
 
+Disponibilidad.objects.create(dia='1',horaDesde='12:30',horaHasta='13:00', ee = ee,)
+Disponibilidad.objects.create(dia='2',horaDesde='12:30',horaHasta='13:00', ee = ee,)
+Disponibilidad.objects.create(dia='3',horaDesde='12:30',horaHasta='13:00', ee = ee,)
+Disponibilidad.objects.create(dia='4',horaDesde='12:30',horaHasta='13:00', ee = ee,)
+Disponibilidad.objects.create(dia='5',horaDesde='12:30',horaHasta='13:00', ee = ee,)
+Disponibilidad.objects.create(dia='6',horaDesde='12:30',horaHasta='13:00', ee = ee,)
+
 fecha = datetime.now() + timedelta(days=4*365)
 for i in range (1,20):
     fecha = fecha + timedelta(minutes=15)

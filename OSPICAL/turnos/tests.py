@@ -60,7 +60,7 @@ class ReservarTurnoTest(TestCase):
         with self.assertRaises(AfiliadoNotExistsException):
             b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         last = LineaDeReserva.objects.latest('id')
-        self.assertNotIn(last.turno, listaTurnos)
+        self.assertNotIn(last.turno.id, listaTurnos)
 
     def testTurnoVacio(self):
         afiliado_id = 1
@@ -179,68 +179,57 @@ class CrearTurnoTest(TestCase):
     fixtures = ['turnos.json']
     def testUnDia(self):
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
-                                          horaDesde="12:00",
-                                          horaHasta="13:00",
-                                          ee=ee)
         turnos = b.crearTurnos(ee, 1)
         self.assertGreater(len(turnos), 1)
     def test8Dias(self):
         DIAS = 8
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
-                                          horaDesde="12:00",
-                                          horaHasta="13:00",
-                                          ee=ee)
         turnos = b.crearTurnos(ee, DIAS)
         exito = False
         for turno in turnos:
-            diff = turno.fecha - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
+            diff = turno.fecha.replace(tzinfo=None) - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
             exito = exito or diff.days == 0
         self.assertTrue(exito)
     def test365Dias(self):
         DIAS = 365
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
-                                          horaDesde="12:00",
-                                          horaHasta="13:00",
-                                          ee=ee)
         turnos = b.crearTurnos(ee, DIAS)
         exito = False
         for turno in turnos:
-            diff = turno.fecha - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
+            diff = turno.fecha.replace(tzinfo=None) - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
             exito = exito or diff.days == 0
         self.assertTrue(exito)
     def testDosAnos(self):
         DIAS = 365 * 2
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
-                                          horaDesde="12:00",
-                                          horaHasta="13:00",
-                                          ee=ee)
         turnos = b.crearTurnos(ee, DIAS)
         self.assertTrue(turnos)
     def testDiasNegativos(self):
         DIAS = -7
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
-                                          horaDesde="12:00",
-                                          horaHasta="13:00",
-                                          ee=ee)
         turnos = b.crearTurnos(ee, DIAS)
         self.assertFalse(turnos)
     def testSinDias(self):
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        Disponibilidad.objects.create(dia="%s" % datetime.datetime.now().weekday(),
-                                          horaDesde="12:00",
-                                          horaHasta="13:00",
-                                          ee=ee)
         turnos = b.crearTurnos(ee)
         self.assertTrue(turnos)
-#     def testTurnosExistentes(self):
-#         self.assertTrue(False)
-#     def testAlgunosExistentes(self):
-#         self.assertTrue(False)
+    def testTurnosExistentes(self):
+        fecha = datetime.datetime(2014,1,20,12,30, tzinfo=timezone.get_default_timezone())
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        b.crearTurnos(ee, 1, fecha) # Creamos los turnos
+        creados = b.crearTurnos(ee, 1, fecha)  # No deberia dejarlo crear nuevamente. Falla silenciosa
+        self.assertFalse(creados)
+    def testAlgunosExistentes(self):
+        fecha = datetime.datetime(2014,1,20,12,30, tzinfo=timezone.get_default_timezone())
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        turno = Turno.objects.create(fecha=fecha,
+                                     ee=ee,
+                                     sobreturno=False,
+                                     estado=Turno.RESERVADO)
+        creados = b.crearTurnos(ee,a_partir_de=fecha)
+        logger.debug("turno %s" %turno)
+        logger.debug(creados)
+        self.assertTrue(turno not in creados)
     def testProximoDia(self):
         base = datetime.datetime(2014,01,01) # miercoles
         target = datetime.datetime(2014,01,04) # sabado

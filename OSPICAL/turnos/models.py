@@ -81,6 +81,7 @@ class Disponibilidad(models.Model):
         return "%s" % model_to_dict(self)
 
 class Turno (models.Model):
+    unique_together = ("fecha", "ee", "sobreturno")
     # Constantes ~
     DISPONIBLE = 'D'
     RESERVADO = 'R'
@@ -104,6 +105,11 @@ class Turno (models.Model):
     ee = models.ForeignKey(EspecialistaEspecialidad)
     def __str__(self):
         return "%s" % model_to_dict(self)
+    def __eq__(self, other):
+        return (self.fecha == other.fecha and 
+                self.sobreturno == other.sobreturno and 
+                self.ee == other.ee)
+        
 class LineaDeReserva (models.Model):
     estado = models.CharField(max_length=1, choices=Turno.ESTADO)
     reserva = models.ForeignKey(Reserva)
