@@ -159,6 +159,10 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
+        'standard': {
+            'format' : "[TURNOS] [%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+            },
     },
     'filters': {
         'require_debug_false': {
@@ -177,6 +181,13 @@ LOGGING = {
             'filename': 'turnos/log/turnos.log',
             'formatter': 'verbose'
         },
+         'syslog': {
+            'class': 'logging.handlers.SysLogHandler',
+            'formatter': 'standard',
+            'facility': 'user',
+            # uncomment next line if rsyslog works with unix socket only (UDP reception disabled)
+            # 'address': '/dev/log'
+        },
     },
     'loggers': {
         'django.request': {
@@ -190,15 +201,4 @@ LOGGING = {
         },
     }
 }
-
-#########################################################
-#        Configuracion de aplicacion: Turnos            #
-#########################################################
-TURNOS = {
-          # Cantidad de meses que se tendran en cuenta para el calculo de presentismo
-          'ausente_meses' : 6,
-          # Cantidad de ausentes maximos que se tendran en cuenta para no declarar al 
-          # afiliado como ausente recurrente 
-          'ausente_cantidad' : 3,
-          }
 

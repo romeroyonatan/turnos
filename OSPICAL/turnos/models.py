@@ -125,3 +125,9 @@ class HistorialTurno(models.Model):
     empleado = models.ForeignKey(Empleado, null=True)
     def __str__(self):
         return "%s" % model_to_dict(self)
+class Settings(models.Model):
+    """Esta clase almacenara en la base de datos la configuracion de la aplicacion"""
+    key = models.CharField(primary_key=True, max_length=255)
+    value = models.CharField(max_length=255)
+    def __str__(self):
+        return "%s" % model_to_dict(self)

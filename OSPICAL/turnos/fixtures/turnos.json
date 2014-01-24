@@ -367,5 +367,33 @@
         "estado": "C", 
         "turno": 19
     }
+},
+{
+    "pk": "ausente_cantidad", 
+    "model": "turnos.settings", 
+    "fields": {
+        "value": "3"
+    }
+},
+{
+    "pk": "ausente_meses", 
+    "model": "turnos.settings", 
+    "fields": {
+        "value": "6"
+    }
+},
+{
+    "pk": "crear_cantidad_dias_turnos", 
+    "model": "turnos.settings", 
+    "fields": {
+        "value": "7"
+    }
+},
+{
+    "pk": "crear_minutos_entre_turnos", 
+    "model": "turnos.settings", 
+    "fields": {
+        "value": "15"
+    }
 }
 ]

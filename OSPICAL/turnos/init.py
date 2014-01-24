@@ -53,3 +53,13 @@ r.save()
 lr=LineaDeReserva(estado=Turno.CANCELADO,reserva=r,turno=turno)
 lr.save()
 
+
+# Cantidad de meses que se tendran en cuenta para el calculo de presentismo
+Settings.objects.create(key="ausente_meses",value="6")
+# Cantidad de ausentes maximos que se tendran en cuenta para no declarar al afiliado como ausente recurrente 
+Settings.objects.create(key="ausente_cantidad",value="3")
+# Minutos entre turnos al crearlos
+Settings.objects.create(key="crear_minutos_entre_turnos",value="15")
+# Cantidad de dias que se crearan los turnos
+Settings.objects.create(key="crear_cantidad_dias_turnos",value="7")
+

@@ -1,6 +1,5 @@
 from dateutil.relativedelta import relativedelta
 import datetime
-from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
 
@@ -12,9 +11,14 @@ logger = logging.getLogger(__name__)
 class Bussiness():
     """Esta clase encapsula toda la logica de negocios"""
     def __init__(self):
-        s = getattr(settings, 'TURNOS', {})
-        self.AUSENTES_CANTIDAD = s.get('ausente_cantidad', 6)
-        self.AUSENTES_MESES = s.get('ausente_meses', 6)
+        self.AUSENTES_CANTIDAD = int(self.__getSetting('ausente_meses', 3))
+        self.AUSENTES_MESES = int(self.__getSetting('ausente_meses', 6))
+        self.MINUTOS = int(self.__getSetting('minutos_entre_turnos', 15))
+        self.DIAS = int(self.__getSetting('cantidad_dias_crear_turnos', 7))
+    
+    def __getSetting(self, key, default_value=None):
+        setting = Settings.objects.filter(key=key)
+        return setting[0].value if setting else default_value
     
     def getAfiliados(self, parametro, valor):
         # Buscar en la base de datos local
@@ -154,9 +158,10 @@ class Bussiness():
         logger.error("%s - %s" % (excepcion.__name__, mensaje))
         raise e
     
-    def crearTurnos(self, especialista_especialidad, cantidad_dias=7, a_partir_de = timezone.now()):
+    def crearTurnos(self, especialista_especialidad, cantidad_dias=None, a_partir_de = timezone.now()):
         """Crea turnos para un especialista y una especialidad a partir del dia especificado"""
-        turnos = []
+        cantidad_dias = self.DIAS if cantidad_dias == None else cantidad_dias
+        turnos = list()
         disponibilidades = Disponibilidad.objects.filter(ee=especialista_especialidad)
         aux = cantidad_dias
         base = a_partir_de
@@ -171,7 +176,7 @@ class Bussiness():
             base += datetime.timedelta(days=7)
         return self.__guardarTurnos(especialista_especialidad, turnos, a_partir_de) if turnos else []
     
-    def __crearTurnos(self, disponibilidad, dia, minutos=15):
+    def __crearTurnos(self, disponibilidad, dia):
         """Crea turnos para una disponibilidad de un especialista en un dia determinado"""
         desde = datetime.datetime.combine(dia, disponibilidad.horaDesde)
         hasta = datetime.datetime.combine(dia, disponibilidad.horaHasta)
@@ -183,7 +188,7 @@ class Bussiness():
                                 consultorio=disponibilidad.consultorio,
                                 ee=disponibilidad.ee)
                           )
-            desde += datetime.timedelta(minutes=minutos)
+            desde += datetime.timedelta(minutes=self.MINUTOS)
         return turnos
     
     def __proximoDia(self, dia, desde = timezone.now()):
@@ -193,6 +198,7 @@ class Bussiness():
             days_ahead += 7
         return desde + datetime.timedelta(days_ahead)
     
+    @transaction.atomic
     def __guardarTurnos(self, ee, turnos, a_partir_de):
         """Guarda los turnos creados en la base de datos cuidando que no se guarden repetidos"""
         existentes = Turno.objects.filter(ee=ee, fecha__gte = a_partir_de)
