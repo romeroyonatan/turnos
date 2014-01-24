@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 b = Bussiness()
 
 class ReservarTurnoTest(TestCase):
+    """Esta clase agrupa las pruebas de reservar turnos"""
     fixtures = ['turnos.json']
         
     def setUp(self):
@@ -226,7 +227,11 @@ class CrearTurnoTest(TestCase):
         DIAS = 365 * 2
         ee = EspecialistaEspecialidad.objects.get(id=1)
         turnos = b.crearTurnos(ee, DIAS)
-        self.assertTrue(turnos)
+        exito = False
+        for turno in turnos:
+            diff = turno.fecha.replace(tzinfo=None) - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
+            exito = exito or diff.days == 0
+        self.assertTrue(exito)
     def testDiasNegativos(self):
         """Prueba que pasa si se pasan dias negativos a crear turnos. Debe devolver una lista de turnos creados"""
         DIAS = -7
@@ -236,9 +241,14 @@ class CrearTurnoTest(TestCase):
     def testSinDias(self):
         """Prueba que pasa si se llama a la funcion de crear sin indicarle el numero de dias. 
         Debe devolver una lista de turnos creados"""
+        DIAS = b.DIAS
         ee = EspecialistaEspecialidad.objects.get(id=1)
         turnos = b.crearTurnos(ee)
-        self.assertTrue(turnos)
+        exito = False
+        for turno in turnos:
+            diff = turno.fecha.replace(tzinfo=None) - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
+            exito = exito or diff.days == 0
+        self.assertTrue(exito)
     def testTurnosExistentes(self):
         """Prueba de crear turnos si todos los turnos a crear ya existen (doble llamada a la funcion).
         Debe devolver una lista vacia de turnos creados, fallando silenciosamente"""
