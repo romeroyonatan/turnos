@@ -1,4 +1,3 @@
-# coding=utf-8
 from django import forms
 from turnos.models import Especialidad
 
@@ -21,3 +20,10 @@ class ReservarTurnoForm(forms.Form):
                               required=False)
     turnos = forms.CharField(widget=forms.HiddenInput(),required=False)
     afiliado = forms.CharField(widget=forms.HiddenInput())
+
+class CrearTurnoForm(forms.Form):
+    dias = forms.IntegerField()
+    hasta = forms.DateField(widget=forms.TextInput(attrs={'disabled':'disabled'}),
+                                required=False,)
+    frecuencia = forms.IntegerField()
+    

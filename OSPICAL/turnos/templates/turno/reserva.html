@@ -1,4 +1,10 @@
 {% extends "site/application.html" %}
+{% load static %}
+
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/reservaturno.js' %}"></script>
+{% endblock %}
 
 {% block title %}Reservar turno{% endblock %}
 

@@ -12,8 +12,9 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render
+from django.utils import timezone
 
-from turnos.forms import ReservarTurnoForm
+from turnos.forms import ReservarTurnoForm, CrearTurnoForm
 from turnos.models import *
 from turnos.bussiness import Bussiness
 import logging
@@ -126,11 +127,29 @@ def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            logger.info("Creando cuenta del usuario %s" % form.username)
+            logger.info("Creando cuenta del usuario %s" % form.cleaned_data['username'])
             form.save()
             return HttpResponseRedirect("/")
     else:
         form = UserCreationForm()
-    return render(request, "registration/register.html", {
-        'form': form,
-    })
+    return render(request, "registration/register.html", {'form': form})
+
+@login_required
+def crear_turnos(request):
+    # TODO: Verificar permisos de crear turnos
+    b = Bussiness()
+    if request.method == 'POST':
+        form = CrearTurnoForm(request.POST)
+        if form.is_valid():
+            logger.info("<%s> esta creando turnos" % request.user.username)
+            creados = b.crear_turnos(form.cleaned_data['dias'])
+            if creados:
+                messages.info(request, u'Turnos creados con éxito: %s' % creados)
+            else:
+                messages.warning(request, u'No se creó ningún turno, puede que ya se crearon con anterioridad')
+            return HttpResponseRedirect("/crear")
+    else:
+        form = CrearTurnoForm(initial={'dias':b.DIAS,
+                                       'hasta':(timezone.now()+datetime.timedelta(days=b.DIAS)).strftime("%d-%m-%Y"),
+                                       'frecuencia':b.MINUTOS,})
+    return render(request, "turno/creacion.html", {'form': form})

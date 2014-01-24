@@ -120,7 +120,7 @@ class ReservarTurnoTest(TestCase):
         # Creando turnos
         listaTurnos = range(1000,1000 + cantidad + 1)
         for i in listaTurnos:
-            Turno.objects.create(fecha=timezone.now(),
+            Turno.objects.create(fecha=timezone.now()+timedelta(days=1),
                                  estado=Turno.DISPONIBLE,
                                  sobreturno=False,
                                  consultorio=Consultorio.objects.get(id=1),
@@ -200,63 +200,58 @@ class CrearTurnoTest(TestCase):
     def testUnDia(self):
         """Crea turnos para un dia. Debe devolver una lista con mas de un turno"""
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crearTurnos(ee, 1)
+        turnos = b.crear_turnos_del_especialista(ee, 1)
         self.assertGreater(len(turnos), 1)
     def test8Dias(self):
         """Crea una semana de turnos. Debe devolver una lista de turnos creados"""
         DIAS = 8
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crearTurnos(ee, DIAS)
+        turnos = b.crear_turnos_del_especialista(ee, DIAS)
         exito = False
         for turno in turnos:
-            diff = turno.fecha.replace(tzinfo=None) - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
+            diff = turno.fecha.replace(tzinfo=None) - (datetime.now() + timedelta(days=DIAS - 1))
             exito = exito or diff.days == 0
         self.assertTrue(exito)
     def test365Dias(self):
         """Crea un año de turnos y verifica que sea correcto. Debe devolver una lista de turnos creados"""
         DIAS = 365
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crearTurnos(ee, DIAS)
+        turnos = b.crear_turnos_del_especialista(ee, DIAS)
         exito = False
         for turno in turnos:
-            diff = turno.fecha.replace(tzinfo=None) - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
+            diff = turno.fecha.replace(tzinfo=None) - (datetime.now() + timedelta(days=DIAS - 1))
             exito = exito or diff.days == 0
         self.assertTrue(exito)
     def testDosAnos(self):
         """Crea turnos a dos años. Debe devolver una lista de turnos creados"""
         DIAS = 365 * 2
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crearTurnos(ee, DIAS)
+        turnos = b.crear_turnos_del_especialista(ee, DIAS)
         exito = False
         for turno in turnos:
-            diff = turno.fecha.replace(tzinfo=None) - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
+            diff = turno.fecha.replace(tzinfo=None) - (datetime.now() + timedelta(days=DIAS - 1))
             exito = exito or diff.days == 0
         self.assertTrue(exito)
     def testDiasNegativos(self):
         """Prueba que pasa si se pasan dias negativos a crear turnos. Debe devolver una lista de turnos creados"""
         DIAS = -7
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crearTurnos(ee, DIAS)
+        turnos = b.crear_turnos_del_especialista(ee, DIAS)
         self.assertFalse(turnos)
     def testSinDias(self):
         """Prueba que pasa si se llama a la funcion de crear sin indicarle el numero de dias. 
         Debe devolver una lista de turnos creados"""
-        DIAS = b.DIAS
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crearTurnos(ee)
-        exito = False
-        for turno in turnos:
-            diff = turno.fecha.replace(tzinfo=None) - (datetime.datetime.now() + datetime.timedelta(days=DIAS - 1))
-            exito = exito or diff.days == 0
-        self.assertTrue(exito)
+        turnos = b.crear_turnos_del_especialista(ee)
+        self.assertTrue(turnos)
     def testTurnosExistentes(self):
         """Prueba de crear turnos si todos los turnos a crear ya existen (doble llamada a la funcion).
         Debe devolver una lista vacia de turnos creados, fallando silenciosamente"""
-        fecha = datetime.datetime(2014,1,20,12,30, tzinfo=timezone.get_default_timezone())
+        fecha = datetime(2014,1,20,12,30, tzinfo=timezone.utc)
         ee = EspecialistaEspecialidad.objects.get(id=1)
-        b.crearTurnos(ee, 1, fecha) # Creamos los turnos
+        b.crear_turnos_del_especialista(ee, 1, fecha) # Creamos los turnos
         antes = Turno.objects.all().count() # contamos la cantidad de elementos antes de crear
-        creados = b.crearTurnos(ee, 1, fecha)  # No deberia dejarlo crear nuevamente. Falla silenciosa
+        creados = b.crear_turnos_del_especialista(ee, 1, fecha)  # No deberia dejarlo crear nuevamente. Falla silenciosa
         despues = Turno.objects.all().count() # contamos la cantidad de elementos despues de crear
         self.assertFalse(creados)
         # verifico que se hayan creado en la base de datos correctamente
@@ -264,14 +259,14 @@ class CrearTurnoTest(TestCase):
     def testAlgunosExistentes(self):
         """Prueba de crear turnos si hay un turno existente.
         Debe devolver una lista de turnos creados y el turno existente no debe estar en esa lista"""
-        fecha = datetime.datetime(2014,1,20,12,30, tzinfo=timezone.get_default_timezone())
+        fecha = datetime(2014,1,20,12,30, tzinfo=timezone.utc)
         ee = EspecialistaEspecialidad.objects.get(id=1)
         turno = Turno.objects.create(fecha=fecha,
                                      ee=ee,
                                      sobreturno=False,
                                      estado=Turno.RESERVADO)
         antes = Turno.objects.all().count() # contamos la cantidad de elementos antes de crear
-        creados = b.crearTurnos(ee,a_partir_de=fecha)
+        creados = b.crear_turnos_del_especialista(ee,a_partir_de=fecha)
         despues = Turno.objects.all().count() # contamos la cantidad de elementos despues de crear
         self.assertTrue(turno not in creados)
         # verifico que se hayan creado en la base de datos correctamente
@@ -279,8 +274,8 @@ class CrearTurnoTest(TestCase):
     def testProximoDia(self):
         """Prueba para obtener el proximo dia a partir de una fecha conocida.
         Debe devolver mismo dia conocido"""
-        base = datetime.datetime(2014,01,01) # miercoles
-        target = datetime.datetime(2014,01,04) # sabado
+        base = datetime(2014,01,01) # miercoles
+        target = datetime(2014,01,04) # sabado
         dia = 5 # sabado
         fecha = b._Bussiness__proximoDia(dia, base)
         self.assertEquals(target, fecha)
@@ -290,5 +285,5 @@ class CrearTurnoTest(TestCase):
         es=Especialidad.objects.get(id=1)
         e=Especialista.objects.create(nombre='n',apellido='n',dni=1234)
         ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es)
-        turnos = b.crearTurnos(ee)
+        turnos = b.crear_turnos_del_especialista(ee)
         self.assertFalse(turnos)

@@ -1,11 +1,12 @@
 from dateutil.relativedelta import relativedelta
-import datetime
+from datetime import date, timedelta, datetime
 from django.utils import timezone
 from django.db import transaction
 
 from turnos.models import *
 
 import logging
+from models import EspecialistaEspecialidad
 logger = logging.getLogger(__name__)
 
 class Bussiness():
@@ -128,6 +129,8 @@ class Bussiness():
         turno = Turno.objects.get(id=turno_id)
         if turno.estado == Turno.RESERVADO:
             self.__lanzar(TurnoReservadoException, "Turno ID '%s' ya se encuentra reservado" % turno_id)
+        if turno.fecha < (timezone.now()+timedelta(minutes=self.MINUTOS)):
+            self.__lanzar(ReservaTurnoException, "No se pueden reservar turnos anteriores a la fecha actual")
         historial = HistorialTurno.objects.create(fecha=timezone.now(),
                                    estadoAnterior=turno.estado,
                                    estadoNuevo=Turno.RESERVADO,
@@ -151,75 +154,80 @@ class Bussiness():
         faltas = self.contarFaltas(afiliado_id);
         logger.debug("Cantidad de faltas del afiliado %s: %s, Presentismo_ok %s" % (afiliado_id, faltas, faltas <= self.AUSENTES_CANTIDAD))
         return faltas <= self.AUSENTES_CANTIDAD
-    
     def __lanzar(self, excepcion, mensaje):
         """Lanza una excepcion y loguea la misma"""
         e = excepcion(mensaje)
         logger.error("%s - %s" % (excepcion.__name__, mensaje))
         raise e
-    
-    def crearTurnos(self, especialista_especialidad, cantidad_dias=None, a_partir_de = timezone.now()):
+    def crear_turnos(self, dias):
+        cantidad = 0
+        for ee in EspecialistaEspecialidad.objects.all():
+            creados = self.crear_turnos_del_especialista(ee, dias)
+            cantidad += len(creados)
+        return cantidad
+    def crear_turnos_del_especialista(self, especialista_especialidad, 
+                                      cantidad_dias=None, 
+                                      a_partir_de = timezone.now()):
         """Crea turnos para un especialista y una especialidad a partir del dia especificado"""
+        logger.debug("Creando turnos para el especialista %s" % especialista_especialidad)
         cantidad_dias = self.DIAS if cantidad_dias == None else cantidad_dias
         turnos = list()
         disponibilidades = Disponibilidad.objects.filter(ee=especialista_especialidad)
+        base = a_partir_de = a_partir_de.date()
         aux = cantidad_dias
-        base = a_partir_de
+        today = date.today()
         while aux > 0:
             for disponibilidad in disponibilidades:
                 dia = self.__proximoDia(int(disponibilidad.dia), base)
-                diff = dia.replace(tzinfo=None) - datetime.datetime.now().replace(tzinfo=None)
+                diff = dia - today
                 if diff.days <= cantidad_dias:
-                    turnos += self.__crearTurnos(disponibilidad, dia)
+                    turnos += self.__crear_turnos_del_dia(disponibilidad, dia)
             # Avanzamos de semana
             aux -= 7
-            base += datetime.timedelta(days=7)
+            base += timedelta(days=7)
         return self.__guardarTurnos(especialista_especialidad, turnos, a_partir_de) if turnos else []
-    
-    def __crearTurnos(self, disponibilidad, dia):
+    def __crear_turnos_del_dia(self, disponibilidad, dia):
         """Crea turnos para una disponibilidad de un especialista en un dia determinado"""
-        desde = datetime.datetime.combine(dia, disponibilidad.horaDesde)
-        hasta = datetime.datetime.combine(dia, disponibilidad.horaHasta)
+        logger.debug("Creando turnos para el dia <%s> para el especialista <%s>" % (dia, disponibilidad.ee))
+        desde = datetime.combine(dia, disponibilidad.horaDesde)
+        hasta = datetime.combine(dia, disponibilidad.horaHasta)
         turnos = []
         while desde < hasta:
-            turnos.append(Turno(fecha=desde.replace(tzinfo=timezone.get_default_timezone()),
+            turnos.append(Turno(fecha=desde.replace(tzinfo=timezone.utc),
                                 estado=Turno.DISPONIBLE,
                                 sobreturno=False,
                                 consultorio=disponibilidad.consultorio,
                                 ee=disponibilidad.ee)
                           )
-            desde += datetime.timedelta(minutes=self.MINUTOS)
+            desde += timedelta(minutes=self.MINUTOS)
         return turnos
-    
-    def __proximoDia(self, dia, desde = timezone.now()):
+    def __proximoDia(self, dia, desde = timezone.now().date()):
         """Obtiene el proximo dia de la semana a partir de otro dia"""
         days_ahead = dia - desde.weekday()
         if days_ahead < 0: # El dia ya paso en esta semana
             days_ahead += 7
-        return desde + datetime.timedelta(days_ahead)
-    
-    @transaction.atomic
+        return desde + timedelta(days=days_ahead)
     def __guardarTurnos(self, ee, turnos, a_partir_de):
         """Guarda los turnos creados en la base de datos cuidando que no se guarden repetidos"""
-        existentes = Turno.objects.filter(ee=ee, fecha__gte = a_partir_de)
+        # Hago este lio para evitar el mensaje de warning por ser un datetime sin timezone
+        fecha = datetime.combine(a_partir_de, datetime.min.time().replace(tzinfo=timezone.utc))
+        existentes = Turno.objects.filter(ee=ee, fecha__gte = fecha)
         lista = filter(lambda turno: turno not in existentes, turnos)
+        logger.debug("Guardando %s turnos del especialista <%s>"%(len(lista), ee))
         Turno.objects.bulk_create(lista)
         return lista
     
-class TurnoNotExistsException(Exception):
+class ReservaTurnoException(Exception):
     def __init__(self, message=None):
         self.message = message
     def __str__(self):
-        return self.message
-
-class AfiliadoNotExistsException(Exception):
+        return self.message   
+class TurnoNotExistsException(ReservaTurnoException):
     def __init__(self, message=None):
         self.message = message
-    def __str__(self):
-        return self.message
-
-class TurnoReservadoException(Exception):
+class AfiliadoNotExistsException(ReservaTurnoException):
     def __init__(self, message=None):
         self.message = message
-    def __str__(self):
-        return self.message
+class TurnoReservadoException(ReservaTurnoException):
+    def __init__(self, message=None):
+        self.message = message

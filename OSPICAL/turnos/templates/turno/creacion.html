@@ -1,12 +1,11 @@
 {% extends "site/application.html" %}
-
 {% block title %}Crear turnos{% endblock %}
 
 {% block content %}
 	{% if last_created %}
-	<div class="alert alert-info pure-u-1">
-		Turnos creados hasta el día: {{ last_created|date: "DATETIME_FORMAT" }}
-	</div>
+		<div class="alert alert-info pure-u-1">
+			Turnos creados hasta el día: {{ last_created|date:"DATETIME_FORMAT" }}
+		</div>
 	{% endif %}
 	
 	<form action="." method="post" class="pure-form pure-form-aligned">
@@ -47,13 +46,15 @@
 				<th>Realizado por</th>
 				<th>Cantidad de turnos creados</th>
 			</thead>
-			{% for item in historial %}
-			<tr>
-				<td>item.dia</td>
-				<td>item.responsable</td>
-				<td>item.cantidad</td>
-			</tr>
+			<tbody>
+			{% for item in historial|dictsort:"dia"%}
+				<tr>
+					<td>item.dia</td>
+					<td>item.responsable</td>
+					<td>item.cantidad</td>
+				</tr>
 			{% endfor %}
+			</tbody>
 		</table>
 	{% endif %}
 {% endblock %}
