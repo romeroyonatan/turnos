@@ -137,6 +137,7 @@ def register(request):
 @login_required
 def crear_turnos(request):
     # TODO: Verificar permisos de crear turnos
+    # TODO: Mostrar el ultimo turno creado y el historial de creaciones de turno
     b = Bussiness()
     if request.method == 'POST':
         form = CrearTurnoForm(request.POST)
