@@ -1,0 +1,52 @@
+{% extends "site/application.html" %}
+{% load static %}
+
+{% block title %}Creación automática de turnos{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="pure-form pure-form-aligned">
+	<fieldset>
+		<legend>Creación automática de turnos</legend>
+		<div class="pure-control-group">
+		<label for="dias">Cantidad de días</label>
+		<input type="text" id="dias" name="dias"/>
+		</div>
+	
+		<div class="pure-control-group">
+		<label for="frecuencia">Frecuencia de turnos (en minutos)</label>
+		<input type="text" id="frecuencia" name="frecuencia"/>
+		</div>
+		
+		<div class="pure-controls">		
+		<input type="submit" value="Guardar" class="pure-button pure-button-primary"/>
+		</div>
+	</fieldset>
+
+
+	<fieldset title="Lista de turnos" class="pure-u-1">
+		<legend>Historial de creación de turnos</legend>
+		<table class="pure-table">
+		<thead>
+			<th>Día</th>
+			<th>Realizado por</th>
+			<th>Cantidad de turnos creados</th>
+		</thead>
+		<tr>
+			<td>dd/mm/yyyy</td>
+			<td>AUTOMATICO</td>
+			<td>53</td>
+		</tr>
+		<tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+		<tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+		</table>
+	</fieldset>
+</form>
+{% endblock %}

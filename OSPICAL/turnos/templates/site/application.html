@@ -1,4 +1,10 @@
 {% extends 'site/base.html' %}
+{% load static %}
+
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/reservaturno.js' %}"></script>
+{% endblock %}
 
 {% block main %}
 <div id="layout">
