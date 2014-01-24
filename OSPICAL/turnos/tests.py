@@ -120,7 +120,7 @@ class ReservarTurnoTest(TestCase):
         # Creando turnos
         listaTurnos = range(1000,1000 + cantidad + 1)
         for i in listaTurnos:
-            Turno.objects.create(fecha=timezone.now()+timedelta(days=1),
+            Turno.objects.create(fecha=timezone.now(),
                                  estado=Turno.DISPONIBLE,
                                  sobreturno=False,
                                  consultorio=Consultorio.objects.get(id=1),
@@ -147,7 +147,7 @@ class ReservarTurnoTest(TestCase):
         # Creando turnos
         listaTurnos = range(1000,1000 + cantidad + 1)
         for i in listaTurnos:
-            Turno.objects.create(fecha=timezone.now() + relativedelta(months=-meses, days=-1),
+            Turno.objects.create(fecha=timezone.now(),
                                  estado=Turno.DISPONIBLE,
                                  sobreturno=False,
                                  consultorio=Consultorio.objects.get(id=1),

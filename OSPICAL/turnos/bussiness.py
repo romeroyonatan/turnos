@@ -129,7 +129,7 @@ class Bussiness():
         turno = Turno.objects.get(id=turno_id)
         if turno.estado == Turno.RESERVADO:
             self.__lanzar(TurnoReservadoException, "Turno ID '%s' ya se encuentra reservado" % turno_id)
-        if turno.fecha < (timezone.now()+timedelta(minutes=self.MINUTOS)):
+        if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)):
             self.__lanzar(ReservaTurnoException, "No se pueden reservar turnos anteriores a la fecha actual")
         historial = HistorialTurno.objects.create(fecha=timezone.now(),
                                    estadoAnterior=turno.estado,
