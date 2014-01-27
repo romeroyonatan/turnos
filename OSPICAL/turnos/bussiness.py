@@ -120,7 +120,6 @@ class Bussiness():
         reserva = Reserva()
         reserva.afiliado = Afiliado.objects.get(id=afiliado)
         reserva.telefono = telefono
-        reserva.fecha = timezone.now()
         reserva.save()
         return reserva
     
@@ -133,8 +132,7 @@ class Bussiness():
             self.__lanzar(TurnoReservadoException, "Turno ID '%s' ya se encuentra reservado" % turno_id)
         if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)):
             self.__lanzar(ReservaTurnoException, "No se pueden reservar turnos anteriores a la fecha actual")
-        historial = HistorialTurno.objects.create(fecha=timezone.now(),
-                                   estadoAnterior=turno.estado,
+        historial = HistorialTurno.objects.create(estadoAnterior=turno.estado,
                                    estadoNuevo=Turno.RESERVADO,
                                    turno=turno,
                                    empleado=empleado,
@@ -230,8 +228,7 @@ class Bussiness():
         lista = list()
         for turno in turnos:
             #TODO tener en cuenta el empleado que hace la operacion
-            lista.append(HistorialTurno(fecha=timezone.now(),
-                                        estadoNuevo=Turno.DISPONIBLE,
+            lista.append(HistorialTurno(estadoNuevo=Turno.DISPONIBLE,
                                         descripcion="Creación de turno",
                                         turno=turno,
                                         empleado=None,))
@@ -245,7 +242,7 @@ class Bussiness():
         lista = list()
         for evento in eventos:
             lista.append({'dia':evento['fecha'],
-                          'responsable':evento['empleado'] if evento['empleado'] else "AUTOMÁTICO",
+                          'responsable':evento['empleado'] if evento['empleado'] else 'Proceso automático',
                           'cantidad': evento['cantidad']})
         logger.debug("lista: %s" %lista)
         return lista
