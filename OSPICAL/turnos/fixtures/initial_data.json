@@ -361,6 +361,234 @@
     }
 },
 {
+    "pk": 1, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:50.974Z", 
+        "estadoNuevo": "D", 
+        "turno": 1, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 2, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.090Z", 
+        "estadoNuevo": "D", 
+        "turno": 2, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 3, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.191Z", 
+        "estadoNuevo": "D", 
+        "turno": 3, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 4, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.291Z", 
+        "estadoNuevo": "D", 
+        "turno": 4, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 5, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.391Z", 
+        "estadoNuevo": "D", 
+        "turno": 5, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 6, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.492Z", 
+        "estadoNuevo": "D", 
+        "turno": 6, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 7, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.593Z", 
+        "estadoNuevo": "D", 
+        "turno": 7, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 8, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.693Z", 
+        "estadoNuevo": "D", 
+        "turno": 8, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 9, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.794Z", 
+        "estadoNuevo": "D", 
+        "turno": 9, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 10, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.895Z", 
+        "estadoNuevo": "D", 
+        "turno": 10, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 11, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:51.995Z", 
+        "estadoNuevo": "D", 
+        "turno": 11, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 12, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:52.095Z", 
+        "estadoNuevo": "D", 
+        "turno": 12, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 13, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:52.196Z", 
+        "estadoNuevo": "D", 
+        "turno": 13, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 14, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:52.280Z", 
+        "estadoNuevo": "D", 
+        "turno": 14, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 15, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:52.382Z", 
+        "estadoNuevo": "D", 
+        "turno": 15, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 16, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:52.483Z", 
+        "estadoNuevo": "D", 
+        "turno": 16, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 17, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:52.583Z", 
+        "estadoNuevo": "D", 
+        "turno": 17, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 18, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:52.683Z", 
+        "estadoNuevo": "D", 
+        "turno": 18, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
+    "pk": 19, 
+    "model": "turnos.historialturno", 
+    "fields": {
+        "empleado": null, 
+        "fecha": "2014-01-27T14:48:52.784Z", 
+        "estadoNuevo": "D", 
+        "turno": 19, 
+        "descripcion": null, 
+        "estadoAnterior": null
+    }
+},
+{
     "pk": "ausente_cantidad", 
     "model": "turnos.settings", 
     "fields": {

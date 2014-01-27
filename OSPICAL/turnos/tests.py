@@ -211,6 +211,8 @@ class CrearTurnoTest(TestCase):
         for turno in turnos:
             diff = turno.fecha.replace(tzinfo=None) - (datetime.now() + timedelta(days=DIAS - 1))
             exito = exito or diff.days == 0
+            #Verifico que exista el historial
+            self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
         self.assertTrue(exito)
     def test365Dias(self):
         """Crea un año de turnos y verifica que sea correcto. Debe devolver una lista de turnos creados"""
@@ -221,6 +223,8 @@ class CrearTurnoTest(TestCase):
         for turno in turnos:
             diff = turno.fecha.replace(tzinfo=None) - (datetime.now() + timedelta(days=DIAS - 1))
             exito = exito or diff.days == 0
+            #Verifico que exista el historial
+            self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
         self.assertTrue(exito)
     def testDosAnos(self):
         """Crea turnos a dos años. Debe devolver una lista de turnos creados"""
@@ -231,6 +235,8 @@ class CrearTurnoTest(TestCase):
         for turno in turnos:
             diff = turno.fecha.replace(tzinfo=None) - (datetime.now() + timedelta(days=DIAS - 1))
             exito = exito or diff.days == 0
+            #Verifico que exista el historial
+            self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
         self.assertTrue(exito)
     def testDiasNegativos(self):
         """Prueba que pasa si se pasan dias negativos a crear turnos. Debe devolver una lista de turnos creados"""
@@ -287,3 +293,7 @@ class CrearTurnoTest(TestCase):
         ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es)
         turnos = b.crear_turnos_del_especialista(ee)
         self.assertFalse(turnos)
+    def testGetHistorialCreacion(self):
+        """Prueba que se obtenga el historial de turnos creados"""
+        historial = b.get_historial_creacion_turnos()
+        self.assertTrue(historial)

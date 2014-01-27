@@ -1,12 +1,14 @@
+# coding=utf-8
 from dateutil.relativedelta import relativedelta
 from datetime import date, timedelta, datetime
 from django.utils import timezone
 from django.db import transaction
+from django.db.models import Count
 
 from turnos.models import *
 
 import logging
-from models import EspecialistaEspecialidad
+from models import EspecialistaEspecialidad, HistorialTurno
 logger = logging.getLogger(__name__)
 
 class Bussiness():
@@ -64,7 +66,7 @@ class Bussiness():
         logger.debug("Obteniendo dias de turnos para el especialista_id:%s " % especialista)
         data = []
         queryset = Turno.objects.filter(ee__especialista__id=especialista,
-                                        fecha__gte=timezone.now()).datetimes('fecha', 'day')
+                                        fecha__gte=timezone.now()).datetimes('fecha', 'day')[:self.DIAS]
         for fecha in queryset:
             estado = None
             if self.__isCompleto(especialista, fecha):
@@ -207,6 +209,7 @@ class Bussiness():
         if days_ahead < 0: # El dia ya paso en esta semana
             days_ahead += 7
         return desde + timedelta(days=days_ahead)
+    @transaction.commit_manually
     def __guardarTurnos(self, ee, turnos, a_partir_de):
         """Guarda los turnos creados en la base de datos cuidando que no se guarden repetidos"""
         # Hago este lio para evitar el mensaje de warning por ser un datetime sin timezone
@@ -214,9 +217,39 @@ class Bussiness():
         existentes = Turno.objects.filter(ee=ee, fecha__gte = fecha)
         lista = filter(lambda turno: turno not in existentes, turnos)
         logger.debug("Guardando %s turnos del especialista <%s>"%(len(lista), ee))
-        Turno.objects.bulk_create(lista)
+        #XXX: Lo hago asi, para obtener los ID de turnos, es necesario para crear los historiales
+        for turno in lista:
+            turno.save()
+        transaction.commit(); #Asi es mas rapido
+        self.__crear_historial_turnos(lista)
         return lista
     
+    def __crear_historial_turnos(self, turnos):
+        """Crea los historiales de cada turno nuevo"""
+        logger.debug("Creando historial de turnos")
+        lista = list()
+        for turno in turnos:
+            #TODO tener en cuenta el empleado que hace la operacion
+            lista.append(HistorialTurno(fecha=timezone.now(),
+                                        estadoNuevo=Turno.DISPONIBLE,
+                                        descripcion="Creación de turno",
+                                        turno=turno,
+                                        empleado=None,))
+        return HistorialTurno.objects.bulk_create(lista)
+        
+    def get_historial_creacion_turnos(self):
+        """Obtiene el detalle de las ultimas creaciones de turnos"""
+        logger.debug("Obteniendo historial de creacion de turnos")
+        eventos = HistorialTurno.objects.extra(select={'fecha':'date( fecha )'})
+        eventos = eventos.values('fecha','empleado').annotate(cantidad=Count('fecha'))
+        lista = list()
+        for evento in eventos:
+            lista.append({'dia':evento['fecha'],
+                          'responsable':evento['empleado'] if evento['empleado'] else "AUTOMÁTICO",
+                          'cantidad': evento['cantidad']})
+        logger.debug("lista: %s" %lista)
+        return lista
+        
 class ReservaTurnoException(Exception):
     def __init__(self, message=None):
         self.message = message

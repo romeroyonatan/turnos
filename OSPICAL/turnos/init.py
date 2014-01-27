@@ -2,6 +2,7 @@
 from turnos.models import *
 from datetime import datetime
 from datetime import timedelta
+from django.utils import timezone
 from django.contrib.auth.models import User
 
 a = Afiliado(nombre='Yonatan',apellido='Romero',dni=12345678,numero='000100020003')
@@ -45,6 +46,7 @@ fecha = datetime.now() + timedelta(days=4*365)
 for i in range (1,20):
     fecha = fecha + timedelta(minutes=15)
     turno = Turno(fecha=fecha, estado=Turno.DISPONIBLE,sobreturno=False,consultorio=c, ee=ee)
+    HistorialTurno.objects.create(fecha=timezone.now(),turno=turno,estadoNuevo=Turno.DISPONIBLE,)
     turno.save()
 
 r=Reserva(fecha=datetime.now(),telefono='41234345',afiliado=a)

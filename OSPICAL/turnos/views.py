@@ -145,12 +145,14 @@ def crear_turnos(request):
             logger.info("<%s> esta creando turnos" % request.user.username)
             creados = b.crear_turnos(form.cleaned_data['dias'])
             if creados:
-                messages.info(request, u'Turnos creados con éxito: %s' % creados)
+                messages.success(request, u'Turnos creados con éxito: %s' % creados)
             else:
                 messages.warning(request, u'No se creó ningún turno, puede que ya se crearon con anterioridad')
-            return HttpResponseRedirect("/crear")
+            return HttpResponseRedirect("/crear/")
     else:
         form = CrearTurnoForm(initial={'dias':b.DIAS,
                                        'hasta':(timezone.now()+datetime.timedelta(days=b.DIAS)).strftime("%d-%m-%Y"),
                                        'frecuencia':b.MINUTOS,})
-    return render(request, "turno/creacion.html", {'form': form})
+        last = Turno.objects.order_by('fecha').last()
+        historial = b.get_historial_creacion_turnos()
+    return render(request, "turno/creacion.html", locals())
