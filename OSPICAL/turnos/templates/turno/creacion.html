@@ -2,18 +2,17 @@
 {% block title %}Crear turnos{% endblock %}
 
 {% block content %}
-	{% if last %}
-	<ul class='messages'>
-		<li class="alert info pure-u-1">
-			Turnos creados hasta el día: {{ last.fecha|date:"DATE_FORMAT" }}
-		</li>
-	</ul>
-	{% endif %}
-	
 	<form action="." method="post" class="pure-form pure-form-aligned">
 		{% csrf_token %}
 		<fieldset>
 			<legend>Creación manual de turnos</legend>
+			{% if last %}
+			<ul class='messages'>
+				<li class="alert info pure-u-3-4">
+					Turnos creados hasta el día: {{ last.fecha|date:"DATE_FORMAT" }}
+				</li>
+			</ul>
+			{% endif %}
 		
 			<div class="pure-control-group">
 				{{ form.dias.errors }}

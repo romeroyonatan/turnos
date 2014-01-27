@@ -4,7 +4,6 @@ from datetime import date, timedelta, datetime
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Count
-
 from turnos.models import *
 
 import logging
@@ -207,19 +206,22 @@ class Bussiness():
         if days_ahead < 0: # El dia ya paso en esta semana
             days_ahead += 7
         return desde + timedelta(days=days_ahead)
-    @transaction.commit_manually
+    
     def __guardarTurnos(self, ee, turnos, a_partir_de):
         """Guarda los turnos creados en la base de datos cuidando que no se guarden repetidos"""
-        # Hago este lio para evitar el mensaje de warning por ser un datetime sin timezone
-        fecha = datetime.combine(a_partir_de, datetime.min.time().replace(tzinfo=timezone.utc))
-        existentes = Turno.objects.filter(ee=ee, fecha__gte = fecha)
-        lista = filter(lambda turno: turno not in existentes, turnos)
-        logger.debug("Guardando %s turnos del especialista <%s>"%(len(lista), ee))
-        #XXX: Lo hago asi, para obtener los ID de turnos, es necesario para crear los historiales
-        for turno in lista:
-            turno.save()
-        transaction.commit(); #Asi es mas rapido
-        self.__crear_historial_turnos(lista)
+        try:
+            # Hago este lio para evitar el mensaje de warning por ser un datetime sin timezone
+            fecha = datetime.combine(a_partir_de, datetime.min.time().replace(tzinfo=timezone.utc))
+            existentes = Turno.objects.filter(ee=ee, fecha__gte = fecha)
+            lista = filter(lambda turno: turno not in existentes, turnos)
+            #XXX: Lo hago asi, para obtener los ID de turnos, es necesario para crear los historiales
+            if lista:
+                for turno in lista:
+                    turno.save()
+            logger.debug("Guardando %s turnos del especialista <%s>"%(len(lista), ee))
+            self.__crear_historial_turnos(lista)
+        except Error:
+            transaction.rollback()
         return lista
     
     def __crear_historial_turnos(self, turnos):
@@ -237,11 +239,13 @@ class Bussiness():
     def get_historial_creacion_turnos(self):
         """Obtiene el detalle de las ultimas creaciones de turnos"""
         logger.debug("Obteniendo historial de creacion de turnos")
-        eventos = HistorialTurno.objects.extra(select={'fecha':'date( fecha )'})
+        eventos = HistorialTurno.objects.extra(select={'fecha':'datetime( fecha )'})
         eventos = eventos.values('fecha','empleado').annotate(cantidad=Count('fecha'))
         lista = list()
         for evento in eventos:
-            lista.append({'dia':evento['fecha'],
+            #Convierto la fecha (string) a datetime con timezone utc 
+            dia = datetime.strptime(evento['fecha'],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            lista.append({'dia':dia,
                           'responsable':evento['empleado'] if evento['empleado'] else 'Proceso automático',
                           'cantidad': evento['cantidad']})
         logger.debug("lista: %s" %lista)

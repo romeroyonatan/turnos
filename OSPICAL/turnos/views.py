@@ -145,7 +145,7 @@ def crear_turnos(request):
             logger.info("<%s> esta creando turnos" % request.user.username)
             creados = b.crear_turnos(form.cleaned_data['dias'])
             if creados:
-                messages.success(request, u'Turnos creados con éxito: %s' % creados)
+                messages.success(request, u'%s Turnos creados con éxito' % creados)
             else:
                 messages.warning(request, u'No se creó ningún turno, puede que ya se crearon con anterioridad')
             return HttpResponseRedirect("/crear/")
