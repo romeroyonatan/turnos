@@ -25,7 +25,12 @@ class MyEncoder(json.JSONEncoder):
     ### Uso este encoder para codficar la fecha a JSON ###
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
-            return int(mktime(obj.timetuple()))
+            tz = timezone.get_default_timezone()
+            fecha = obj.astimezone(tz)
+            logger.debug("tz %s" %tz)
+            logger.debug("obj %s"%obj)
+            logger.debug("fecha %s"%fecha)
+            return int(mktime(fecha.timetuple()))
         return json.JSONEncoder.default(self, obj)
 
 def JSONResponse(response):
@@ -150,9 +155,10 @@ def crear_turnos(request):
                 messages.warning(request, u'No se creó ningún turno, puede que ya se crearon con anterioridad')
             return HttpResponseRedirect("/crear/")
     else:
-        form = CrearTurnoForm(initial={'dias':b.DIAS,
-                                       'hasta':(timezone.now()+datetime.timedelta(days=b.DIAS)).strftime("%d-%m-%Y"),
-                                       'frecuencia':b.MINUTOS,})
+        hasta = (timezone.now() + datetime.timedelta(days=b.DIAS)).strftime("%d-%m-%Y")
         last = Turno.objects.order_by('fecha').last()
+        form = CrearTurnoForm(initial={'dias':b.DIAS,
+                                       'hasta':hasta,
+                                       'frecuencia':b.MINUTOS,})
         historial = b.get_historial_creacion_turnos()
     return render(request, "turno/creacion.html", locals())

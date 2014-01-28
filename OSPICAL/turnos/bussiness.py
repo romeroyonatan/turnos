@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.db import transaction
 from django.db.models import Count
 from turnos.models import *
+import pytz
 
 import logging
 from models import EspecialistaEspecialidad, HistorialTurno
@@ -65,7 +66,7 @@ class Bussiness():
         logger.debug("Obteniendo dias de turnos para el especialista_id:%s " % especialista)
         data = []
         queryset = Turno.objects.filter(ee__especialista__id=especialista,
-                                        fecha__gte=timezone.now()).datetimes('fecha', 'day')[:self.DIAS]
+                                        fecha__gte=timezone.now()).datetimes('fecha', 'day')[:self.DIAS*2]
         for fecha in queryset:
             estado = None
             if self.__isCompleto(especialista, fecha):
@@ -124,13 +125,7 @@ class Bussiness():
     
     def __reservarTurno(self, reserva, turno_id, empleado):
         logger.info("Reservando turno %s" % turno_id)
-        if not Turno.objects.filter(id=turno_id).exists():
-            self.__lanzar(TurnoNotExistsException, "Turno ID '%s' inexistente" % turno_id)
-        turno = Turno.objects.get(id=turno_id)
-        if turno.estado == Turno.RESERVADO:
-            self.__lanzar(TurnoReservadoException, "Turno ID '%s' ya se encuentra reservado" % turno_id)
-        if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)):
-            self.__lanzar(ReservaTurnoException, "No se pueden reservar turnos anteriores a la fecha actual")
+        turno = self.__validar_reserva(turno_id)
         historial = HistorialTurno.objects.create(estadoAnterior=turno.estado,
                                    estadoNuevo=Turno.RESERVADO,
                                    turno=turno,
@@ -139,6 +134,16 @@ class Bussiness():
         turno.estado = Turno.RESERVADO
         turno.save()
         logger.debug("Modificacion de turno: %s" % historial)
+        return turno
+    
+    def __validar_reserva(self, turno_id):
+        if not Turno.objects.filter(id=turno_id).exists():
+            self.__lanzar(TurnoNotExistsException, "Turno ID '%s' inexistente" % turno_id)
+        turno = Turno.objects.get(id=turno_id)
+        if turno.estado == Turno.RESERVADO:
+            self.__lanzar(TurnoReservadoException, "Turno ID '%s' ya se encuentra reservado" % turno_id)
+        if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)):
+            self.__lanzar(ReservaTurnoException, "No se pueden reservar turnos anteriores a la fecha actual")
         return turno
     
     def contarFaltas(self, afiliado_id):
@@ -187,12 +192,17 @@ class Bussiness():
         return self.__guardarTurnos(especialista_especialidad, turnos, a_partir_de) if turnos else []
     def __crear_turnos_del_dia(self, disponibilidad, dia):
         """Crea turnos para una disponibilidad de un especialista en un dia determinado"""
-        logger.debug("Creando turnos para el dia <%s> para el especialista <%s>" % (dia, disponibilidad.ee))
-        desde = datetime.combine(dia, disponibilidad.horaDesde)
-        hasta = datetime.combine(dia, disponibilidad.horaHasta)
+        logger.debug("Creando turnos para el dia <%s> para el especialista <%s>" % 
+                     (dia, disponibilidad.ee))
+        # Para solucionar problema de timezone :s
+        import dateutil.tz
+        tz = dateutil.tz.tzoffset(None, -3*60*60)
+        #tz = timezone.get_default_timezone() 
+        desde = datetime.combine(dia, disponibilidad.horaDesde).replace(tzinfo=tz)
+        hasta = datetime.combine(dia, disponibilidad.horaHasta).replace(tzinfo=tz)
         turnos = []
         while desde < hasta:
-            turnos.append(Turno(fecha=desde.replace(tzinfo=timezone.utc),
+            turnos.append(Turno(fecha=desde,
                                 estado=Turno.DISPONIBLE,
                                 sobreturno=False,
                                 consultorio=disponibilidad.consultorio,
@@ -209,19 +219,16 @@ class Bussiness():
     
     def __guardarTurnos(self, ee, turnos, a_partir_de):
         """Guarda los turnos creados en la base de datos cuidando que no se guarden repetidos"""
-        try:
-            # Hago este lio para evitar el mensaje de warning por ser un datetime sin timezone
-            fecha = datetime.combine(a_partir_de, datetime.min.time().replace(tzinfo=timezone.utc))
-            existentes = Turno.objects.filter(ee=ee, fecha__gte = fecha)
-            lista = filter(lambda turno: turno not in existentes, turnos)
-            #XXX: Lo hago asi, para obtener los ID de turnos, es necesario para crear los historiales
-            if lista:
-                for turno in lista:
-                    turno.save()
-            logger.debug("Guardando %s turnos del especialista <%s>"%(len(lista), ee))
-            self.__crear_historial_turnos(lista)
-        except Error:
-            transaction.rollback()
+        # Hago este lio para evitar el mensaje de warning por ser un datetime sin timezone
+        fecha = datetime.combine(a_partir_de, datetime.min.time().replace(tzinfo=timezone.utc))
+        existentes = Turno.objects.filter(ee=ee, fecha__gte = fecha)
+        lista = filter(lambda turno: turno not in existentes, turnos)
+        #XXX: Lo hago asi, para obtener los ID de turnos, es necesario para crear los historiales
+        if lista:
+            for turno in lista:
+                turno.save()
+        logger.debug("Guardando %s turnos del especialista <%s>"%(len(lista), ee))
+        self.__crear_historial_turnos(lista)
         return lista
     
     def __crear_historial_turnos(self, turnos):
@@ -245,10 +252,10 @@ class Bussiness():
         for evento in eventos:
             #Convierto la fecha (string) a datetime con timezone utc 
             dia = datetime.strptime(evento['fecha'],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            responsable = evento['empleado'] or 'Proceso automático'
             lista.append({'dia':dia,
-                          'responsable':evento['empleado'] if evento['empleado'] else 'Proceso automático',
+                          'responsable':responsable,
                           'cantidad': evento['cantidad']})
-        logger.debug("lista: %s" %lista)
         return lista
         
 class ReservaTurnoException(Exception):
