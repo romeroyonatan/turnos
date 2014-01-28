@@ -195,9 +195,11 @@ class Bussiness():
         logger.debug("Creando turnos para el dia <%s> para el especialista <%s>" % 
                      (dia, disponibilidad.ee))
         # Para solucionar problema de timezone :s
+        # Si lo uso de la forma
+        # tz = timezone.get_default_timezone() 
+        # me da un offset -04:17 para America/Argentina/Buenos_Aires
         import dateutil.tz
         tz = dateutil.tz.tzoffset(None, -3*60*60)
-        #tz = timezone.get_default_timezone() 
         desde = datetime.combine(dia, disponibilidad.horaDesde).replace(tzinfo=tz)
         hasta = datetime.combine(dia, disponibilidad.horaHasta).replace(tzinfo=tz)
         turnos = []
