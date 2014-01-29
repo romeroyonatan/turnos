@@ -5,7 +5,6 @@ from django.utils import timezone
 from django.db import transaction
 from django.db.models import Count
 from turnos.models import *
-import pytz
 
 import logging
 from models import EspecialistaEspecialidad, HistorialTurno
@@ -218,7 +217,7 @@ class Bussiness():
         if days_ahead < 0: # El dia ya paso en esta semana
             days_ahead += 7
         return desde + timedelta(days=days_ahead)
-    
+    @transaction.commit_on_success()
     def __guardarTurnos(self, ee, turnos, a_partir_de):
         """Guarda los turnos creados en la base de datos cuidando que no se guarden repetidos"""
         # Hago este lio para evitar el mensaje de warning por ser un datetime sin timezone
