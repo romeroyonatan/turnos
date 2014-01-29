@@ -1,4 +1,5 @@
 {% extends "site/application.html" %}
+{% load static %}
 {% block title %}Crear turnos{% endblock %}
 
 {% block js %}
@@ -10,7 +11,7 @@
 	<form action="." method="post" class="pure-form pure-form-aligned">
 		{% csrf_token %}
 		<fieldset>
-			<legend>Creación manual de turnos</legend>
+			<legend>Creación manual de turnos (Frecuencia entre turnos: {{ frecuencia }} minutos)</legend>
 			{% if last %}
 			<ul class='messages'>
 				<li class="alert info pure-u-3-4">
@@ -24,25 +25,15 @@
 				<label for="id_dias">Cantidad de días</label>
 				{{ form.dias }}
 			</div>
-		
-			<div class="pure-control-group">
-				{{ form.hasta.errors }}
-				<label for="id_hasta">Día hasta</label>
-				{{ form.hasta }}
-			</div>	
-		
-			<div class="pure-control-group">
-				{{ form.frecuencia.errors }}
-				<label for="frecuencia">Frecuencia de turnos (en minutos)</label>
-				{{ form.frecuencia }}
-			</div>
 			
+		
 			<div class="pure-controls">
 			<input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
 			<input type="submit" value="Crear" class="pure-button pure-button-primary"/>
 			</div>
 		</fieldset>
 	</form>
+	<p>Se crearán turnos hasta el día <span id='id_hasta'>{{ hasta }}</span></p>
 	
 	{% if historial %}
 		<h2>Historial de creación de turnos</h2>

@@ -239,8 +239,14 @@ class CrearTurnoTest(TestCase):
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
         self.assertTrue(exito)
     def testDiasNegativos(self):
-        """Prueba que pasa si se pasan dias negativos a crear turnos. Debe devolver una lista de turnos creados"""
+        """Prueba que pasa si se pasan dias negativos a crear turnos. Debe devolver una lista vacia"""
         DIAS = -7
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        turnos = b.crear_turnos_del_especialista(ee, DIAS)
+        self.assertFalse(turnos)
+    def testDiasCero(self):
+        """Prueba que pasa si se pasan cero dias a crear turnos. Debe devolver una lista vacia"""
+        DIAS = 0
         ee = EspecialistaEspecialidad.objects.get(id=1)
         turnos = b.crear_turnos_del_especialista(ee, DIAS)
         self.assertFalse(turnos)
@@ -276,7 +282,8 @@ class CrearTurnoTest(TestCase):
         despues = Turno.objects.all().count() # contamos la cantidad de elementos despues de crear
         self.assertTrue(turno not in creados)
         # verifico que se hayan creado en la base de datos correctamente
-        self.assertEqual(antes + len(creados), despues) 
+        self.assertEqual(antes + len(creados), despues)
+        
     def testProximoDia(self):
         """Prueba para obtener el proximo dia a partir de una fecha conocida.
         Debe devolver mismo dia conocido"""

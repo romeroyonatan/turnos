@@ -23,7 +23,3 @@ class ReservarTurnoForm(forms.Form):
 
 class CrearTurnoForm(forms.Form):
     dias = forms.IntegerField()
-    hasta = forms.DateField(widget=forms.TextInput(attrs={'disabled':'disabled'}),
-                                required=False)
-    frecuencia = forms.IntegerField()
-    
