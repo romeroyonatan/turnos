@@ -1,6 +1,11 @@
 {% extends "site/application.html" %}
 {% block title %}Crear turnos{% endblock %}
 
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/turno.crear.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 	<form action="." method="post" class="pure-form pure-form-aligned">
 		{% csrf_token %}
