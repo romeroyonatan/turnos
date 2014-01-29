@@ -24,6 +24,7 @@
 				{{ form.dias.errors }}
 				<label for="id_dias">Cantidad de días</label>
 				{{ form.dias }}
+				<p>Se crearán turnos hasta el día <span id='id_hasta'>{{ hasta }}</span></p>
 			</div>
 			
 		
@@ -33,7 +34,7 @@
 			</div>
 		</fieldset>
 	</form>
-	<p>Se crearán turnos hasta el día <span id='id_hasta'>{{ hasta }}</span></p>
+	
 	
 	{% if historial %}
 		<h2>Historial de creación de turnos</h2>
@@ -44,7 +45,7 @@
 				<th>Cantidad de turnos creados</th>
 			</thead>
 			<tbody>
-			{% for item in historial|dictsort:"dia"%}
+			{% for item in historial%}
 				<tr>
 					<td>{{ item.dia }}</td>
 					<td>{{ item.responsable }}</td>
