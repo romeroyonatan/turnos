@@ -249,7 +249,7 @@ class Bussiness():
         logger.debug("Obteniendo historial de creacion de turnos")
         eventos = HistorialTurno.objects.extra(select={'fecha':'datetime( fecha )'})
         eventos = eventos.values('fecha','empleado').annotate(cantidad=Count('fecha'))
-        eventos = eventos.order_by('-fecha')[:5]
+        eventos = eventos.filter(estadoAnterior=None, estadoNuevo=Turno.DISPONIBLE).order_by('-fecha')[:5]
         lista = list()
         for evento in eventos:
             #Convierto la fecha (string) a datetime con timezone utc 
