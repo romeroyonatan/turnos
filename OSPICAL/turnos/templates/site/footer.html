@@ -1,13 +1,18 @@
 {% load staticfiles %}
 <div class="legal pure-g-r">
 	<p class="pure-u-2-5 legal-license">
-		2014. Todos los derechos reservados.<br/>
-		{{ user.username }}
+		{{ user.get_full_name }}<br/>
+		{{ user.email }}<br/>
+		{{ user.get_profile.dni }} <br/>
 	</p>
 	
 	<p class="pure-u-1-5 legal-logo">
 		<img style=" height: 50px;" alt="OSPICAL" title="OSPICAL" src="{% static 'img/ospical.jpg' %}"/>
 	</p>
 	
-	<p class="pure-u-2-5 legal-links">La Matanza</p>
+	<p class="pure-u-2-5 legal-links">
+	Obra Social del Personal de la Industria del Calzado<br/>
+	Seccional La Matanza<br/>
+	2014. Todos los derechos reservados.
+	</p>
 </div>

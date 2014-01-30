@@ -1,11 +1,66 @@
 {% extends "site/application.html" %}
+{% load static %}
 
 {% block title %}Crear cuenta{% endblock %}
+
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/turno.crear.usuario.js' %}"></script>
+{% endblock %}
 
 {% block content %}
   <form action="." method="post" class="pure-form pure-form-stacked">
   	  {% csrf_token %}
-      {{ form.as_p }}
-      <input type="submit" value="Crear cuenta">
+  	  
+ 	   	 <div class="pure-control-group">
+			<label for="id_username">Nombre</label>
+			{{ form.first_name.errors }}
+			{{ form.first_name }}
+			{{ form.first_name.help_text }}
+		</div>
+		
+ 	   	 <div class="pure-control-group">
+			<label for="id_username">Apellido</label>
+			{{ form.last_name.errors }}
+			{{ form.last_name }}
+			{{ form.last_name.help_text }}
+		</div>
+  	  
+ 	   	 <div class="pure-control-group">
+			<label for="id_username">Email</label>
+			{{ form.email.errors }}
+			{{ form.email }}
+			{{ form.email.help_text }}
+		</div>
+  	  
+   	   	<div class="pure-control-group">
+			<label for="id_username">DNI</label>
+			{{ form.dni.errors }}
+			{{ form.dni }}
+			{{ form.dni.help_text }}
+		</div>
+  	  
+		<div class="pure-control-group">
+			<label for="id_username">Nombre de usuario</label>
+			{{ form.username.errors }}
+			{{ form.username }}
+			{{ form.username.help_text }}
+		</div>
+  	  
+ 	  	<div class="pure-control-group">
+			<label for="id_username">Contraseña</label>
+			{{ form.password1.errors }}
+			{{ form.password1 }}
+			{{ form.password1.help_text }}
+		</div>
+		
+ 	  	<div class="pure-control-group">
+			<label for="id_username">Repita contraseña</label>
+			{{ form.password2.errors }}
+			{{ form.password2 }}
+			{{ form.password2.help_text }}
+		</div>
+      	
+      	<input type="submit" value="Crear cuenta">
   </form>
 {% endblock %}

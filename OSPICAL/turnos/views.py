@@ -10,11 +10,10 @@ from django.forms.models import model_to_dict
 from django.contrib import messages
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render
 from django.utils import timezone
 
-from turnos.forms import ReservarTurnoForm, CrearTurnoForm
+from turnos.forms import ReservarTurnoForm, CrearTurnoForm, RegistrarUsuarioForm
 from turnos.models import *
 from turnos.bussiness import Bussiness
 import logging
@@ -52,9 +51,11 @@ def reservar(request):
                     messages.error(request, __getExceptionMessage(e))
                 else:
                     messages.success(request, u'Turno reservado con éxito')
-                    return HttpResponseRedirect('/reservar/')
+                    return HttpResponseRedirect(request.path)
     else:
         form = ReservarTurnoForm()
+        dni=request.user.get_profile().dni
+        logger.debug("DNI %s" %dni)
     return render_to_response('turno/reserva.html',
                               locals(),
                               context_instance=RequestContext(request))
@@ -130,13 +131,15 @@ def register(request):
     # TODO: Verificar permisos de crear usuarios
     # TODO: Falta agregar el dni, nombre, apellido, email, etc
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = RegistrarUsuarioForm(request.POST)
         if form.is_valid():
             logger.info("Creando cuenta del usuario %s" % form.cleaned_data['username'])
-            form.save()
-            return HttpResponseRedirect("/")
+            user = form.save()
+            messages.success(request, 
+                             u'La cuenta para el usuario <%s> ha sido creada con éxito' % user.username)
+            return HttpResponseRedirect(request.path)
     else:
-        form = UserCreationForm()
+        form = RegistrarUsuarioForm()
     return render(request, "registration/register.html", {'form': form})
 
 @login_required
@@ -156,7 +159,7 @@ def crear_turnos(request):
                 messages.warning(request, 
                                  u'No se creó ningún turno, puede que ya se \
                                  crearon con anterioridad')
-            return HttpResponseRedirect("/crear/")
+            return HttpResponseRedirect(request.path)
     else:
         hasta = (timezone.now() + datetime.timedelta(days=b.DIAS-1)).strftime("%d-%m-%Y")
         last = Turno.objects.order_by('fecha').last()

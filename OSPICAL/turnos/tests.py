@@ -1,10 +1,12 @@
 # coding=utf-8
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta, datetime
-from django.test import TestCase
 from turnos.models import *
 from turnos.bussiness import *
+from turnos.validators import PasswordValidator
+from django.test import TestCase
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 import logging
 logger = logging.getLogger(__name__)
@@ -13,10 +15,8 @@ b = Bussiness()
 class ReservarTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de reservar turnos"""
     fixtures = ['turnos.json']
-        
     def setUp(self):
         TestCase.setUp(self)
-    
     def testGetDiasTurnos(self):
         """Verifica el funcionamiento del algoritmo para la obtencion de turnos disponibles.
         Debe obtener una lista con todos los turnos disponibles"""
@@ -29,7 +29,6 @@ class ReservarTurnoTest(TestCase):
                              )
         test = b.getDiaTurnos(1)
         self.assertGreaterEqual(len(test), 1)
-    
     def testReservarTurno(self):
         """Verifica que se reserve un turno de forma correcta"""
         afiliado_id = 1
@@ -49,7 +48,6 @@ class ReservarTurnoTest(TestCase):
             self.assertEqual(lr.reserva.id, reserva.id)
             self.assertIn(lr.turno.id, listaTurnos)
             self.assertEqual(lr.estado, Turno.RESERVADO)
-    
     def testTurnoInexistente(self):
         """Verifica que pasa si se quiere reservar un turno que no existe.
         Deberia lanzar una excepcion"""
@@ -59,7 +57,6 @@ class ReservarTurnoTest(TestCase):
             b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         turno = Turno.objects.get(id=2)
         self.assertEqual(turno.estado, Turno.DISPONIBLE)
-        
     def testAfiliadoInexistente(self):
         """Verifica que pasa si el afiliado no existe. Debe lanzar una excepcion"""
         afiliado_id = 4000
@@ -68,7 +65,6 @@ class ReservarTurnoTest(TestCase):
             b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         last = LineaDeReserva.objects.latest('id')
         self.assertNotIn(last.turno.id, listaTurnos)
-
     def testTurnoVacio(self):
         """Verifica que pasa si se quiere reservar turnos con una lista de turnos vacia.
         Deberia fallar silenciosamente"""
@@ -76,14 +72,12 @@ class ReservarTurnoTest(TestCase):
         listaTurnos = []
         reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
         self.assertIsNone(reserva)
-
     def testSinTelefono(self):
         """Verifica que pasa si se quiere reservar un turno sin telefono de contacto Debe lanzar una excepcion"""
         afiliado_id = 1
         listaTurnos = [1]
         with self.assertRaises(Exception):
             b.reservarTurnos(afiliado_id, None, listaTurnos)
-        
     def testTurnoReservado(self):
         """Verifica que pasa si se quiere reservar un turno que esta reservado"""
         afiliado_id = 1
@@ -93,14 +87,12 @@ class ReservarTurnoTest(TestCase):
             b.reservarTurnos(afiliado_id, '41234345', listaTurnos)
         turno = Turno.objects.get(id=2)
         self.assertEqual(turno.estado, Turno.DISPONIBLE)
-    
     def testPresentismo(self):
         """Verifica el correcto funcionamiento del algoritmo de presentismo, si el 
         afiliado esta en regla"""
         afiliado_id = 1
         p = b.presentismoOK(afiliado_id)
         self.assertTrue(p)
-    
     def testCrearSobreturno(self):
         """Verifica que pasa si no hay mas turnos y se deben crear sobreturnos"""
         #TODO: Hacer test crear sobreturno
@@ -111,7 +103,6 @@ class ReservarTurnoTest(TestCase):
         #TODO: Hacer test sin sobreturno
         #self.assertTrue(False)
         pass
-    
     def testPresentismoNotOK(self):
         """Verifica el funcionamiento del algoritmo de presentismo con un afiliado que falta mucho.
         Debe devolver falso, indicando que el afiliado falta mucho a los turnos"""
@@ -136,7 +127,6 @@ class ReservarTurnoTest(TestCase):
         # Verificando presentismo
         p = b.presentismoOK(afiliado_id)
         self.assertFalse(p)
-        
     def testPresentismoExpirado(self):
         """Verifica el funcionamiento del algoritmo de presentismo con faltas anteriores a las 
         que el sistema debe tener en cuenta. Debe devolver verdadero, dado que el sistema no debe
@@ -165,7 +155,6 @@ class ReservarTurnoTest(TestCase):
         # Verificando presentismo
         p = b.presentismoOK(afiliado_id)
         self.assertTrue(p)
-    
     def testFatiga(self):
         """Reserva una alta cantidad de turnos para verificar como se comporta el algoritmo de reserva.
         Debe reservar los turnos en un tiempo razonable a la cantidad de turnos a reservar"""
@@ -304,3 +293,55 @@ class CrearTurnoTest(TestCase):
         """Prueba que se obtenga el historial de turnos creados"""
         historial = b.get_historial_creacion_turnos()
         self.assertTrue(historial)
+
+class TestValidadores(TestCase):
+    def testLongitud(self):
+        """Prueba que el validador funcione cuando una contraseña es menor a la longitud permitida"""
+        invalid_password='12345'
+        valid_password='123456'
+        other_valid_password='1234567'
+        validator = PasswordValidator(min_length=6)
+        self.assertFalse(validator(valid_password))
+        self.assertFalse(validator(other_valid_password))
+        with self.assertRaises(ValidationError):
+            validator(invalid_password)
+    def testCaracterMinuscula(self):
+        """Prueba una contraseña con y sin caracteres minusculas"""
+        invalid_password='12345ASD'
+        valid_password='123456asd'
+        validator = PasswordValidator(lower=True)
+        self.assertFalse(validator(valid_password))
+        with self.assertRaises(ValidationError):
+            validator(invalid_password)
+    def testCaracterMayuscula(self):
+        """Prueba una contraseña con y sin caracter mayuscula"""
+        invalid_password='12345asd'
+        valid_password='123456ASD'
+        validator = PasswordValidator(upper=True)
+        self.assertFalse(validator(valid_password))
+        with self.assertRaises(ValidationError):
+            validator(invalid_password)
+    def testCaracterEspecial(self):
+        """Prueba una contraseña con y sin caracteres especiales"""
+        invalid_password='12345ASD'
+        valid_password='123456asd_*'
+        validator = PasswordValidator(special_characters=True)
+        self.assertFalse(validator(valid_password))
+        with self.assertRaises(ValidationError):
+            validator(invalid_password)
+    def testNumero(self):
+        """Prueba una contraseña con y sin numeros"""
+        invalid_password='ASDasdf'
+        valid_password='123456asd'
+        validator = PasswordValidator(number=True)
+        self.assertFalse(validator(valid_password))
+        with self.assertRaises(ValidationError):
+            validator(invalid_password)
+    def testCaracterMinusculayNumero(self):
+        """Prueba una contraseña con varias politicas juntas. En este caso minuscula y numero"""
+        invalid_password='12345ASD'
+        valid_password='123456asd'
+        validator = PasswordValidator(lower=True,number=True)
+        self.assertFalse(validator(valid_password))
+        with self.assertRaises(ValidationError):
+            validator(invalid_password)
