@@ -80,6 +80,7 @@ class Disponibilidad(models.Model):
     def __str__(self):
         return "%s" % model_to_dict(self)
 
+
 class Turno (models.Model):
     unique_together = ("fecha", "ee", "sobreturno")
     # Constantes ~
@@ -107,6 +108,12 @@ class Turno (models.Model):
         return (self.fecha == other.fecha and 
                 self.sobreturno == other.sobreturno and 
                 self.ee == other.ee)
+    class Meta:
+        permissions = (
+            # Permission identifier     human-readable permission name
+            ("crear_turnos",                  "Crear turnos"),
+            ("reservar_turnos",               "Reservar turnos"),
+        )
         
 class LineaDeReserva (models.Model):
     estado = models.CharField(max_length=1, choices=Turno.ESTADO)

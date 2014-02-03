@@ -61,6 +61,14 @@
 			{{ form.password2.help_text }}
 		</div>
       	
+ 	  	<div class="pure-control-group">
+			<label for="id_username">Permisos</label>
+			{{ form.permisos.errors }}
+			{{ form.permisos }}
+			{{ form.permisos.help_text }}
+		</div>
+      	
+      	
       	<input type="submit" value="Crear cuenta">
   </form>
 {% endblock %}

@@ -17,11 +17,9 @@ class Bussiness():
         self.AUSENTES_MESES = int(self.__getSetting('ausente_meses', 6))
         self.MINUTOS = int(self.__getSetting('minutos_entre_turnos', 15))
         self.DIAS = int(self.__getSetting('cantidad_dias_crear_turnos', 7))
-    
     def __getSetting(self, key, default_value=None):
         setting = Settings.objects.filter(key=key)
         return setting[0].value if setting else default_value
-    
     def getAfiliados(self, parametro, valor):
         # Buscar en la base de datos local
         logger.info("Buscando afiliado %s %s" % (parametro, valor))
@@ -34,32 +32,27 @@ class Bussiness():
             pass
         logger.info("Resultado de busqueda de afiliado %s %s: %s" % (parametro, valor, data))
         return data
-    
     def getTurnosDisponibles(self, especialista, fecha):
         disponibles = self.__buscarTurnosDisponibles(especialista, fecha)
         logger.debug("Turnos disponibles para el dia %s: %s" % (fecha, disponibles))
         if not disponibles and not self.__haySobreturnos(especialista, fecha):
             disponibles = self.crearSobreturnos(especialista, fecha)
         return disponibles
-    
     def __buscarTurnosDisponibles(self, especialista, fecha):
         logger.debug("Obteniendo turnos disponibles especialista_id:%s fecha:%s" % (especialista, fecha))
         filtro = self.__getFiltroFecha(especialista, fecha)
         queryset = Turno.objects.filter(**filtro)
         return [item for item in queryset.values()]
-    
     def __haySobreturnos(self, especialista, fecha):
         """ Verifica si hay sobreturnos en un dia para un especialista """
         filtro = self.__getFiltroFecha(especialista, fecha)
         filtro['sobreturno'] = True
         query = Turno.objects.filter(**filtro).only("id")
         return query.exists()
-    
     def crearSobreturnos(self, especialista, fecha):
         logger.info("Creando sobreturnos para el dia:%s" % fecha)
         # TODO: Crear sobreturnos
         return {}
-    
     def getDiaTurnos(self, especialista):
         """Devuelve una lista de dias y el estado (Completo, Sobreturno)"""
         logger.debug("Obteniendo dias de turnos para el especialista_id:%s " % especialista)
@@ -75,14 +68,12 @@ class Bussiness():
                     estado = 'S'
             data.append({'fecha':fecha, 'estado':estado})
         return data
-    
     def __isCompleto(self, especialista, fecha):
         """ Verifica si el dia esta completo para el especialista,
         es decir que no haya turnos disponibles para ese dia """
         filtro = self.__getFiltroFecha(especialista, fecha)
         query = Turno.objects.filter(**filtro).only("id")
         return not query.exists()
-    
     def __getFiltroFecha(self, especialista, fecha):
         """Devuelve un filtro para buscar los turnos disponibles del especialista 
         en una fecha determinada"""
@@ -93,7 +84,6 @@ class Bussiness():
                   'estado':Turno.DISPONIBLE,
                   }
         return filtro
-    
     @transaction.atomic
     def reservarTurnos(self, afiliado, telefono, turnos, empleado=None):
         """ Reserva turnos a afiliado"""
@@ -112,7 +102,6 @@ class Bussiness():
         else:
             logger.warning("La lista de turnos a reservar esta vacia")
         return None
-    
     def __crearReserva(self, afiliado, telefono):
         if not Afiliado.objects.filter(id=afiliado).exists():
             self.__lanzar(AfiliadoNotExistsException, "Afiliado ID '%s' inexistente" % afiliado)
@@ -121,7 +110,6 @@ class Bussiness():
         reserva.telefono = telefono
         reserva.save()
         return reserva
-    
     def __reservarTurno(self, reserva, turno_id, empleado):
         logger.info("Reservando turno %s" % turno_id)
         turno = self.__validar_reserva(turno_id)
@@ -134,7 +122,6 @@ class Bussiness():
         turno.save()
         logger.debug("Modificacion de turno: %s" % historial)
         return turno
-    
     def __validar_reserva(self, turno_id):
         if not Turno.objects.filter(id=turno_id).exists():
             self.__lanzar(TurnoNotExistsException, "Turno ID '%s' inexistente" % turno_id)
@@ -144,14 +131,12 @@ class Bussiness():
         if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)):
             self.__lanzar(ReservaTurnoException, "No se pueden reservar turnos anteriores a la fecha actual")
         return turno
-    
     def contarFaltas(self, afiliado_id):
         fecha = timezone.now() + relativedelta(months=-self.AUSENTES_MESES)
         queryset = LineaDeReserva.objects.filter(reserva__fecha__gte=fecha,
                                                  reserva__afiliado__id=afiliado_id,
                                                  estado=Turno.AUSENTE)
         return queryset.count()
-    
     def presentismoOK(self, afiliado_id):
         """ Verifica si un afiliado se ausenta concurrentemente a los turnos"""
         faltas = self.contarFaltas(afiliado_id);
@@ -207,8 +192,7 @@ class Bussiness():
                                 estado=Turno.DISPONIBLE,
                                 sobreturno=False,
                                 consultorio=disponibilidad.consultorio,
-                                ee=disponibilidad.ee)
-                          )
+                                ee=disponibilidad.ee))
             desde += timedelta(minutes=self.MINUTOS)
         return turnos
     def __proximoDia(self, dia, desde = timezone.now().date()):
@@ -231,7 +215,6 @@ class Bussiness():
         logger.debug("Guardando %s turnos del especialista <%s>"%(len(lista), ee))
         self.__crear_historial_turnos(lista)
         return lista
-    
     def __crear_historial_turnos(self, turnos):
         """Crea los historiales de cada turno nuevo"""
         logger.debug("Creando historial de turnos")
@@ -243,7 +226,6 @@ class Bussiness():
                                         turno=turno,
                                         empleado=None,))
         return HistorialTurno.objects.bulk_create(lista)
-        
     def get_historial_creacion_turnos(self):
         """Obtiene el detalle de las ultimas creaciones de turnos"""
         logger.debug("Obteniendo historial de creacion de turnos")
@@ -259,7 +241,6 @@ class Bussiness():
                           'responsable':responsable,
                           'cantidad': evento['cantidad']})
         return lista
-        
 class ReservaTurnoException(Exception):
     def __init__(self, message=None):
         self.message = message

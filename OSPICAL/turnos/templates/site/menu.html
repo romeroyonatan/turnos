@@ -6,12 +6,18 @@
 			<a class="pure-menu-heading" href="#" title="OSPICAL La Matanza">OSPICAL</a>
 			<ul>
 				<li class="menu-item-divided">
-					<a href="{% url 'turnos.views.reservar' %}">Reservar turno</a>
-					<a href="{% url 'turnos.views.crear_turnos' %}">Crear turnos</a>
+					{% if perms.turnos.reservar_turnos %}
+						<a href="{% url 'turnos.views.reservar' %}">Reservar turno</a>
+					{% endif %}
+					{% if perms.turnos.crear_turnos %}
+						<a href="{% url 'turnos.views.crear_turnos' %}">Crear turnos</a>
+					{% endif %}
 				</li>
+				{% if perms.auth.add_user %}
 				<li class="menu-item-divided">
 					<a href="{% url 'turnos.views.register' %}">Crear cuenta</a>
 				</li>
+				{% endif %}
 				<li class="menu-item-divided">
 					<a href="{% url 'django.contrib.auth.views.logout' %}">Cerrar sesión</a>
 				</li>

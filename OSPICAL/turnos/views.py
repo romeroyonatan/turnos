@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.forms.models import model_to_dict
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
@@ -21,7 +22,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class MyEncoder(json.JSONEncoder):
-    ### Uso este encoder para codficar la fecha a JSON ###
+    """Uso este encoder para codficar la fecha a JSON """
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
             tz = timezone.get_default_timezone()
@@ -36,6 +37,7 @@ def JSONResponse(response):
     return HttpResponse(json.dumps(response, cls=MyEncoder), content_type="application/json")
 
 @login_required
+@permission_required('turnos.reservar_turnos', raise_exception=True)
 def reservar(request):
     if request.method == 'POST':
         form = ReservarTurnoForm(request.POST)
@@ -127,9 +129,8 @@ def getTelefono(request, afiliado_id):
     return JSONResponse(data)
 
 @login_required
+@permission_required('auth.add_user')
 def register(request):
-    # TODO: Verificar permisos de crear usuarios
-    # TODO: Falta agregar el dni, nombre, apellido, email, etc
     if request.method == 'POST':
         form = RegistrarUsuarioForm(request.POST)
         if form.is_valid():
@@ -143,9 +144,8 @@ def register(request):
     return render(request, "registration/register.html", {'form': form})
 
 @login_required
+@permission_required('turnos.crear_turnos', raise_exception=True)
 def crear_turnos(request):
-    # TODO: Verificar permisos de crear turnos
-    # TODO: Mostrar el ultimo turno creado y el historial de creaciones de turno
     b = Bussiness()
     if request.method == 'POST':
         form = CrearTurnoForm(request.POST)

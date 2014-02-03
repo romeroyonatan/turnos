@@ -1,7 +1,7 @@
 # coding=utf-8
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from turnos.models import Especialidad, Empleado
 from turnos.validators import PasswordValidator
 from django.utils.translation import ugettext_lazy as _
@@ -30,6 +30,12 @@ class ReservarTurnoForm(forms.Form):
 class CrearTurnoForm(forms.Form):
     dias = forms.IntegerField()
 class RegistrarUsuarioForm(UserCreationForm):
+    CREAR_TURNO = "crear_turnos"
+    RESERVAR_TURNO = "reservar_turnos"
+    CREAR_USUARIOS = "add_user"
+    PERMISOS = ((CREAR_TURNO,"Crear turnos"),
+                (RESERVAR_TURNO,"Reservar turnos"),
+                (CREAR_USUARIOS, "Crear usuarios"))
     password1 = forms.CharField(label=_("Password"),
                                 widget=forms.PasswordInput,
                                 validators=[PasswordValidator(lower=True,number=True,min_length=6)],
@@ -39,10 +45,10 @@ class RegistrarUsuarioForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
+    permisos = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=PERMISOS)
     class Meta:
         model = User
         fields = ("username", "email", "password1", "password2","first_name","last_name")
-
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
@@ -50,4 +56,7 @@ class RegistrarUsuarioForm(UserCreationForm):
         if commit:
             user.save()
             Empleado.objects.create(user=user,dni=dni)
+            for codename in self.cleaned_data["permisos"]:
+                p = Permission.objects.get(codename=codename)
+                user.user_permissions.add(p)
         return user
