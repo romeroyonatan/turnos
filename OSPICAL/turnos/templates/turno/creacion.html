@@ -1,42 +1,40 @@
 {% extends "site/application.html" %}
+{% load static %}
 {% block title %}Crear turnos{% endblock %}
 
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/turno.crear.js' %}"></script>
+{% endblock %}
+
 {% block content %}
-	{% if last_created %}
-		<div class="alert alert-info pure-u-1">
-			Turnos creados hasta el día: {{ last_created|date:"DATETIME_FORMAT" }}
-		</div>
-	{% endif %}
-	
 	<form action="." method="post" class="pure-form pure-form-aligned">
 		{% csrf_token %}
 		<fieldset>
-			<legend>Creación manual de turnos</legend>
+			<legend>Creación manual de turnos (Frecuencia entre turnos: {{ frecuencia }} minutos)</legend>
+			{% if last %}
+			<ul class='messages'>
+				<li class="alert info pure-u-3-4">
+					Turnos creados hasta el día: {{ last.fecha|date:"DATE_FORMAT" }}
+				</li>
+			</ul>
+			{% endif %}
 		
 			<div class="pure-control-group">
 				{{ form.dias.errors }}
 				<label for="id_dias">Cantidad de días</label>
 				{{ form.dias }}
-			</div>
-		
-			<div class="pure-control-group">
-				{{ form.hasta.errors }}
-				<label for="id_hasta">Día hasta</label>
-				{{ form.hasta }}
-			</div>	
-		
-			<div class="pure-control-group">
-				{{ form.frecuencia.errors }}
-				<label for="frecuencia">Frecuencia de turnos (en minutos)</label>
-				{{ form.frecuencia }}
+				<p>Se crearán turnos hasta el día <span id='id_hasta'>{{ hasta }}</span></p>
 			</div>
 			
+		
 			<div class="pure-controls">
 			<input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
 			<input type="submit" value="Crear" class="pure-button pure-button-primary"/>
 			</div>
 		</fieldset>
 	</form>
+	
 	
 	{% if historial %}
 		<h2>Historial de creación de turnos</h2>
@@ -47,11 +45,11 @@
 				<th>Cantidad de turnos creados</th>
 			</thead>
 			<tbody>
-			{% for item in historial|dictsort:"dia"%}
+			{% for item in historial%}
 				<tr>
-					<td>item.dia</td>
-					<td>item.responsable</td>
-					<td>item.cantidad</td>
+					<td>{{ item.dia }}</td>
+					<td>{{ item.responsable }}</td>
+					<td>{{ item.cantidad }}</td>
 				</tr>
 			{% endfor %}
 			</tbody>

@@ -8,13 +8,13 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.forms.models import model_to_dict
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render
 from django.utils import timezone
 
-from turnos.forms import ReservarTurnoForm, CrearTurnoForm
+from turnos.forms import ReservarTurnoForm, CrearTurnoForm, RegistrarUsuarioForm,ConfirmarTurnoForm
 from turnos.models import *
 from turnos.bussiness import Bussiness
 import logging
@@ -22,16 +22,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 class MyEncoder(json.JSONEncoder):
-    ### Uso este encoder para codficar la fecha a JSON ###
+    """Uso este encoder para codficar la fecha a JSON """
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
-            return int(mktime(obj.timetuple()))
+            tz = timezone.get_default_timezone()
+            fecha = obj.astimezone(tz)
+            return int(mktime(fecha.timetuple()))
         return json.JSONEncoder.default(self, obj)
 
 def JSONResponse(response):
     return HttpResponse(json.dumps(response, cls=MyEncoder), content_type="application/json")
 
 @login_required
+@permission_required('turnos.reservar_turnos', raise_exception=True)
 def reservar(request):
     if request.method == 'POST':
         form = ReservarTurnoForm(request.POST)
@@ -47,9 +50,11 @@ def reservar(request):
                     messages.error(request, __getExceptionMessage(e))
                 else:
                     messages.success(request, u'Turno reservado con éxito')
-                    return HttpResponseRedirect('/reservar/')
+                    return HttpResponseRedirect(request.path)
     else:
         form = ReservarTurnoForm()
+        dni=request.user.get_profile().dni
+        logger.debug("DNI %s" %dni)
     return render_to_response('turno/reserva.html',
                               locals(),
                               context_instance=RequestContext(request))
@@ -121,22 +126,23 @@ def getTelefono(request, afiliado_id):
     return JSONResponse(data)
 
 @login_required
+@permission_required('auth.add_user')
 def register(request):
-    # TODO: Verificar permisos de crear usuarios
-    # TODO: Falta agregar el dni, nombre, apellido, email, etc
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = RegistrarUsuarioForm(request.POST)
         if form.is_valid():
             logger.info("Creando cuenta del usuario %s" % form.cleaned_data['username'])
-            form.save()
-            return HttpResponseRedirect("/")
+            user = form.save()
+            messages.success(request, 
+                             u'La cuenta para el usuario <%s> ha sido creada con éxito' % user.username)
+            return HttpResponseRedirect(request.path)
     else:
-        form = UserCreationForm()
+        form = RegistrarUsuarioForm()
     return render(request, "registration/register.html", {'form': form})
 
 @login_required
+@permission_required('turnos.crear_turnos', raise_exception=True)
 def crear_turnos(request):
-    # TODO: Verificar permisos de crear turnos
     b = Bussiness()
     if request.method == 'POST':
         form = CrearTurnoForm(request.POST)
@@ -144,12 +150,35 @@ def crear_turnos(request):
             logger.info("<%s> esta creando turnos" % request.user.username)
             creados = b.crear_turnos(form.cleaned_data['dias'])
             if creados:
-                messages.info(request, u'Turnos creados con éxito: %s' % creados)
+                messages.success(request, 
+                                 u'%s Turnos creados con éxito' % creados)
             else:
-                messages.warning(request, u'No se creó ningún turno, puede que ya se crearon con anterioridad')
-            return HttpResponseRedirect("/crear")
+                messages.warning(request, 
+                                 u'No se creó ningún turno, puede que ya se \
+                                 crearon con anterioridad')
+            return HttpResponseRedirect(request.path)
     else:
-        form = CrearTurnoForm(initial={'dias':b.DIAS,
-                                       'hasta':(timezone.now()+datetime.timedelta(days=b.DIAS)).strftime("%d-%m-%Y"),
-                                       'frecuencia':b.MINUTOS,})
-    return render(request, "turno/creacion.html", {'form': form})
+        hasta = (timezone.now() + datetime.timedelta(days=b.DIAS-1)).strftime("%d-%m-%Y")
+        last = Turno.objects.order_by('fecha').last()
+        frecuencia = b.MINUTOS
+        form = CrearTurnoForm(initial={'dias':b.DIAS})
+        historial = b.get_historial_creacion_turnos()
+    return render(request, "turno/creacion.html", locals())
+
+@login_required
+@permission_required('turnos.reservar_turnos', raise_exception=True)
+def confirmar_turno(request):
+    b = Bussiness()
+    if request.method == 'POST':
+        form = ConfirmarTurnoForm(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect(request.path)
+    else:
+        form = ConfirmarTurnoForm()
+    return render(request, "turno/confirmar.html", locals())
+
+@login_required
+def get_turnos_afiliado(request,afiliado_id):
+    b = Bussiness()
+    data = b.get_turnos_reservados(afiliado_id)
+    return JSONResponse(data)

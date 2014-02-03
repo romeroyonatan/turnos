@@ -31,7 +31,7 @@ class Empleado (models.Model):
         return "%s" % model_to_dict(self)
 
 class Reserva(models.Model):
-    fecha = models.DateTimeField()
+    fecha = models.DateTimeField(auto_now_add=True)
     telefono = models.CharField(max_length=20)
     afiliado = models.ForeignKey(Afiliado)
     def __str__(self):
@@ -44,6 +44,8 @@ class Especialista(models.Model):
     fecha_baja = models.DateField(null=True)
     def __str__(self):
         return "%s" % model_to_dict(self)
+    def full_name(self):
+        return "%s, %s" % (self.apellido, self.nombre)
     
 class EspecialistaEspecialidad(models.Model):
     unique_together = ("especialista", "especialidad")
@@ -80,6 +82,7 @@ class Disponibilidad(models.Model):
     def __str__(self):
         return "%s" % model_to_dict(self)
 
+
 class Turno (models.Model):
     unique_together = ("fecha", "ee", "sobreturno")
     # Constantes ~
@@ -89,14 +92,12 @@ class Turno (models.Model):
     AUSENTE = 'A'
     CANCELADO = 'C'
     NO_RESERVADO = 'N'
-    ESTADO = (
-              (DISPONIBLE,'DISPONIBLE'),
+    ESTADO = ((DISPONIBLE,'DISPONIBLE'),
               (RESERVADO,'RESERVADO'),
               (PRESENTE,'PRESENTE'),
               (AUSENTE,'AUSENTE'),
               (CANCELADO,'CANCELADO'),
-              (NO_RESERVADO,'NO RESERVADO'),
-              )
+              (NO_RESERVADO,'NO RESERVADO'),)
     # Atributos ~
     fecha = models.DateTimeField()
     estado = models.CharField(max_length=1, choices=ESTADO)
@@ -109,6 +110,12 @@ class Turno (models.Model):
         return (self.fecha == other.fecha and 
                 self.sobreturno == other.sobreturno and 
                 self.ee == other.ee)
+    class Meta:
+        permissions = (
+            # Permission identifier     human-readable permission name
+            ("crear_turnos",                  "Crear turnos"),
+            ("reservar_turnos",               "Reservar turnos"),
+        )
         
 class LineaDeReserva (models.Model):
     estado = models.CharField(max_length=1, choices=Turno.ESTADO)
@@ -117,7 +124,7 @@ class LineaDeReserva (models.Model):
     def __str__(self):
         return "%s" % model_to_dict(self)
 class HistorialTurno(models.Model):
-    fecha = models.DateTimeField()
+    fecha = models.DateTimeField(auto_now_add=True)
     estadoAnterior = models.CharField(max_length=1, null=True, choices=Turno.ESTADO)
     estadoNuevo = models.CharField(max_length=1, choices=Turno.ESTADO)
     descripcion = models.CharField(max_length=100, null=True)

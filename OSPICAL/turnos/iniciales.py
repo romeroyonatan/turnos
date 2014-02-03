@@ -2,7 +2,8 @@
 from turnos.models import *
 from datetime import datetime
 from datetime import timedelta
-from django.contrib.auth.models import User
+from django.utils import timezone
+from django.contrib.auth.models import User, Permission
 
 a = Afiliado(nombre='Yonatan',apellido='Romero',dni=12345678,numero='000100020003')
 a.save()
@@ -16,10 +17,13 @@ e.save()
 c=Consultorio(numero='1',disponible=True)
 c.save()
 
-
+r = Permission.objects.get(codename="reservar_turnos")
+c = Permission.objects.get(codename="crear_turnos")
+p = Permission.objects.get(codename="add_user")
 user = User.objects.create_user(username='operador',
                                  email='operador@ospical.org.ar',
                                  password='qwerty')
+user.user_permissions = [r]
 
 em=Empleado(user=user,dni=44556677)
 em.save()
@@ -45,6 +49,7 @@ fecha = datetime.now() + timedelta(days=4*365)
 for i in range (1,20):
     fecha = fecha + timedelta(minutes=15)
     turno = Turno(fecha=fecha, estado=Turno.DISPONIBLE,sobreturno=False,consultorio=c, ee=ee)
+    HistorialTurno.objects.create(fecha=timezone.now(),turno=turno,estadoNuevo=Turno.DISPONIBLE,)
     turno.save()
 
 r=Reserva(fecha=datetime.now(),telefono='41234345',afiliado=a)

@@ -113,7 +113,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-AUTH_PROFILE_MODULE = "turnos.models.Empleado"
+AUTH_PROFILE_MODULE = "turnos.Empleado"
 
 ROOT_URLCONF = 'OSPICAL.urls'
 
