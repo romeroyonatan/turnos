@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
 
-from turnos.forms import ReservarTurnoForm, CrearTurnoForm, RegistrarUsuarioForm
+from turnos.forms import ReservarTurnoForm, CrearTurnoForm, RegistrarUsuarioForm,ConfirmarTurnoForm
 from turnos.models import *
 from turnos.bussiness import Bussiness
 import logging
@@ -27,9 +27,6 @@ class MyEncoder(json.JSONEncoder):
         if isinstance(obj, datetime.datetime):
             tz = timezone.get_default_timezone()
             fecha = obj.astimezone(tz)
-            logger.debug("tz %s" %tz)
-            logger.debug("obj %s"%obj)
-            logger.debug("fecha %s"%fecha)
             return int(mktime(fecha.timetuple()))
         return json.JSONEncoder.default(self, obj)
 
@@ -167,3 +164,21 @@ def crear_turnos(request):
         form = CrearTurnoForm(initial={'dias':b.DIAS})
         historial = b.get_historial_creacion_turnos()
     return render(request, "turno/creacion.html", locals())
+
+@login_required
+@permission_required('turnos.reservar_turnos', raise_exception=True)
+def confirmar_turno(request):
+    b = Bussiness()
+    if request.method == 'POST':
+        form = ConfirmarTurnoForm(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect(request.path)
+    else:
+        form = ConfirmarTurnoForm()
+    return render(request, "turno/confirmar.html", locals())
+
+@login_required
+def get_turnos_afiliado(request,afiliado_id):
+    b = Bussiness()
+    data = b.get_turnos_reservados(afiliado_id)
+    return JSONResponse(data)

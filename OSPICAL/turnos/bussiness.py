@@ -7,7 +7,7 @@ from django.db.models import Count
 from turnos.models import *
 
 import logging
-from models import EspecialistaEspecialidad, HistorialTurno
+from models import EspecialistaEspecialidad, HistorialTurno, Afiliado
 logger = logging.getLogger(__name__)
 
 class Bussiness():
@@ -241,6 +241,36 @@ class Bussiness():
                           'responsable':responsable,
                           'cantidad': evento['cantidad']})
         return lista
+    def get_turnos_reservados(self, afiliado_id):
+        """Obtiene los turnos reservados por el afiliado"""
+        lineas = LineaDeReserva.objects.filter(estado=Turno.RESERVADO,
+                                               reserva__afiliado__id=afiliado_id)
+        data = list()
+        for linea in lineas:
+            data.append({'id' : linea.id,
+                        'fecha_reserva' : linea.reserva.fecha,
+                        'fecha_turno' : linea.turno.fecha,
+                        'especialidad' : linea.turno.ee.especialidad.descripcion,
+                        'especialista' : linea.turno.ee.especialista.full_name(),})
+        logger.debug("Turnos reservados del afiliado %s: %s" % (afiliado_id, data))
+        return data
+    def confirmar_reserva(self,lineas_reserva, empleado):
+        """Confirma las lineas de reservas pasadas por parametro"""
+        logger.debug("Confirmando las lineas de reserva %s" % lineas_reserva)
+        try:
+            for linea in lineas_reserva:
+                lr = LineaDeReserva.object.get(id=linea)
+                HistorialTurno.objects.create(estadoAnterior=lr.turno.estado,
+                                              estadoNuevo=Turno.PRESENTE,
+                                              descripcion="El afiliado confirma su presencia al turno",
+                                              turno=lr.turno,
+                                              empleado=empleado)
+                lr.turno.estado = lr.estado = Turno.PRESENTE
+                lr.turno.save()
+                lr.save()
+        except Exception:
+            self.__lanzar(ConfirmarTurnoException, "Ocurrió un problema al intentar confirmar las reservas")
+            logger.info("Reservas con problemas de confirmacion %s", lineas_reserva)
 class ReservaTurnoException(Exception):
     def __init__(self, message=None):
         self.message = message
@@ -255,3 +285,8 @@ class AfiliadoNotExistsException(ReservaTurnoException):
 class TurnoReservadoException(ReservaTurnoException):
     def __init__(self, message=None):
         self.message = message
+class ConfirmarTurnoException(Exception):
+    def __init__(self, message=None):
+        self.message = message
+    def __str__(self):
+        return self.message   

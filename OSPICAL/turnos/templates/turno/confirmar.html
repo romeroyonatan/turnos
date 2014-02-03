@@ -1,0 +1,47 @@
+{% extends "site/application.html" %}
+{% load static %}
+{% block title %}Confirmar turno{% endblock %}
+
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/turno.confirmar.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+	<form action="." method="post" enctype="multipart/form-data" class="pure-form pure-form-aligned">
+		{% csrf_token %}
+		<fieldset title="Confirmar Turno">	
+			{{ form.afiliado }}
+			<div class="pure-control-group">
+				<label for="afiliado">Numero afiliado</label>
+				{{ form.numero.errors }}
+				{{ form.numero }}
+			</div>	
+			
+			<div class="pure-control-group">
+				<label for="turnos">Turnos pedidos</label>
+				{{ form.turnos.errors }}
+				{{ form.turnos }}
+			</div>
+			
+			<table id="id_info" class="pure-table">
+				<thead>
+					<th>Nombre y apellido del afiliado</th>
+					<th>Fecha de reserva</th>
+					<th>Consultorio</th>
+				</thead>
+				<tbody>
+					<tr>
+						<td id="id_nya">{{ item.dia }}</td>
+						<td id="id_fecha_r">{{ item.responsable }}</td>
+						<td id="id_consultorio">{{ item.cantidad }}</td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<div class="pure-controls">
+				<input type="submit" value="Confirmar" class="pure-button pure-button-primary"/>
+			</div>
+		</fieldset>
+	</form>
+{% endblock %}

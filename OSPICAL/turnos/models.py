@@ -44,6 +44,8 @@ class Especialista(models.Model):
     fecha_baja = models.DateField(null=True)
     def __str__(self):
         return "%s" % model_to_dict(self)
+    def full_name(self):
+        return "%s, %s" % (self.apellido, self.nombre)
     
 class EspecialistaEspecialidad(models.Model):
     unique_together = ("especialista", "especialidad")

@@ -60,3 +60,8 @@ class RegistrarUsuarioForm(UserCreationForm):
                 p = Permission.objects.get(codename=codename)
                 user.user_permissions.add(p)
         return user
+class ConfirmarTurnoForm(forms.Form):
+    choices = [('','Ingrese el número de afiliado')]
+    afiliado = forms.IntegerField(widget=forms.HiddenInput())
+    numero = forms.CharField()
+    turnos = forms.ChoiceField(choices=choices)

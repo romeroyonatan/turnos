@@ -182,7 +182,25 @@ class ReservarTurnoTest(TestCase):
             self.assertEqual(lr.reserva.id, reserva.id)
             self.assertIn(lr.turno.id, listaTurnos)
             self.assertEqual(lr.estado, Turno.RESERVADO)
-
+    def testGetTurnosReservados(self):
+        """Verifica que se obtenga la lista de turnos reservados correctamente.
+        Debe devolver una lista de diccionarios con los turnos reservados"""
+        afiliado_id = 1
+        afiliado_falla=2
+        listaTurnos = [2,3,4]
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reservados = b.get_turnos_reservados(afiliado_id)
+        reservados_falla = b.get_turnos_reservados(afiliado_falla)
+        self.assertIsNotNone(reservados)
+        self.assertFalse(reservados_falla)
+        for reservado in reservados:
+            linea = LineaDeReserva.objects.get(id=reservado['id'])
+            self.assertEquals(linea.estado, Turno.RESERVADO)
+            self.assertEquals(linea.turno.ee.especialista.full_name(), reservado['especialista'])
+            self.assertEquals(linea.turno.ee.especialidad.descripcion, reservado['especialidad'])
+            self.assertEquals(linea.turno.fecha, reservado['fecha_turno'])
+            self.assertEquals(linea.reserva.fecha, reservado['fecha_reserva'])
+            
 class CrearTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de crear turnos"""
     fixtures = ['turnos.json']
