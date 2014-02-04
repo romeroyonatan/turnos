@@ -45,7 +45,10 @@ def reservar(request):
                 messages.error(request, 'Debe ingresar al menos un turno a reservar')
             else:
                 try:
-                    reserva = bussiness.reservarTurnos(p['afiliado'], p['telefono'], p['turnos'])
+                    reserva = bussiness.reservarTurnos(p['afiliado'], 
+                                                       p['telefono'],
+                                                       p['turnos'],
+                                                       empleado=request.user.get_profile())
                 except Exception, e:
                     messages.error(request, __getExceptionMessage(e))
                 else:

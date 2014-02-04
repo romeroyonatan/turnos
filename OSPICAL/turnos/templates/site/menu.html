@@ -3,24 +3,39 @@
 	</a>
 	<div id="menu">
 		<div class="pure-menu pure-menu-open">
-			<a class="pure-menu-heading" href="#" title="OSPICAL La Matanza">OSPICAL</a>
+			<a class="pure-menu-heading" href="/" title="Página principal">OSPICAL</a>
 			<ul>
 				<li class="menu-item-divided">
 					{% if perms.turnos.reservar_turnos %}
-						<a href="{% url 'turnos.views.reservar' %}">Reservar turno</a>
-						<a href="{% url 'turnos.views.confirmar_turno' %}">Confirmar turno</a>
+						<a href="{% url 'turnos.views.reservar' %}" 
+						   title="Permite reservar uno o varios turnos a distintas especialidades">
+							Reservar turno
+						</a>
+						<a href="{% url 'turnos.views.confirmar_turno' %}"
+						title="Permite confirmar una reserva, indicando que el afiliado está presente en el turno">
+							Confirmar reserva
+						</a>
 					{% endif %}
 					{% if perms.turnos.crear_turnos %}
-						<a href="{% url 'turnos.views.crear_turnos' %}">Crear turnos</a>
+						<a href="{% url 'turnos.views.crear_turnos' %}"
+						   title="Permite crear turnos manualmente">
+						Crear turnos
+						</a>
 					{% endif %}
 				</li>
 				{% if perms.auth.add_user %}
 				<li class="menu-item-divided">
-					<a href="{% url 'turnos.views.register' %}">Crear cuenta</a>
+					<a href="{% url 'turnos.views.register' %}"
+						   title="Permite crear nuevas cuentas de usuario">
+					Crear cuenta
+					</a>
 				</li>
 				{% endif %}
 				<li class="menu-item-divided">
-					<a href="{% url 'django.contrib.auth.views.logout' %}">Cerrar sesión</a>
+					<a href="{% url 'django.contrib.auth.views.logout' %}"
+					   title="Permite salir del sistema de forma segura">
+						Cerrar sesión
+					</a>
 				</li>
 			</ul>
 		</div>

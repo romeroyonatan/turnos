@@ -101,7 +101,6 @@ class Bussiness():
             return reserva
         else:
             logger.warning("La lista de turnos a reservar esta vacia")
-        return None
     def __crearReserva(self, afiliado, telefono):
         if not Afiliado.objects.filter(id=afiliado).exists():
             self.__lanzar(AfiliadoNotExistsException, "Afiliado ID '%s' inexistente" % afiliado)
@@ -260,6 +259,7 @@ class Bussiness():
                         'consultorio': linea.turno.consultorio.numero})
         logger.debug("Turnos reservados del afiliado %s: %s" % (afiliado_id, data))
         return data
+    @transaction.atomic
     def confirmar_reserva(self,lineas_reserva, empleado=None):
         """Confirma las lineas de reservas pasadas por parametro"""
         logger.debug("Confirmando las lineas de reserva %s" % lineas_reserva)
