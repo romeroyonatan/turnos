@@ -7,9 +7,14 @@ MESSAGE_DNI_DUPLICADO_TITLE = "DNI duplicado";
 MESSAGE_DNI_DUPLICADO_DESCRIPCION = "Deberá ingresar el número de afiliado para realizar la reserva";
 MESSAGE_DNI_INEXISTENTE_TITLE = "DNI Inexistente";
 MESSAGE_DNI_INEXISTENTE_DESCRIPCION = "Verifique que el número de DNI ingresado sea correcto";
-MESSAGE_NUMERO_DUPLICADO = "Número de afiliado duplicado";
+MESSAGE_NUMERO_DUPLICADO_TITLE = "Número de afiliado duplicado";
+MESSAGE_NUMERO_DUPLICADO_DESCRIPCION = "El número de afiliado está duplicado. Verifique los registros de base de datos de afiliados";
 MESSAGE_NUMERO_INEXISTENTE_TITLE = "Número de afiliado Inexistente";
 MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION = "Verifique que el número de número de afiliado ingresado sea correcto";
+MESSAGE_ID_DUPLICADO_TITLE = "Identificador de afiliado duplicado";
+MESSAGE_ID_DUPLICADO_DESCRIPCION = "El identificador de usuario está duplicado. Verifique los registros de base de datos de afiliados";
+MESSAGE_ID_INEXISTENTE_TITLE = "Identificador de usuario inexistente";
+MESSAGE_ID_INEXISTENTE_DESCRIPCION = "Identificador de usuario inexistente";
 MESSAGE_SIN_TURNOS_RESERVADOS_HOY = "El afiliado no posee turnos reservados para hoy, o los mismos ya fueron considerados como ausente"
 MESSAGE_SIN_TURNOS_RESERVADOS_HOY_TITLE= "No se encuentran turnos reservados para hoy"
 MESSAGE_PRESENTISMO = "El afiliado ha faltado a muchos turnos en los ultimos meses";
@@ -152,14 +157,16 @@ Lista.prototype.remove = function (id) {
 
 //////////////////////////////////////////////////////////////////////////////////
 function Afiliado(obj) {
-	this.id = obj.id;
-	this.dni = obj.dni;
-	this.numero = obj.numero;
-	this.nombre = obj.nombre;
-	this.apellido = obj.apellido;
-	this.obtenerTelefono();
-	this.verificarPresentismo();
-	this.mostrar();
+	if(obj) {
+		this.id = obj.id;
+		this.dni = obj.dni;
+		this.numero = obj.numero;
+		this.nombre = obj.nombre;
+		this.apellido = obj.apellido;
+		this.obtenerTelefono();
+		this.verificarPresentismo();
+		this.mostrar();
+	}
 }
 
 /**
@@ -195,4 +202,51 @@ Afiliado.prototype.mostrar = function () {
 	$("#id_numero").val(this.numero).mask('0000 0000 0000');
 	$("#id_nombre").val(this.nombre);
 	$("#id_apellido").val(this.apellido);
+}
+
+Afiliado.load = function(filter) {
+	/*** Carga un afiliado, segun el filtro especificado
+	 * El filtro trabaja con id, numero o dni***/
+	var url = "";
+	// Configuro la url y los mensajes de error, segun el filtro pasado
+	if (filter.numero) {
+		url = "/json/afiliado/numero/{0}/".format(filter.numero);
+		duplicateError = {message:MESSAGE_NUMERO_DUPLICADO_DESCRIPCION,
+						  title:MESSAGE_NUMERO_DUPLICADO_TITLE};
+		notExistsError = {title:MESSAGE_NUMERO_INEXISTENTE_TITLE,
+						  message:MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION};
+	} else if (filter.dni) {
+		url = "/json/afiliado/dni/{0}/".format(filter.dni);
+		duplicateError = {title:MESSAGE_DNI_DUPLICADO_TITLE,
+				  		  message:MESSAGE_DNI_DUPLICADO_DESCRIPCION};
+		notExistsError = {title:MESSAGE_DNI_INEXISTENTE_TITLE,
+						  message:MESSAGE_DNI_INEXISTENTE_DESCRIPCION};
+	} else if (filter.id) {
+		url = "/json/afiliado/id/{0}/".format(filter.id);
+		duplicateError = {title:MESSAGE_ID_DUPLICADO_TITLE,
+		  		  		message:MESSAGE_ID_DUPLICADO_DESCRIPCION};
+		notExistsError = {title:MESSAGE_ID_INEXISTENTE_TITLE,
+						  message:MESSAGE_ID_INEXISTENTE_DESCRIPCION}
+	}
+	// Hago la llamada ajax para cargar el afiliado desde el servidor
+	var af;
+	if (url)
+		$.ajax({
+			url : url,
+			dataType : 'json',
+			async : false,
+			success : function(data) {
+				if (data.length == 1) {
+					af = new Afiliado(data[0])
+				} else if (data.length > 1) {
+					mostrarMensaje(duplicateError.message, {
+								   type : 'warning',
+								   title : duplicateError.title});
+				} else {
+					mostrarMensaje(notExistsError.message, {
+								   title : notExistsError.title});
+				}
+			},
+		});
+	return af;
 }

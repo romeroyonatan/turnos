@@ -2,21 +2,11 @@ confirmar = {
 	afiliado: false,
 	turnos: [],
 	buscar: function(numero) {
-		var url = "/json/afiliado/numero/{0}/".format(numero);
-		$.getJSON(url, function(data) {
-			if (data.length > 0) {
-				confirmar.afiliado = new Afiliado(data[0]);
-				confirmar.cargar();
-			} else if (data.length > 1){
-				mostrarMensaje(MESSAGE_NUMERO_DUPLICADO,{type:'warning'});
-			} else {
-				mostrarMensaje(MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION,
-						{title:MESSAGE_NUMERO_INEXISTENTE_TITLE});
-			}
-		});
+		this.afiliado = Afiliado.load({numero:numero});
+		this.cargar();
 	},
 	cargar: function() {
-		var url = "/json/turnos/afiliado/{0}/".format(confirmar.afiliado.id);
+		var url = "/json/turnos/afiliado/{0}/".format(this.afiliado.id);
 		var destino = $('#id_turnos');
 		$.getJSON(url, function(data) {
 			if(data.length > 0) {
@@ -46,10 +36,10 @@ confirmar = {
 		reserva = this.__obtenerReserva(id);
 		fecha_r = new Date(reserva.fecha_reserva * 1000);
 		consultorio = reserva.consultorio ? reserva.consultorio : MESSAGES_NO_ASIGNADO;
-		$('#id_info').show();
-		$('#id_nya').text("{0} {1}".format(confirmar.afiliado.nombre, confirmar.afiliado.apellido));
 		$.datepicker.setDefaults($.datepicker.regional["es"])
 		$('#id_fecha_r').text($.datepicker.formatDate("DD dd 'de' MM", fecha_r));
+		$('#id_info').show();
+		$('#id_nya').text("{0} {1}".format(confirmar.afiliado.nombre, confirmar.afiliado.apellido));
 		$('#id_consultorio').text(consultorio);
 	},
 	__obtenerReserva: function(id) {
@@ -71,8 +61,10 @@ function changeNumero(){
 
 function changeTurno() {
 	var id = parseInt($('#id_turnos').val());
-	if(id)
+	if(id) {
 		confirmar.mostrarDatosReserva(id);
+		$(':submit').focus();
+	}
 }
 
 $(document).ready(function(){

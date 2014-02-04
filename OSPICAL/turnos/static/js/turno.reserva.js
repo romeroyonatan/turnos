@@ -97,39 +97,16 @@ $(document).ready(function(){
 	l = new Lista($('#id_turnos'),{template:ajax.responseText});
 
 	$("#id_dni").blur(function() {
-		var container = $("#id_dni");
-		var dni = container.val();
+		var dni = $("#id_dni").val();
 		if(/\d+/.test(dni)) {
-			url = '/json/afiliado/dni/{0}/'.format(dni);
-			$.getJSON(url, function(data) {
-				if (data.length == 1) {
-					var a = new Afiliado(data[0]);
-				} else if (data.length > 1) {
-					mostrarMensaje(MESSAGE_DNI_DUPLICADO_DESCRIPCION, 
-							   {title:MESSAGE_DNI_DUPLICADO_TITLE, type:'warning'});
-				} else {
-					mostrarMensaje(MESSAGE_DNI_INEXISTENTE_DESCRIPCION,
-							{title:MESSAGE_DNI_INEXISTENTE_TITLE, element:container});
-				}
-			});
+			Afiliado.load({dni:dni})
 		}
 	});
 	
 	$("#id_numero").blur(function() {
-		var container = $("#id_numero");
-		var value = container.data('mask').getCleanVal();;
+		var value = $("#id_numero").data('mask').getCleanVal();;
 		if(/\d+/.test(value)) {
-			url = '/json/afiliado/numero/{0}/'.format(value);
-			$.getJSON(url, function(data) {
-				if (data.length == 1){
-					new Afiliado(data[0]);
-				} else if (data.length > 1){
-					mostrarMensaje(MESSAGE_NUMERO_DUPLICADO,{type:'warning'});
-				} else {
-					mostrarMensaje(MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION,
-							{title:MESSAGE_NUMERO_INEXISTENTE_TITLE, element:container});
-				}
-			});
+			Afiliado.load({numero:value})
 		}
 	});
 
