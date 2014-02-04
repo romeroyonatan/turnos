@@ -190,6 +190,33 @@
     }
 },
 {
+    "pk": 9, 
+    "model": "turnos.reserva", 
+    "fields": {
+        "fecha": "2014-02-04T12:23:47.530Z", 
+        "afiliado": 1, 
+        "telefono": "46201009"
+    }
+},
+{
+    "pk": 10, 
+    "model": "turnos.reserva", 
+    "fields": {
+        "fecha": "2014-02-04T12:30:50.490Z", 
+        "afiliado": 1, 
+        "telefono": "46201009"
+    }
+},
+{
+    "pk": 11, 
+    "model": "turnos.reserva", 
+    "fields": {
+        "fecha": "2014-02-04T12:51:40.864Z", 
+        "afiliado": 1, 
+        "telefono": "46201009"
+    }
+},
+{
     "pk": 1, 
     "model": "turnos.especialista", 
     "fields": {
@@ -291,9 +318,9 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2014-02-03T15:30:00Z", 
+        "fecha": "2018-02-03T13:44:20.283Z", 
         "sobreturno": false, 
-        "estado": "R"
+        "estado": "D"
     }
 },
 {
@@ -302,7 +329,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2014-02-03T15:45:00Z", 
+        "fecha": "2018-02-03T13:59:20.283Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -313,7 +340,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2014-02-03T16:00:00Z", 
+        "fecha": "2018-02-03T14:14:20.283Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -324,392 +351,9 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2014-02-03T16:15:00Z", 
+        "fecha": "2018-02-03T14:29:20.283Z", 
         "sobreturno": false, 
         "estado": "D"
-    }
-},
-{
-    "pk": 5, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T16:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 6, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T16:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 7, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T17:00:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 8, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T17:15:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 9, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T17:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 10, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T17:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 11, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T18:00:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 12, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T18:15:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 13, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T18:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 14, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T18:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 15, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T19:00:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 16, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T19:15:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 17, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T19:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 18, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T19:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 19, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T20:00:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 20, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T20:15:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 21, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T20:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 22, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T20:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 23, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T21:00:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 24, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T21:15:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 25, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T21:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 26, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": 1, 
-        "ee": 1, 
-        "fecha": "2014-02-03T21:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 27, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-04T15:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 28, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-04T15:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 29, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-05T15:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 30, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-05T15:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 31, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-06T15:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 32, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-06T15:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 33, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-07T15:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 34, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-07T15:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 35, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-08T15:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 36, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-08T15:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 37, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-09T15:30:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 38, 
-    "model": "turnos.turno", 
-    "fields": {
-        "consultorio": null, 
-        "ee": 1, 
-        "fecha": "2014-02-09T15:45:00Z", 
-        "sobreturno": false, 
-        "estado": "D"
-    }
-},
-{
-    "pk": 1, 
-    "model": "turnos.lineadereserva", 
-    "fields": {
-        "reserva": 8, 
-        "estado": "R", 
-        "turno": 1
     }
 },
 {
@@ -717,10 +361,10 @@
     "model": "turnos.historialturno", 
     "fields": {
         "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
+        "fecha": "2014-02-04T13:29:21.459Z", 
         "estadoNuevo": "D", 
         "turno": 1, 
-        "descripcion": "Creaci\u00f3n de turno", 
+        "descripcion": null, 
         "estadoAnterior": null
     }
 },
@@ -729,10 +373,10 @@
     "model": "turnos.historialturno", 
     "fields": {
         "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
+        "fecha": "2014-02-04T13:29:21.659Z", 
         "estadoNuevo": "D", 
         "turno": 2, 
-        "descripcion": "Creaci\u00f3n de turno", 
+        "descripcion": null, 
         "estadoAnterior": null
     }
 },
@@ -741,10 +385,10 @@
     "model": "turnos.historialturno", 
     "fields": {
         "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
+        "fecha": "2014-02-04T13:29:21.836Z", 
         "estadoNuevo": "D", 
         "turno": 3, 
-        "descripcion": "Creaci\u00f3n de turno", 
+        "descripcion": null, 
         "estadoAnterior": null
     }
 },
@@ -753,431 +397,11 @@
     "model": "turnos.historialturno", 
     "fields": {
         "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
+        "fecha": "2014-02-04T13:29:22.013Z", 
         "estadoNuevo": "D", 
         "turno": 4, 
-        "descripcion": "Creaci\u00f3n de turno", 
+        "descripcion": null, 
         "estadoAnterior": null
-    }
-},
-{
-    "pk": 5, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 5, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 6, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 6, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 7, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 7, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 8, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 8, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 9, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 9, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 10, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 10, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 11, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 11, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 12, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 12, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 13, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 13, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 14, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 14, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 15, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 15, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 16, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 16, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 17, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 17, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 18, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 18, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 19, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 19, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 20, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 20, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 21, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.375Z", 
-        "estadoNuevo": "D", 
-        "turno": 21, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 22, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 22, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 23, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 23, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 24, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 24, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 25, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 25, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 26, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 26, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 27, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 27, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 28, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 28, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 29, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 29, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 30, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 30, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 31, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 31, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 32, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 32, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 33, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 33, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 34, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 34, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 35, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 35, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 36, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 36, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 37, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 37, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 38, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T14:15:06.376Z", 
-        "estadoNuevo": "D", 
-        "turno": 38, 
-        "descripcion": "Creaci\u00f3n de turno", 
-        "estadoAnterior": null
-    }
-},
-{
-    "pk": 39, 
-    "model": "turnos.historialturno", 
-    "fields": {
-        "empleado": null, 
-        "fecha": "2014-02-03T15:36:11.364Z", 
-        "estadoNuevo": "R", 
-        "turno": 1, 
-        "descripcion": "ID de reserva 8", 
-        "estadoAnterior": "D"
     }
 },
 {

@@ -10,7 +10,10 @@ MESSAGE_DNI_INEXISTENTE_DESCRIPCION = "Verifique que el número de DNI ingresado
 MESSAGE_NUMERO_DUPLICADO = "Número de afiliado duplicado";
 MESSAGE_NUMERO_INEXISTENTE_TITLE = "Número de afiliado Inexistente";
 MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION = "Verifique que el número de número de afiliado ingresado sea correcto";
+MESSAGE_SIN_TURNOS_RESERVADOS_HOY = "El afiliado no posee turnos reservados para hoy, o los mismos ya fueron considerados como ausente"
+MESSAGE_SIN_TURNOS_RESERVADOS_HOY_TITLE= "No se encuentran turnos reservados para hoy"
 MESSAGE_PRESENTISMO = "El afiliado ha faltado a muchos turnos en los ultimos meses";
+MESSAGES_NO_ASIGNADO = "No asignado"
 DIA=["Domingo", "Lunes", "Martes", "Miércoles", "Jueves","Viernes","Sábado"];
 MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
 ESTADOS={C:"Completo",S:"Sobreturno"};
@@ -193,4 +196,3 @@ Afiliado.prototype.mostrar = function () {
 	$("#id_nombre").val(this.nombre);
 	$("#id_apellido").val(this.apellido);
 }
-

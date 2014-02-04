@@ -8,6 +8,7 @@
 				<li class="menu-item-divided">
 					{% if perms.turnos.reservar_turnos %}
 						<a href="{% url 'turnos.views.reservar' %}">Reservar turno</a>
+						<a href="{% url 'turnos.views.confirmar_turno' %}">Confirmar turno</a>
 					{% endif %}
 					{% if perms.turnos.crear_turnos %}
 						<a href="{% url 'turnos.views.crear_turnos' %}">Crear turnos</a>

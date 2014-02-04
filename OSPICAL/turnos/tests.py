@@ -63,8 +63,6 @@ class ReservarTurnoTest(TestCase):
         listaTurnos = [2,3,4]
         with self.assertRaises(AfiliadoNotExistsException):
             b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
-        last = LineaDeReserva.objects.latest('id')
-        self.assertNotIn(last.turno.id, listaTurnos)
     def testTurnoVacio(self):
         """Verifica que pasa si se quiere reservar turnos con una lista de turnos vacia.
         Deberia fallar silenciosamente"""
@@ -198,9 +196,20 @@ class ReservarTurnoTest(TestCase):
             self.assertEquals(linea.estado, Turno.RESERVADO)
             self.assertEquals(linea.turno.ee.especialista.full_name(), reservado['especialista'])
             self.assertEquals(linea.turno.ee.especialidad.descripcion, reservado['especialidad'])
-            self.assertEquals(linea.turno.fecha, reservado['fecha_turno'])
+            self.assertEquals(linea.turno.consultorio, reservado['consultorio'])
             self.assertEquals(linea.reserva.fecha, reservado['fecha_reserva'])
-            
+    def testConfirmarReserva(self):
+        """Verifica que se confirmen las reservas correctamente"""
+        afiliado_id = 1
+        listaTurnos = [2,3,4]
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reservados = b.get_turnos_reservados(afiliado_id)
+        c = b.confirmar_reserva(reservados)
+        self.assertEqual(c, len(reservados))
+        for reservado in reservados:
+            linea = LineaDeReserva.objects.get(id=reservado['id'])
+            self.assertEquals(linea.estado, Turno.PRESENTE)
+            self.assertEquals(linea.turno.estado, Turno.PRESENTE)
 class CrearTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de crear turnos"""
     fixtures = ['turnos.json']

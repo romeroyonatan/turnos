@@ -64,4 +64,6 @@ class ConfirmarTurnoForm(forms.Form):
     choices = [('','Ingrese el número de afiliado')]
     afiliado = forms.IntegerField(widget=forms.HiddenInput())
     numero = forms.CharField()
-    turnos = forms.ChoiceField(choices=choices)
+    # XXX:Esta asi para que no me valide lo que envio el usuario con las opciones especificadas
+    # dado que lo completo mediante ajax
+    turnos = forms.CharField(widget=forms.Select(choices=choices))

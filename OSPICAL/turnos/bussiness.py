@@ -1,6 +1,6 @@
 # coding=utf-8
 from dateutil.relativedelta import relativedelta
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta, datetime, time
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Count
@@ -126,6 +126,7 @@ class Bussiness():
         if not Turno.objects.filter(id=turno_id).exists():
             self.__lanzar(TurnoNotExistsException, "Turno ID '%s' inexistente" % turno_id)
         turno = Turno.objects.get(id=turno_id)
+        logger.debug(turno)
         if turno.estado == Turno.RESERVADO:
             self.__lanzar(TurnoReservadoException, "Turno ID '%s' ya se encuentra reservado" % turno_id)
         if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)):
@@ -157,7 +158,9 @@ class Bussiness():
                                       cantidad_dias=None, 
                                       a_partir_de = timezone.now()):
         """Crea turnos para un especialista y una especialidad a partir del dia especificado"""
-        logger.debug("Creando turnos para el especialista %s" % especialista_especialidad)
+        logger.info("Creando turnos para el especialista <%s:%s>" % 
+                     (especialista_especialidad.especialista.id,
+                      especialista_especialidad.especialista.full_name()))
         cantidad_dias = self.DIAS if cantidad_dias == None else cantidad_dias
         turnos = list()
         disponibilidades = Disponibilidad.objects.filter(ee=especialista_especialidad)
@@ -176,8 +179,8 @@ class Bussiness():
         return self.__guardarTurnos(especialista_especialidad, turnos, a_partir_de) if turnos else []
     def __crear_turnos_del_dia(self, disponibilidad, dia):
         """Crea turnos para una disponibilidad de un especialista en un dia determinado"""
-        logger.debug("Creando turnos para el dia <%s> para el especialista <%s>" % 
-                     (dia, disponibilidad.ee))
+        logger.debug("Creando turnos para el dia <%s> para el especialista <%s:%s>" % 
+                     (dia,disponibilidad.ee.especialista.id, disponibilidad.ee.especialista.full_name()))
         # Para solucionar problema de timezone :s
         # Si lo uso de la forma
         # tz = timezone.get_default_timezone() 
@@ -220,7 +223,7 @@ class Bussiness():
         logger.debug("Creando historial de turnos")
         lista = list()
         for turno in turnos:
-            #TODO tener en cuenta el empleado que hace la operacion
+            #TODO: tener en cuenta el empleado que hace la operacion
             lista.append(HistorialTurno(estadoNuevo=Turno.DISPONIBLE,
                                         descripcion="Creación de turno",
                                         turno=turno,
@@ -241,25 +244,31 @@ class Bussiness():
                           'responsable':responsable,
                           'cantidad': evento['cantidad']})
         return lista
-    def get_turnos_reservados(self, afiliado_id):
-        """Obtiene los turnos reservados por el afiliado"""
+    def get_turnos_reservados(self, afiliado_id, dia = date.today()):
+        """Obtiene los turnos reservados por el afiliado para el dia especificado"""
+        today_min = datetime.combine(dia, time.min);
+        today_max = datetime.combine(dia, time.max);
         lineas = LineaDeReserva.objects.filter(estado=Turno.RESERVADO,
-                                               reserva__afiliado__id=afiliado_id)
+                                               reserva__afiliado__id=afiliado_id,
+                                               turno__fecha__range=(today_min,today_max))
         data = list()
         for linea in lineas:
             data.append({'id' : linea.id,
-                        'fecha_reserva' : linea.reserva.fecha,
-                        'fecha_turno' : linea.turno.fecha,
-                        'especialidad' : linea.turno.ee.especialidad.descripcion,
-                        'especialista' : linea.turno.ee.especialista.full_name(),})
+                        'fecha_reserva':linea.reserva.fecha,
+                        'especialidad':linea.turno.ee.especialidad.descripcion,
+                        'especialista':linea.turno.ee.especialista.full_name(),
+                        'consultorio': linea.turno.consultorio.numero})
         logger.debug("Turnos reservados del afiliado %s: %s" % (afiliado_id, data))
         return data
-    def confirmar_reserva(self,lineas_reserva, empleado):
+    def confirmar_reserva(self,lineas_reserva, empleado=None):
         """Confirma las lineas de reservas pasadas por parametro"""
         logger.debug("Confirmando las lineas de reserva %s" % lineas_reserva)
         try:
             for linea in lineas_reserva:
-                lr = LineaDeReserva.object.get(id=linea)
+                lr = LineaDeReserva.objects.get(id=linea)
+                if lr.estado != Turno.RESERVADO:
+                    self.__lanzar(ConfirmarTurnoException, 
+                                  "No se puede confirmar un turno que no está reservado")
                 HistorialTurno.objects.create(estadoAnterior=lr.turno.estado,
                                               estadoNuevo=Turno.PRESENTE,
                                               descripcion="El afiliado confirma su presencia al turno",
@@ -268,9 +277,10 @@ class Bussiness():
                 lr.turno.estado = lr.estado = Turno.PRESENTE
                 lr.turno.save()
                 lr.save()
-        except Exception:
-            self.__lanzar(ConfirmarTurnoException, "Ocurrió un problema al intentar confirmar las reservas")
-            logger.info("Reservas con problemas de confirmacion %s", lineas_reserva)
+            return len(lineas_reserva)
+        except Exception as e:
+            logger.info("Reservas con problemas de confirmacion %s - excepcion %s"% (lineas_reserva,e))
+            self.__lanzar(ConfirmarTurnoException, u"Ocurrió un problema al intentar confirmar las reservas")
 class ReservaTurnoException(Exception):
     def __init__(self, message=None):
         self.message = message

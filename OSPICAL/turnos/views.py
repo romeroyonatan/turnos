@@ -172,6 +172,9 @@ def confirmar_turno(request):
     if request.method == 'POST':
         form = ConfirmarTurnoForm(request.POST)
         if form.is_valid():
+            reservas = form.cleaned_data["turnos"]
+            if b.confirmar_reserva(reservas, request.user.get_profile()):
+                messages.success(request, u'Reserva confirmada con éxito')
             return HttpResponseRedirect(request.path)
     else:
         form = ConfirmarTurnoForm()

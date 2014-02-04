@@ -1,48 +1,3 @@
-$(document).ready(function(){
-	var ajax = $.ajax({
-		url:"/static/js/templates/reservarturno.template.html",
-		async: false});
-	
-	// TODO: Reconstruir lista cuando tenga algo
-	l = new Lista($('#id_turnos'),{template:ajax.responseText});
-
-	$("#id_dni").blur(function() {
-		var container = $("#id_dni");
-		var dni = container.val();
-		if(/\d+/.test(dni)) {
-			url = '/json/afiliado/dni/{0}/'.format(dni);
-			$.getJSON(url, function(data) {
-				if (data.length == 1) {
-					var a = new Afiliado(data[0]);
-				} else if (data.length > 1) {
-					mostrarMensaje(MESSAGE_DNI_DUPLICADO_DESCRIPCION, 
-							   {title:MESSAGE_DNI_DUPLICADO_TITLE, type:'warning'});
-				} else {
-					mostrarMensaje(MESSAGE_DNI_INEXISTENTE_DESCRIPCION,
-							{title:MESSAGE_DNI_INEXISTENTE_TITLE, element:container});
-				}
-			});
-		}
-	});
-	
-	$("#id_numero").blur(function() {
-		var container = $("#id_numero");
-		var value = container.data('mask').getCleanVal();;
-		if(/\d+/.test(value)) {
-			url = '/json/afiliado/numero/{0}/'.format(value);
-			$.getJSON(url, function(data) {
-				if (data.length == 1){
-					new Afiliado(data[0]);
-				} else if (data.length > 1){
-					mostrarMensaje(MESSAGE_NUMERO_DUPLICADO,{type:'warning'});
-				} else {
-					mostrarMensaje(MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION,
-							{title:MESSAGE_NUMERO_INEXISTENTE_TITLE, element:container});
-				}
-			});
-		}
-	});
-
 	function cambiaEspecialidad() {
 		$("#id_especialista, #id_dia, #id_hora").prop('disabled', true);
 		var id = $("#id_especialidad").val();
@@ -53,7 +8,9 @@ $(document).ready(function(){
 		$.getJSON(url, function(data) {
 			if(data.length > 0) {
 				destino.removeAttr('disabled');
-				var options = "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE);
+				var options = data.length > 1 ? 
+						  "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE) : 
+						  "";
 				$.each(data,function(index, value){
 					options += '<option value="{0}">{1}, {2}</option>'.format(value.id,
 																			 value.apellido,
@@ -106,7 +63,9 @@ $(document).ready(function(){
 		$.getJSON(url, function(data) {
 			if(data.length > 0) {
 				destino.removeAttr('disabled');
-				var options = "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE);
+				var options = data.length > 1 ? 
+						  "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE) : 
+						  "";
 				$.each(data,function(index, value){
 					var estado = ESTADOS[value.estado] ? "["+ESTADOS[value.estado]+"] " : "";
 					var milis = value.fecha * 1000;
@@ -128,7 +87,52 @@ $(document).ready(function(){
 			}
 		});
 	}
+
+$(document).ready(function(){
+	var ajax = $.ajax({
+		url:"/static/js/templates/reservarturno.template.html",
+		async: false});
 	
+	// TODO: Reconstruir lista cuando tenga algo
+	l = new Lista($('#id_turnos'),{template:ajax.responseText});
+
+	$("#id_dni").blur(function() {
+		var container = $("#id_dni");
+		var dni = container.val();
+		if(/\d+/.test(dni)) {
+			url = '/json/afiliado/dni/{0}/'.format(dni);
+			$.getJSON(url, function(data) {
+				if (data.length == 1) {
+					var a = new Afiliado(data[0]);
+				} else if (data.length > 1) {
+					mostrarMensaje(MESSAGE_DNI_DUPLICADO_DESCRIPCION, 
+							   {title:MESSAGE_DNI_DUPLICADO_TITLE, type:'warning'});
+				} else {
+					mostrarMensaje(MESSAGE_DNI_INEXISTENTE_DESCRIPCION,
+							{title:MESSAGE_DNI_INEXISTENTE_TITLE, element:container});
+				}
+			});
+		}
+	});
+	
+	$("#id_numero").blur(function() {
+		var container = $("#id_numero");
+		var value = container.data('mask').getCleanVal();;
+		if(/\d+/.test(value)) {
+			url = '/json/afiliado/numero/{0}/'.format(value);
+			$.getJSON(url, function(data) {
+				if (data.length == 1){
+					new Afiliado(data[0]);
+				} else if (data.length > 1){
+					mostrarMensaje(MESSAGE_NUMERO_DUPLICADO,{type:'warning'});
+				} else {
+					mostrarMensaje(MESSAGE_NUMERO_INEXISTENTE_DESCRIPCION,
+							{title:MESSAGE_NUMERO_INEXISTENTE_TITLE, element:container});
+				}
+			});
+		}
+	});
+
 	$("#id_especialidad").change(cambiaEspecialidad);
 	$("#id_especialista").change(cambiaEspecialista);
 	$("#id_dia").change(cambiaDia);
