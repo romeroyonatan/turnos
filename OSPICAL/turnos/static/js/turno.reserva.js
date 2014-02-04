@@ -8,9 +8,7 @@ function cambiaEspecialidad() {
 	$.getJSON(url, function(data) {
 		if(data.length > 0) {
 			destino.removeAttr('disabled');
-			var options = data.length > 1 ? 
-					  "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE) : 
-					  "";
+			var options = "";
 			$.each(data,function(index, value){
 				options += '<option value="{0}">{1}, {2}</option>'.format(value.id,
 																		 value.apellido,
@@ -19,7 +17,7 @@ function cambiaEspecialidad() {
 			destino.empty().append(options);
 			destino.focus();
 			if(data.length == 1) {
-				$('#id_especialista option:eq(1)').prop('selected', true);
+				$('#id_especialista option:eq(0)').prop('selected', true);
 				cambiaEspecialista();
 			}
 		}
@@ -35,9 +33,7 @@ function cambiaEspecialista() {
 	$.getJSON(url, function(data) {
 		if(data.length > 0) {
 			destino.removeAttr('disabled');
-			var options = data.length > 1 ? 
-					  "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE) : 
-					  "";
+			var options = "";
 			var disponible=0;
 			$.each(data,function(index, value){
 				var estado = ESTADOS[value.estado] ? "["+ESTADOS[value.estado]+"] " : "";
@@ -50,7 +46,7 @@ function cambiaEspecialista() {
 						MES[fecha.getMonth()],
 						estado);
 				// Busco el primer dia que posea turnos disponibles
-				disponible = disponible == 0 && value.estado === null ? index + 1 : disponible;
+				disponible = disponible == 0 && value.estado === null ? index : disponible;
 			});
 			destino.empty().append(options);
 			destino.focus();
@@ -74,7 +70,7 @@ function cambiaDia() {
 	$.getJSON(url, function(data) {
 		if(data.length > 0) {
 			destino.removeAttr('disabled');
-			var options = "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE);
+			var options = "";
 			$.each(data,function(index, value){
 				fecha = new Date(value.fecha * 1000)
 				options += '<option value="{0}">{1}:{2}</option>'.format(
@@ -84,7 +80,7 @@ function cambiaDia() {
 			});
 			destino.empty().append(options);
 			destino.focus();
-			$('#id_hora option:eq(1)').prop('selected', true)
+			$('#id_hora option:eq(0)').prop('selected', true)
 			cambiaHora();
 		} else {
 			mostrarMensaje(MESSAGE_NO_TURNOS);
