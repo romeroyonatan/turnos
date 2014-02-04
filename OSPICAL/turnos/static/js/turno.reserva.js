@@ -47,6 +47,7 @@
 				});
 				destino.empty().append(options);
 				destino.focus();
+				$('#id_hora option:eq(1)').prop('selected', true);
 			} else {
 				mostrarMensaje(MESSAGE_NO_TURNOS);
 			}
@@ -66,6 +67,7 @@
 				var options = data.length > 1 ? 
 						  "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE) : 
 						  "";
+				var disponible=0;
 				$.each(data,function(index, value){
 					var estado = ESTADOS[value.estado] ? "["+ESTADOS[value.estado]+"] " : "";
 					var milis = value.fecha * 1000;
@@ -75,13 +77,13 @@
 																					 fecha.getDate(),
 																					 MES[fecha.getMonth()],
 																					 estado);
+					// Busco el primer dia que posea turnos disponibles
+					disponible = disponible == 0 && value.estado === null ? index + 1 : disponible;
 				});
 				destino.empty().append(options);
 				destino.focus();
-				if(data.length == 1) {
-					$('#id_dia option:eq(1)').prop('selected', true);
-					cambiaDia();
-				}
+				$('#id_dia option:eq('+disponible+')').prop('selected', true);
+				cambiaDia();
 			} else {
 				mostrarMensaje(MESSAGE_NO_DIAS);
 			}
