@@ -27,7 +27,7 @@ $(document).ready(function(){
 	
 	$("#id_numero").blur(function() {
 		var container = $("#id_numero");
-		var value = container.data('mask').getCleanVal();
+		var value = container.data('mask').getCleanVal();;
 		if(/\d+/.test(value)) {
 			url = '/json/afiliado/numero/{0}/'.format(value);
 			$.getJSON(url, function(data) {
@@ -43,8 +43,8 @@ $(document).ready(function(){
 		}
 	});
 
-	$("#id_especialidad").change(function() {
-		$("#id_especialista, #id_dia, #id_hora").prop({disabled: true});
+	function cambiaEspecialidad() {
+		$("#id_especialista, #id_dia, #id_hora").prop('disabled', true);
 		var id = $("#id_especialidad").val();
 		if(!id)
 			return;
@@ -61,40 +61,15 @@ $(document).ready(function(){
 				});
 				destino.empty().append(options);
 				destino.focus();
+				if(data.length == 1) {
+					$('#id_especialista option:eq(1)').prop('selected', true);
+					cambiaEspecialista();
+				}
 			}
 		});
-	});
+	}
 	
-	$("#id_especialista").change(function() {
-		$("#id_dia, #id_hora").prop({disabled: true});
-		var id = $("#id_especialista").val();
-		if(!id)
-			return;
-		var url = '/json/turnos/{0}/'.format(id);
-		var destino = $('#id_dia');
-		$.getJSON(url, function(data) {
-			if(data.length > 0) {
-				destino.removeAttr('disabled');
-				var options = "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE);
-				$.each(data,function(index, value){
-					var estado = ESTADOS[value.estado] ? "["+ESTADOS[value.estado]+"] " : "";
-					var milis = value.fecha * 1000;
-					var fecha = new Date(milis)
-					options += '<option value="{0}">{4}{1}, {2} de {3}</option>'.format(milis, 
-																					 DIA[fecha.getDay()],
-																					 fecha.getDate(),
-																					 MES[fecha.getMonth()],
-																					 estado);
-				});
-				destino.empty().append(options);
-				destino.focus();
-			} else {
-				mostrarMensaje(MESSAGE_NO_DIAS);
-			}
-		});
-	});
-	
-	$("#id_dia").change(function() {
+	function cambiaDia() {
 		$("#id_hora").prop({disabled: true});
 		var milis = parseInt($("#id_dia").val());
 		var id = $("#id_especialidad").val();
@@ -119,7 +94,44 @@ $(document).ready(function(){
 				mostrarMensaje(MESSAGE_NO_TURNOS);
 			}
 		});
-	});
+	}
+	
+	function cambiaEspecialista() {
+		$("#id_dia, #id_hora").prop({disabled: true});
+		var id = $("#id_especialista").val();
+		if(!id)
+			return;
+		var url = '/json/turnos/{0}/'.format(id);
+		var destino = $('#id_dia');
+		$.getJSON(url, function(data) {
+			if(data.length > 0) {
+				destino.removeAttr('disabled');
+				var options = "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE);
+				$.each(data,function(index, value){
+					var estado = ESTADOS[value.estado] ? "["+ESTADOS[value.estado]+"] " : "";
+					var milis = value.fecha * 1000;
+					var fecha = new Date(milis)
+					options += '<option value="{0}">{4}{1}, {2} de {3}</option>'.format(milis, 
+																					 DIA[fecha.getDay()],
+																					 fecha.getDate(),
+																					 MES[fecha.getMonth()],
+																					 estado);
+				});
+				destino.empty().append(options);
+				destino.focus();
+				if(data.length == 1) {
+					$('#id_dia option:eq(1)').prop('selected', true);
+					cambiaDia();
+				}
+			} else {
+				mostrarMensaje(MESSAGE_NO_DIAS);
+			}
+		});
+	}
+	
+	$("#id_especialidad").change(cambiaEspecialidad);
+	$("#id_especialista").change(cambiaEspecialista);
+	$("#id_dia").change(cambiaDia);
 	
 	$("#id_hora").change(function(e) {
 		var destino = $('#id_agregar');
@@ -177,4 +189,3 @@ $(document).ready(function(){
 		}
 	});
 });
-//////////////////////////////////////////////////////////////////////////////////
