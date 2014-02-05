@@ -24,20 +24,25 @@
 				{{ form.turnos }}
 			</div>
 			
-			<table id="id_info" class="pure-table">
-				<thead>
-					<th>Nombre y apellido del afiliado</th>
-					<th>Fecha de reserva</th>
-					<th>Consultorio</th>
-				</thead>
-				<tbody>
-					<tr>
-						<td id="id_nya">{{ item.dia }}</td>
-						<td id="id_fecha_r">{{ item.responsable }}</td>
-						<td id="id_consultorio">{{ item.cantidad }}</td>
-					</tr>
-				</tbody>
-			</table>
+			<div id="id_info">
+				<h2>Datos de la reserva</h2>
+				<table class="pure-table">
+					<thead>
+						<tr>
+							<th>Nombre y apellido del afiliado</th>
+							<th>Fecha de reserva</th>
+							<th>Consultorio</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td id="id_nya">{{ item.dia }}</td>
+							<td id="id_fecha_r">{{ item.responsable }}</td>
+							<td id="id_consultorio">{{ item.cantidad }}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 			
 			<div class="pure-controls">
 				<input type="submit" value="Confirmar" class="pure-button pure-button-primary"/>
