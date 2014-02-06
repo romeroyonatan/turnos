@@ -67,3 +67,12 @@ class ConfirmarTurnoForm(forms.Form):
     # XXX:Esta asi para que no me valide lo que envio el usuario con las opciones especificadas
     # dado que lo completo mediante ajax
     turnos = forms.CharField(widget=forms.Select(choices=choices))
+class CancelarReservaForm(forms.Form):
+    choices = [('','Ingrese el número de afiliado')]
+    afiliado = forms.IntegerField(widget=forms.HiddenInput)
+    numero = forms.CharField(label="Número de afiliado")
+    dni = forms.IntegerField(label="DNI", widget=forms.TextInput())
+    motivo = forms.CharField(widget=forms.Textarea,label="Motivo",required=False)
+    # XXX:Esta asi para que no me valide lo que envio el usuario con las opciones especificadas
+    # dado que lo completo mediante ajax
+    turnos = forms.CharField(widget=forms.Select(choices=choices))

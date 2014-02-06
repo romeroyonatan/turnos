@@ -1,4 +1,6 @@
 DEFAULT_MESSAGE = "Seleccionar";
+MESSAGE_NO_ESPECIALISTAS_TITLE = "Sin especialistas";
+MESSAGE_NO_ESPECIALISTAS_DESCRIPCION = "No hay especialistas para esta especialidad";
 MESSAGE_NO_DIAS = "El especialista no posee días disponibles para reservar turnos";
 MESSAGE_NO_TURNOS = "No hay turnos disponibles este día";
 MESSAGE_TURNO_YA_AGREGADO = "Ya agregó este turno";

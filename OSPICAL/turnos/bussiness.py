@@ -103,7 +103,8 @@ class Bussiness():
             logger.warning("La lista de turnos a reservar esta vacia")
     def __crearReserva(self, afiliado, telefono):
         if not Afiliado.objects.filter(id=afiliado).exists():
-            self.__lanzar(AfiliadoNotExistsException, "Afiliado ID '%s' inexistente" % afiliado)
+            e = AfiliadoNotExistsException("Afiliado ID '%s' inexistente" % afiliado)
+            self.__lanzar(e)
         reserva = Reserva()
         reserva.afiliado = Afiliado.objects.get(id=afiliado)
         reserva.telefono = telefono
@@ -123,13 +124,16 @@ class Bussiness():
         return turno
     def __validar_reserva(self, turno_id):
         if not Turno.objects.filter(id=turno_id).exists():
-            self.__lanzar(TurnoNotExistsException, "Turno ID '%s' inexistente" % turno_id)
+            e = TurnoNotExistsException("Turno ID '%s' inexistente" % turno_id)
+            self.__lanzar(e)
         turno = Turno.objects.get(id=turno_id)
         logger.debug(turno)
         if turno.estado == Turno.RESERVADO:
-            self.__lanzar(TurnoReservadoException, "Turno ID '%s' ya se encuentra reservado" % turno_id)
+            e = TurnoReservadoException("Turno ID '%s' ya se encuentra reservado" % turno_id)
+            self.__lanzar(e)
         if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)):
-            self.__lanzar(ReservaTurnoException, "No se pueden reservar turnos anteriores a la fecha actual")
+            e = ReservaTurnoException, "No se pueden reservar turnos anteriores a la fecha actual"
+            self.__lanzar(e)
         return turno
     def contarFaltas(self, afiliado_id):
         fecha = timezone.now() + relativedelta(months=-self.AUSENTES_MESES)
@@ -140,14 +144,15 @@ class Bussiness():
     def presentismoOK(self, afiliado_id):
         """ Verifica si un afiliado se ausenta concurrentemente a los turnos"""
         faltas = self.contarFaltas(afiliado_id);
-        logger.debug("Cantidad de faltas del afiliado %s: %s, Presentismo_ok %s" % (afiliado_id, faltas, faltas <= self.AUSENTES_CANTIDAD))
+        logger.debug("Cantidad de faltas del afiliado %s: %s, Presentismo_ok %s" % 
+                     (afiliado_id, faltas, faltas <= self.AUSENTES_CANTIDAD))
         return faltas <= self.AUSENTES_CANTIDAD
-    def __lanzar(self, excepcion, mensaje):
+    def __lanzar(self, e):
         """Lanza una excepcion y loguea la misma"""
-        e = excepcion(mensaje)
-        logger.error("%s - %s" % (excepcion.__name__, mensaje))
+        logger.error("%s - message:'%s' more_info:'%s' prev:'%s'" %
+                    (e.__class__.__name__, e.message, e.more_info, e.prev))
         raise e
-    def crear_turnos(self, dias):
+    def crear_turnos(self, dias=None):
         cantidad = 0
         for ee in EspecialistaEspecialidad.objects.all():
             creados = self.crear_turnos_del_especialista(ee, dias)
@@ -243,60 +248,98 @@ class Bussiness():
                           'responsable':responsable,
                           'cantidad': evento['cantidad']})
         return lista
-    def get_turnos_reservados(self, afiliado_id, dia = date.today()):
-        """Obtiene los turnos reservados por el afiliado para el dia especificado"""
-        today_min = datetime.combine(dia, time.min);
-        today_max = datetime.combine(dia, time.max);
-        lineas = LineaDeReserva.objects.filter(estado=Turno.RESERVADO,
-                                               reserva__afiliado__id=afiliado_id,
-                                               turno__fecha__range=(today_min,today_max))
+    def get_turnos_reservados(self, afiliado_id, dia = None):
+        """Obtiene los turnos reservados por el afiliado para el dia especificado. Si el dia es
+        None, se obtienen todos los turnos reservados del afiliado"""
+        filtro={'estado':Turno.RESERVADO,
+                'reserva__afiliado__id':afiliado_id}
+        if dia:
+            day_min = datetime.combine(dia, time.min)
+            day_max = datetime.combine(dia, time.max)
+            filtro['turno__fecha__range']=(day_min,day_max)
+        lineas = LineaDeReserva.objects.filter(**filtro)
         data = list()
         for linea in lineas:
             data.append({'id' : linea.id,
                         'fecha_reserva':linea.reserva.fecha,
+                        'fecha_turno':linea.turno.fecha,
                         'especialidad':linea.turno.ee.especialidad.descripcion,
                         'especialista':linea.turno.ee.especialista.full_name(),
-                        'consultorio': linea.turno.consultorio.numero})
+                        'consultorio': linea.turno.consultorio.numero if linea.turno.consultorio else None})
         logger.debug("Turnos reservados del afiliado %s: %s" % (afiliado_id, data))
         return data
     @transaction.atomic
     def confirmar_reserva(self,lineas_reserva, empleado=None):
         """Confirma las lineas de reservas pasadas por parametro"""
         logger.debug("Confirmando las lineas de reserva %s" % lineas_reserva)
-        try:
-            for linea in lineas_reserva:
-                lr = LineaDeReserva.objects.get(id=linea)
-                if lr.estado != Turno.RESERVADO:
-                    self.__lanzar(ConfirmarTurnoException, 
-                                  "No se puede confirmar un turno que no está reservado")
-                HistorialTurno.objects.create(estadoAnterior=lr.turno.estado,
-                                              estadoNuevo=Turno.PRESENTE,
-                                              descripcion="El afiliado confirma su presencia al turno",
-                                              turno=lr.turno,
-                                              empleado=empleado)
-                lr.turno.estado = lr.estado = Turno.PRESENTE
-                lr.turno.save()
-                lr.save()
-            return len(lineas_reserva)
-        except Exception as e:
-            logger.info("Reservas con problemas de confirmacion %s - excepcion %s"% (lineas_reserva,e))
-            self.__lanzar(ConfirmarTurnoException, u"Ocurrió un problema al intentar confirmar las reservas")
-class ReservaTurnoException(Exception):
-    def __init__(self, message=None):
+        for linea in lineas_reserva:
+            lr = self.__validar_confirmacion(linea)
+            HistorialTurno.objects.create(estadoAnterior=lr.turno.estado,
+                                          estadoNuevo=Turno.PRESENTE,
+                                          descripcion="El afiliado confirma su presencia al turno",
+                                          turno=lr.turno,
+                                          empleado=empleado)
+            lr.turno.estado = lr.estado = Turno.PRESENTE
+            lr.turno.save()
+            lr.save()
+        return len(lineas_reserva)
+    def __validar_confirmacion(self,lr_id):
+        """Valida que la confimacion cumpla con las reglas de negocio"""
+        if not LineaDeReserva.objects.filter(id=lr_id).exists():
+            e = ConfirmarReservaException(u"No existe la linea de reserva con id %s"%id)
+            self.__lanzar(e)
+        linea_reserva = LineaDeReserva.objects.get(id=lr_id)
+        if linea_reserva.estado != Turno.RESERVADO or linea_reserva.turno.estado != Turno.RESERVADO:
+            e = ConfirmarReservaException(u"No se puede confirmar un turno que no está reservado")
+            self.__lanzar(e)
+        today_min = datetime.combine(date.today(), time.min).replace(tzinfo=timezone.utc)
+        today_max = datetime.combine(date.today(), time.max).replace(tzinfo=timezone.utc)
+        if not today_min <= linea_reserva.turno.fecha <= today_max:
+            e = ConfirmarReservaException(u"No se puede confirmar una reserva de un turno que no sea de hoy")
+            self.__lanzar(e)
+        return linea_reserva
+    def cancelar_reserva(self,lineas_reserva, motivo=None, empleado=None):
+        """Cancela la linea de reserva pasada por parametro"""
+        logger.info("Cancelando la linea de reserva %s con motivo %s" % (lineas_reserva,motivo))
+        lr = self.__validar_cancelacion(lineas_reserva)
+        afiliado = lr.reserva.afiliado
+        HistorialTurno.objects.create(estadoAnterior=lr.turno.estado,
+                          estadoNuevo=Turno.DISPONIBLE,
+                          turno=lr.turno,
+                          empleado=empleado,
+                          descripcion=u"El afiliado %s canceló el turno. Motivo: %s" %
+                                       (afiliado.full_name(), motivo),)
+        lr.estado = Turno.CANCELADO
+        lr.turno.estado = Turno.DISPONIBLE
+        lr.save()
+        lr.turno.save()
+        return lr
+    def __validar_cancelacion(self, lr_id):
+        """Valida que la cancelacion cumpla con las reglas de negocio"""
+        if not LineaDeReserva.objects.filter(id=lr_id).exists():
+            e = CancelarReservaException(u"No existe la linea de reserva con id %s"%id)
+            self.__lanzar(e)
+        linea_reserva = LineaDeReserva.objects.get(id=lr_id)
+        if linea_reserva.estado != Turno.RESERVADO or linea_reserva.turno.estado != Turno.RESERVADO:
+            e = CancelarReservaException(u"No se puede cancelar una reserva con estado distinto a reservado")
+            self.__lanzar(e)
+        return linea_reserva
+class TurnosAppException(Exception):
+    def __init__(self, message=None, more_info=None, prev=None):
         self.message = message
+        self.more_info = more_info
+        self.prev = prev
     def __str__(self):
         return self.message   
+class ReservaTurnoException(TurnosAppException):
+    pass
 class TurnoNotExistsException(ReservaTurnoException):
-    def __init__(self, message=None):
-        self.message = message
+    pass
 class AfiliadoNotExistsException(ReservaTurnoException):
-    def __init__(self, message=None):
-        self.message = message
+    pass
 class TurnoReservadoException(ReservaTurnoException):
-    def __init__(self, message=None):
-        self.message = message
-class ConfirmarTurnoException(Exception):
-    def __init__(self, message=None):
-        self.message = message
-    def __str__(self):
-        return self.message   
+    pass
+class ConfirmarReservaException(TurnosAppException):
+    pass
+class CancelarReservaException(TurnosAppException):
+    pass

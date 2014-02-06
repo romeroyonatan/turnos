@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
 
-from turnos.forms import ReservarTurnoForm, CrearTurnoForm, RegistrarUsuarioForm,ConfirmarTurnoForm
+from turnos.forms import *
 from turnos.models import *
 from turnos.bussiness import Bussiness
 import logging
@@ -56,8 +56,6 @@ def reservar(request):
                     return HttpResponseRedirect(request.path)
     else:
         form = ReservarTurnoForm()
-        dni=request.user.get_profile().dni
-        logger.debug("DNI %s" %dni)
     return render_to_response('turno/reserva.html',
                               locals(),
                               context_instance=RequestContext(request))
@@ -170,7 +168,7 @@ def crear_turnos(request):
 
 @login_required
 @permission_required('turnos.reservar_turnos', raise_exception=True)
-def confirmar_turno(request):
+def confirmar_reserva(request):
     b = Bussiness()
     if request.method == 'POST':
         form = ConfirmarTurnoForm(request.POST)
@@ -184,7 +182,24 @@ def confirmar_turno(request):
     return render(request, "turno/confirmar.html", locals())
 
 @login_required
-def get_turnos_afiliado(request,afiliado_id):
+def get_turnos_afiliado(request,afiliado_id,today=False):
     b = Bussiness()
-    data = b.get_turnos_reservados(afiliado_id)
+    day = timezone.now() if today else None
+    data = b.get_turnos_reservados(afiliado_id, day)
     return JSONResponse(data)
+
+@login_required
+@permission_required('turnos.reservar_turnos', raise_exception=True)
+def cancelar_reserva(request):
+    b = Bussiness()
+    if request.method == 'POST':
+        form = CancelarReservaForm(request.POST)
+        if form.is_valid():
+            reserva = form.cleaned_data["turnos"]
+            motivo = form.cleaned_data["motivo"]
+            if b.cancelar_reserva(reserva, motivo, request.user.get_profile()):
+                messages.success(request, u'Reserva cancelada con éxito')
+            return HttpResponseRedirect(request.path)
+    else:
+        form = CancelarReservaForm()
+    return render(request, "turno/cancelar.html", locals())

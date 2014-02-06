@@ -196,20 +196,97 @@ class ReservarTurnoTest(TestCase):
             self.assertEquals(linea.estado, Turno.RESERVADO)
             self.assertEquals(linea.turno.ee.especialista.full_name(), reservado['especialista'])
             self.assertEquals(linea.turno.ee.especialidad.descripcion, reservado['especialidad'])
-            self.assertEquals(linea.turno.consultorio, reservado['consultorio'])
+            self.assertEquals(linea.turno.consultorio.id, int(reservado['consultorio']))
             self.assertEquals(linea.reserva.fecha, reservado['fecha_reserva'])
     def testConfirmarReserva(self):
         """Verifica que se confirmen las reservas correctamente"""
         afiliado_id = 1
-        listaTurnos = [2,3,4]
-        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        turno = Turno.objects.create(fecha=timezone.now(),
+                                     ee=ee,
+                                     sobreturno=False,
+                                     estado=Turno.DISPONIBLE)
+        b.reservarTurnos(afiliado_id, '12345678', [turno.id])
         reservados = b.get_turnos_reservados(afiliado_id)
-        c = b.confirmar_reserva(reservados)
-        self.assertEqual(c, len(reservados))
         for reservado in reservados:
+            b.confirmar_reserva([reservado['id']])
             linea = LineaDeReserva.objects.get(id=reservado['id'])
             self.assertEquals(linea.estado, Turno.PRESENTE)
             self.assertEquals(linea.turno.estado, Turno.PRESENTE)
+    def testConfirmarReservaOtroDia(self):
+        """Verifica que pasa si se quiere confirmar una reserva de un turno con una fecha distinta a la fecha actual.
+        Deberia fallar con una excepcion ConfirmarTurnoException"""
+        afiliado_id = 1
+        listaTurnos = [2,3,4]
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reservados = b.get_turnos_reservados(afiliado_id)
+        for reservado in reservados:
+            with self.assertRaises(ConfirmarReservaException):
+                b.confirmar_reserva([reservado['id']])
+    def testConfirmarReservaConfirmada(self):
+        """Verifica que pasa si se quiere confirmar una reserva ya confirmada.
+        Deberia fallar con una excepcion ConfirmarTurnoException"""
+        afiliado_id = 1
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        turno = Turno.objects.create(fecha=timezone.now(),
+                                     ee=ee,
+                                     sobreturno=False,
+                                     estado=Turno.DISPONIBLE)
+        b.reservarTurnos(afiliado_id, '12345678', [turno.id])
+        reservados = b.get_turnos_reservados(afiliado_id)
+        for reservado in reservados:
+            b.confirmar_reserva([reservado['id']])
+            with self.assertRaises(ConfirmarReservaException):
+                b.confirmar_reserva([reservado['id']])
+    def testConfirmarReservaCancelada(self):
+        """Verifica que pasa si se quiere confirmar una reserva cancelada.
+        Deberia fallar con una excepcion ConfirmarTurnoException"""
+        afiliado_id = 1
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        turno = Turno.objects.create(fecha=timezone.now(),
+                                     ee=ee,
+                                     sobreturno=False,
+                                     estado=Turno.DISPONIBLE)
+        b.reservarTurnos(afiliado_id, '12345678', [turno.id])
+        reservados = b.get_turnos_reservados(afiliado_id)
+        for reservado in reservados:
+            b.cancelar_reserva(reservado['id'])
+            with self.assertRaises(ConfirmarReservaException):
+                b.confirmar_reserva([reservado['id']])
+    def testConfirmarReservaInexistente(self):
+        """Verifica que pasa si se quiere confirmar una reserva inexistente.
+        Deberia fallar con una excepcion ConfirmarTurnoException"""
+        linea_inexistente=4000
+        with self.assertRaises(ConfirmarReservaException):
+            b.confirmar_reserva([linea_inexistente])
+    def testCancelarReserva(self):
+        """Verifica que se cancelen las reservas correctamente"""
+        afiliado_id = 1
+        listaTurnos = [2,3,4]
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reservados = b.get_turnos_reservados(afiliado_id)
+        linea_reserva_id = reservados[1]["id"]
+        b.cancelar_reserva(linea_reserva_id)
+        linea = LineaDeReserva.objects.get(id=linea_reserva_id)
+        self.assertEquals(linea.estado, Turno.CANCELADO)
+        self.assertEquals(linea.turno.estado, Turno.DISPONIBLE)
+    def testCancelarReservaCancelada(self):
+        """Verifica que sucede cuando se quiere cancelar una reserva ya cancelada.
+        Deberia fallar con una excepcion CancelarReservaException"""
+        afiliado_id = 1
+        listaTurnos = [2,3,4]
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        reservados = b.get_turnos_reservados(afiliado_id)
+        linea_reserva_id = reservados[1]["id"]
+        b.cancelar_reserva(linea_reserva_id)
+        with self.assertRaises(CancelarReservaException):
+            b.cancelar_reserva(linea_reserva_id)
+    def testCancelarReservaInexistente(self):
+        """Verifica que sucede cuando se quiere cancelar una reserva inexistente.
+        Deberia fallar con una excepcion CancelarReservaException"""
+        linea_inexistente=4000
+        with self.assertRaises(CancelarReservaException):
+            b.cancelar_reserva(linea_inexistente)
 class CrearTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de crear turnos"""
     fixtures = ['turnos.json']
@@ -320,6 +397,25 @@ class CrearTurnoTest(TestCase):
         """Prueba que se obtenga el historial de turnos creados"""
         historial = b.get_historial_creacion_turnos()
         self.assertTrue(historial)
+    def testVariosEspecialistas(self):
+        """Prueba que pasa si se crean turnos de varios especialistas"""
+        es1=Especialidad.objects.create(descripcion="Clinico")
+        es2=Especialidad.objects.create(descripcion="Oftamologia")
+        e1=Especialista.objects.create(nombre='n1',apellido='n1',dni=1234)
+        e2=Especialista.objects.create(nombre='n2',apellido='n2',dni=12345)
+        ee1 = EspecialistaEspecialidad.objects.create(especialista=e1, especialidad=es1)
+        ee2 = EspecialistaEspecialidad.objects.create(especialista=e2, especialidad=es2)
+        Disponibilidad.objects.create(dia='0',horaDesde="10:00",horaHasta="13:00",ee=ee1)
+        Disponibilidad.objects.create(dia='1',horaDesde="15:00",horaHasta="20:00",ee=ee2)
+        turnos = b.crear_turnos()
+        t1 = Turno.objects.filter(ee__especialista=e1)
+        t2 = Turno.objects.filter(ee__especialista=e2)
+        logger.debug("t1 %s"%t1)
+        logger.debug("t2 %s"%t2)
+        self.assertGreater(turnos, 0)
+        self.assertGreater(len(t1), 0)
+        self.assertGreater(len(t2), 0)
+        
 
 class TestValidadores(TestCase):
     def testLongitud(self):

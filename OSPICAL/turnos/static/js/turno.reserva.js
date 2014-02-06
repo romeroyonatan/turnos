@@ -20,6 +20,8 @@ function cambiaEspecialidad() {
 				$('#id_especialista option:eq(0)').prop('selected', true);
 				cambiaEspecialista();
 			}
+		} else {
+			mostrarMensaje(MESSAGE_NO_ESPECIALISTAS_DESCRIPCION,{title:MESSAGE_NO_ESPECIALISTAS_TITLE});
 		}
 	});
 }

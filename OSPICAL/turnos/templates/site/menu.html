@@ -11,9 +11,13 @@
 						   title="Permite reservar uno o varios turnos a distintas especialidades">
 							Reservar turno
 						</a>
-						<a href="{% url 'turnos.views.confirmar_turno' %}"
+						<a href="{% url 'turnos.views.confirmar_reserva' %}"
 						title="Permite confirmar una reserva, indicando que el afiliado está presente en el turno">
 							Confirmar reserva
+						</a>
+						<a href="{% url 'turnos.views.cancelar_reserva' %}"
+						title="Permite cancelar una reserva, indicando que el afiliado no asistirá al turno">
+							Cancelar reserva
 						</a>
 					{% endif %}
 					{% if perms.turnos.crear_turnos %}

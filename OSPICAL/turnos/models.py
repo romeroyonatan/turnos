@@ -8,7 +8,9 @@ class Afiliado(models.Model):
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
     def __str__(self):
-        return "%s" % model_to_dict(self)
+        return u"%s" % model_to_dict(self)
+    def full_name(self):
+        return u"%s, %s" % (self.apellido, self.nombre)
 
 class Especialidad(models.Model):
     descripcion = models.CharField(max_length=50)
