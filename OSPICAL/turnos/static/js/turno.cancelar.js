@@ -8,25 +8,9 @@ cancelar = {
 	},
 	cargar: function() {
 		var url = "/json/turnos/afiliado/{0}/".format(this.afiliado.id);
-		var destino = $('#id_turnos');
 		$.getJSON(url, function(data) {
 			if(data.length > 0) {
-				var options = data.length > 1 ?
-							  "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE): 
-							  "";
-				$.each(data,function(index, value){
-					value.fecha_turno = new Date(value.fecha_turno*1000);
-					cancelar.turnos.push(value);
-					$.datepicker.setDefaults($.datepicker.regional["es"])
-					fecha = $.datepicker.formatDate("dd 'de' MM", value.fecha_turno);
-					options += '<option value="{0}">{1} - {2} &lt;{3}&gt;</option>'.format(
-								value.id,
-								fecha,
-								value.especialidad,
-								value.especialista);
-				});
-				destino.empty().append(options);
-				destino.focus();
+				cancelar.__mostrar_item(data);
 				// Si es la unica opcion, la selecciono, llamo al evento y avanzo al siguiente paso
 				if(data.length == 1) {
 					$('#id_turnos option:eq(1)').prop('selected', true);
@@ -37,6 +21,27 @@ cancelar = {
 						{title:MESSAGE_SIN_TURNOS_RESERVADOS_HOY_TITLE})
 			}
 		});
+	},
+	__mostrar_item: function(data) {
+		var destino = $('#id_turnos');
+		var options = data.length > 1 ?
+				  "<option value='{0}'>{1}</option>".format(0,DEFAULT_MESSAGE): 
+				  "";
+		$.each(data, function(index, value){
+			value.fecha_turno = new Date(value.fecha_turno*1000);
+			cancelar.turnos.push(value);
+			$.datepicker.setDefaults($.datepicker.regional["es"])
+			fecha = $.datepicker.formatDate("dd 'de' MM", value.fecha_turno);
+			fecha += " {0}:{1}".format(value.fecha_turno.getHours(),
+									   value.fecha_turno.getMinutes());
+			options += '<option value="{0}">{1} - {2} &lt;{3}&gt;</option>'.format(
+						value.id,
+						fecha,
+						value.especialidad,
+						value.especialista);
+		});
+		destino.empty().append(options);
+		destino.focus();
 	},
 	mostrarDatosReserva: function(id) {
 		reserva = this.__obtenerReserva(id);
