@@ -4,6 +4,8 @@ from datetime import date, timedelta, datetime, time
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Count
+from django.db.models import Q
+from django.conf import settings
 from turnos.models import *
 
 import logging
@@ -127,12 +129,11 @@ class Bussiness():
             e = TurnoNotExistsException("Turno ID '%s' inexistente" % turno_id)
             self.__lanzar(e)
         turno = Turno.objects.get(id=turno_id)
-        logger.debug(turno)
         if turno.estado == Turno.RESERVADO:
             e = TurnoReservadoException("Turno ID '%s' ya se encuentra reservado" % turno_id)
             self.__lanzar(e)
-        if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)):
-            e = ReservaTurnoException, "No se pueden reservar turnos anteriores a la fecha actual"
+        if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)) and not settings.DEBUG:
+            e = ReservaTurnoException("No se pueden reservar turnos anteriores a la fecha actual")
             self.__lanzar(e)
         return turno
     def contarFaltas(self, afiliado_id):
@@ -171,11 +172,11 @@ class Bussiness():
         base = a_partir_de = a_partir_de.date()
         aux = cantidad_dias
         today = date.today()
-        while aux > 0:
+        while aux >= 0:
             for disponibilidad in disponibilidades:
                 dia = self.__proximoDia(int(disponibilidad.dia), base)
                 diff = dia - today
-                if diff.days <= cantidad_dias:
+                if diff.days < cantidad_dias:
                     turnos += self.__crear_turnos_del_dia(disponibilidad, dia)
             # Avanzamos de semana
             aux -= 7
@@ -324,6 +325,34 @@ class Bussiness():
             e = CancelarReservaException(u"No se puede cancelar una reserva con estado distinto a reservado")
             self.__lanzar(e)
         return linea_reserva
+    @transaction.commit_on_success()
+    def cancelar_turnos(self, ee, dia, empleado=None):
+        """Cancela los turnos del especialista para el dia especificado. Devuelve una lista de reservas
+        que posean turnos reservados para ese dia"""
+        logger.info('Cancelando los turnos del especialista %s en el dia %s'%(ee, dia))
+        self.__validar_cancelacion_turno(ee, dia)
+        turnos = Turno.objects.filter(
+                   Q(fecha__day=dia.day),
+                   Q(fecha__month=dia.month),
+                   Q(fecha__year=dia.year),
+                   Q(ee=ee), 
+                   Q(estado=Turno.RESERVADO) | Q(estado=Turno.DISPONIBLE))
+        lineas = LineaDeReserva.objects.filter(turno__in=turnos)
+        reservas = [lr.reserva for lr in lineas]
+        for turno in turnos:
+            HistorialTurno.objects.create(estadoAnterior=turno.estado,
+                                          estadoNuevo=Turno.CANCELADO,
+                                          descripcion="Se cancelaron todos los turnos del dia",
+                                          turno=turno,
+                                          empleado=empleado)
+        turnos.update(estado=Turno.CANCELADO)
+        return reservas
+    def __validar_cancelacion_turno(self, ee, dia):
+        if isinstance(dia, datetime):
+            dia=dia.date()
+        if (dia - date.today()).days < 0:
+            e = CancelarTurnoException(u"No se puede cancelar turnos de un día anterior ala fecha actual")
+            self.__lanzar(e)
 class TurnosAppException(Exception):
     def __init__(self, message=None, more_info=None, prev=None):
         self.message = message
@@ -343,3 +372,6 @@ class ConfirmarReservaException(TurnosAppException):
     pass
 class CancelarReservaException(TurnosAppException):
     pass
+class CancelarTurnoException(TurnosAppException):
+    pass
+

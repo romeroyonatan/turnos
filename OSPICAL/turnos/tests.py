@@ -259,6 +259,9 @@ class ReservarTurnoTest(TestCase):
         linea_inexistente=4000
         with self.assertRaises(ConfirmarReservaException):
             b.confirmar_reserva([linea_inexistente])
+class CancelarReservaTest(TestCase):
+    """Esta clase agrupa las pruebas de cancelacion de reservas"""
+    fixtures = ['turnos.json']
     def testCancelarReserva(self):
         """Verifica que se cancelen las reservas correctamente"""
         afiliado_id = 1
@@ -287,6 +290,173 @@ class ReservarTurnoTest(TestCase):
         linea_inexistente=4000
         with self.assertRaises(CancelarReservaException):
             b.cancelar_reserva(linea_inexistente)
+
+class CancelarTurnoTest(TestCase):
+    """Esta clase agrupa las pruebas de cancelacion de turnos"""
+    fixtures = ['turnos.json']
+    def testCancelarTurnosSinTurnosCreados(self):
+        """Prueba cancelar turnos de un dia antes de que se creen. Debe devolver una lista vacia"""
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        fecha = timezone.now() + timedelta(days=1)
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        self.assertEquals(len(cancelados),0)
+    def testCancelarTurnosSinTurnosReservados(self):
+        """Prueba cancelar turnos de un dia sin ningun turno reservado. Debe devolver una lista vacia
+        y los turnos de ese dia debe estar con el estado CANCELADO"""
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        fecha = timezone.now().date()
+        turnos = b.crear_turnos_del_especialista(ee, 1)
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        for turno in turnos:
+            t = Turno.objects.get(id=turno.id)
+            self.assertEquals(t.estado, Turno.CANCELADO)
+        self.assertFalse(cancelados)
+    def testCancelarTurnosUnoReservados(self):
+        """Prueba cancelar turnos de un dia con un turno reservado. Debe devolver una lista con la reserva
+        que relacionada con el turno reservado y los turnos de ese dia debe estar con el 
+        estado CANCELADO"""
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        fecha = timezone.now().date()
+        turnos = b.crear_turnos_del_especialista(ee, 1)
+        reserva = b.reservarTurnos(1, '12345678', [turnos[0].id])
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        for turno in turnos:
+            t = Turno.objects.get(id=turno.id)
+            self.assertEquals(t.estado, Turno.CANCELADO)
+        self.assertEquals(reserva.id, cancelados[0].id)
+    def testCancelarTurnosTodosReservadosUnaReserva(self):
+        """Prueba cancelar turnos de un diacon todos los turnos reservados en una reserva. Debe devolver una lista 
+        con una unica reserva y los turnos de ese dia debe estar con el estado CANCELADO"""
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        fecha = timezone.now().date()
+        turnos = b.crear_turnos_del_especialista(ee, 1)
+        reserva = b.reservarTurnos(1, '12345678', [turno.id for turno in turnos])
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        for turno in turnos:
+            t = Turno.objects.get(id=turno.id)
+            self.assertEquals(t.estado, Turno.CANCELADO)
+        for cancelado in cancelados:
+            self.assertEquals(reserva.id, cancelado.id)
+    def testCancelarTurnosTodosReservados(self):
+        """Prueba cancelar turnos de un di acon todos los turnos reservados en varias reserva. Debe 
+        devolver una lista con las reservas que esten relacionados con los turnos reservados y 
+        los turnos de ese dia debe estar con el estado CANCELADO"""
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        fecha = timezone.now().date()
+        turnos = b.crear_turnos_del_especialista(ee, 1)
+        reservas = list()
+        for turno in turnos:
+            reservas.append(b.reservarTurnos(1, '12345678', [turno.id]))
+        ids_reservas = [reserva.id for reserva in reservas]
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        for turno in turnos:
+            t = Turno.objects.get(id=turno.id)
+            self.assertEquals(t.estado, Turno.CANCELADO)
+        for cancelado in cancelados:
+            self.assertIn(cancelado.id, ids_reservas)
+    def testCancelarTurnosConPresentes(self):
+        """Prueba cancelar turnos de un dia con algunos turnos con estado PRESENTE. 
+        Debe devolver una lista con las reservas que esten relacionados con los turnos 
+        reservados y los turnos reservados de ese dia debe estar con el estado CANCELADO.
+        Los turnos con estados presente deben mantener su estado"""
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        fecha = timezone.now().date()
+        # Creo los turnos
+        turnos = b.crear_turnos_del_especialista(ee, 1)
+        # Reservo todos los turnos
+        reservas = list()
+        for turno in turnos:
+            reservas.append(b.reservarTurnos(1, '12345678', [turno.id]))
+        # Obtengo una linea de reserva y la confirmo
+        lr = LineaDeReserva.objects.get(reserva__id=reservas[0].id)
+        b.confirmar_reserva([lr.id])
+        # Cancelo los turnos
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        ids_cancelados = [cancelado.id for cancelado in cancelados]
+        # Verifico que todo sea correcto
+        for turno in turnos[1:]:
+            t = Turno.objects.get(id=turno.id)
+            self.assertEquals(t.estado, Turno.CANCELADO)
+        self.assertNotIn(reservas[0].id, ids_cancelados)
+        lr = LineaDeReserva.objects.get(reserva__id=reservas[0].id)
+        self.assertEquals(lr.turno.estado, Turno.PRESENTE)
+    def testCancelarTurnosConCancelados(self):
+        """Prueba cancelar turnos de un dia con todos los turnos con estado CANCELADO. 
+        Debe devolver una lista vacia y los turnos no deben cambiar de estado"""
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        fecha = timezone.now().date()
+        # Creo los turnos
+        turnos = b.crear_turnos_del_especialista(ee, 1)
+        # Reservo todos los turnos
+        reservas = list()
+        for turno in turnos:
+            reservas.append(b.reservarTurnos(1, '12345678', [turno.id]))
+        # Cancelo los turnos dos veces
+        b.cancelar_turnos(ee.especialista.id, fecha)
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        # Verifico que todo sea correcto
+        for turno in turnos[1:]:
+            t = Turno.objects.get(id=turno.id)
+            self.assertEquals(t.estado, Turno.CANCELADO)
+        self.assertFalse(cancelados)
+    def testCancelarTurnosConAusentes(self):
+        """Prueba cancelar turnos de un dia con algunos turnos con estado AUSENTE. 
+        Debe devolver una lista con las reservas de los turnos con estado RESERVADO 
+        y los turnos con estado AUSENTE no deben cambiar de estado"""
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        fecha = timezone.now().date()
+        # Creo los turnos
+        turnos = b.crear_turnos_del_especialista(ee, 1)
+        # Reservo todos los turnos
+        reservas = list()
+        for turno in turnos:
+            reservas.append(b.reservarTurnos(1, '12345678', [turno.id]))
+        # Obtengo una linea de reserva y la pongo como ausente
+        lr = LineaDeReserva.objects.get(reserva__id=reservas[0].id)
+        lr.turno.estado = Turno.AUSENTE
+        lr.estado = Turno.AUSENTE
+        lr.turno.save()
+        lr.save()
+        # Cancelo los turnos
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        ids_cancelados = [cancelado.id for cancelado in cancelados]
+        # Verifico que todo sea correcto
+        for turno in turnos[1:]:
+            t = Turno.objects.get(id=turno.id)
+            self.assertEquals(t.estado, Turno.CANCELADO)
+        self.assertNotIn(reservas[0].id, ids_cancelados)
+        lr = LineaDeReserva.objects.get(reserva__id=reservas[0].id)
+        self.assertEquals(lr.turno.estado, Turno.AUSENTE)
+    def testCancelarTurnosDistintoDiaDisponible(self):
+        """Prueba cancelar turnos de un dia distinto al dia que atiende el especialista"""
+        fecha = timezone.now().date()
+        es=Especialidad.objects.create(descripcion="Clinico")
+        e=Especialista.objects.create(nombre='n1',apellido='n1',dni=1234)
+        ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es)
+        Disponibilidad.objects.create(dia=fecha.weekday() + 1,horaDesde="10:00",horaHasta="13:00",ee=ee)
+        # Creo los turnos
+        b.crear_turnos_del_especialista(ee, 1)
+        # Cancelo los turnos
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        self.assertFalse(cancelados)
+    def testCancelarTurnosAnteriores(self):
+        """Prueba cancelar turnos de un dia anterior a la fecha actual. 
+        Debe devolver una excepcion CancelarTurnoException"""
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        fecha = timezone.now() + timedelta(days=-1)
+        # Creo los turnos
+        turnos = b.crear_turnos_del_especialista(ee, 1)
+        # Cambio la fecha a los turnos
+        for turno in turnos:
+            turno.fecha=fecha
+            turno.save()
+        # Cancelo los turnos
+        with self.assertRaises(CancelarTurnoException):
+            b.cancelar_turnos(ee.especialista.id, fecha)
+        turnos = Turno.objects.filter(ee=ee, fecha = fecha)
+        for turno in turnos:
+            t = Turno.objects.get(id=turno.id)
+            self.assertEquals(t.estado, Turno.DISPONIBLE)
 class CrearTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de crear turnos"""
     fixtures = ['turnos.json']
@@ -410,13 +580,9 @@ class CrearTurnoTest(TestCase):
         turnos = b.crear_turnos()
         t1 = Turno.objects.filter(ee__especialista=e1)
         t2 = Turno.objects.filter(ee__especialista=e2)
-        logger.debug("t1 %s"%t1)
-        logger.debug("t2 %s"%t2)
         self.assertGreater(turnos, 0)
         self.assertGreater(len(t1), 0)
         self.assertGreater(len(t2), 0)
-        
-
 class TestValidadores(TestCase):
     def testLongitud(self):
         """Prueba que el validador funcione cuando una contraseña es menor a la longitud permitida"""
