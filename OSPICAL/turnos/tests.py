@@ -457,6 +457,23 @@ class CancelarTurnoTest(TestCase):
         for turno in turnos:
             t = Turno.objects.get(id=turno.id)
             self.assertEquals(t.estado, Turno.DISPONIBLE)
+    def testFatiga(self):
+        """Prueba cancelar la mayor cantidad de turnos de un especialista"""
+        fecha = timezone.now()
+        es=Especialidad.objects.create(descripcion="Clinico")
+        e=Especialista.objects.create(nombre='n1',apellido='n1',dni=1234)
+        ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es)
+        Disponibilidad.objects.create(dia=fecha.weekday(),horaDesde="00:00",horaHasta="23:59",ee=ee)
+        # Creo los turnos
+        turnos = b.crear_turnos_del_especialista(ee, 1)
+        # Reservo todos los turnos
+        logger.debug('turnos %s'%turnos)
+        reservas = list()
+        for turno in turnos:
+            reservas.append(b.reservarTurnos(1, '12345678', [turno.id]))
+        # Cancelo los turnos
+        cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+        self.assertEquals(len(reservas), len(cancelados))
 class CrearTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de crear turnos"""
     fixtures = ['turnos.json']

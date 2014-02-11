@@ -132,7 +132,7 @@ class Bussiness():
         if turno.estado == Turno.RESERVADO:
             e = TurnoReservadoException("Turno ID '%s' ya se encuentra reservado" % turno_id)
             self.__lanzar(e)
-        if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)) and not settings.DEBUG:
+        if turno.fecha < (timezone.now()-timedelta(minutes=self.MINUTOS)) and settings.DEBUG:
             e = ReservaTurnoException("No se pueden reservar turnos anteriores a la fecha actual")
             self.__lanzar(e)
         return turno
@@ -345,7 +345,8 @@ class Bussiness():
                                           descripcion="Se cancelaron todos los turnos del dia",
                                           turno=turno,
                                           empleado=empleado)
-        turnos.update(estado=Turno.CANCELADO)
+        cancelados = turnos.update(estado=Turno.CANCELADO)
+        logger.info('Se cancelaron %s turnos'%cancelados)
         return reservas
     def __validar_cancelacion_turno(self, ee, dia):
         if isinstance(dia, datetime):
