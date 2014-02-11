@@ -36,7 +36,7 @@ function cambiaEspecialista() {
 		if(data.length > 0) {
 			destino.removeAttr('disabled');
 			var options = "";
-			var disponible=0;
+			var disponible=-1;
 			$.each(data,function(index, value){
 				var estado = ESTADOS[value.estado] ? "["+ESTADOS[value.estado]+"] " : "";
 				var milis = value.fecha * 1000;
@@ -48,7 +48,7 @@ function cambiaEspecialista() {
 						MES[fecha.getMonth()],
 						estado);
 				// Busco el primer dia que posea turnos disponibles
-				disponible = disponible == 0 && value.estado === null ? index : disponible;
+				disponible = disponible == -1 && value.estado === null ? index : disponible;
 			});
 			destino.empty().append(options);
 			destino.focus();
