@@ -1,0 +1,54 @@
+{% extends "site/application.html" %}
+{% load static %}
+{% block title %}Cancelar turnos{% endblock %}
+
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/turno.cancelar.turnos.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="pure-form pure-form-aligned">
+	{% csrf_token %}
+	<fieldset>	
+		<legend>Cancelar turnos por fecha</legend>	
+		<div class="pure-control-group">
+			<label for="id_especialidad">{{ form.especialidad.label }}</label>
+			{{ form.especialidad.errors }}
+			{{ form.especialidad }}
+		</div>
+		<div class="pure-control-group">
+			<label for="id_especialista">{{ form.especialista.label }}</label>
+			{{ form.especialista.errors }}
+			{{ form.especialista }}
+		</div>
+		<div class="pure-control-group">
+			<label for="id_fecha">{{ form.fecha.label }}</label>
+			{{ form.fecha.errors }}
+			{{ form.fecha }}
+		</div>
+	</fieldset>
+	
+	<fieldset id="id_lista_reservas" class="pure-u-1">
+		<legend>Lista de reservas</legend>
+			<table id="id_table_reservas" class="pure-table">
+				<thead>
+					<tr>
+						<th>Hora de turno</th>
+						<th>Fecha de reserva</th>
+						<th>Numero de afiliado</th>
+						<th>Nombre y apellido del afiliado</th>
+						<th>Teléfono de contacto</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+	</fieldset>
+	<div id="id_messages"></div>
+	
+	<div class="pure-controls">
+		<input type="submit" value="Cancelar turnos" class="pure-button pure-button-primary"/>
+	</div>
+</form>
+{% endblock %}

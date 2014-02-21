@@ -20,10 +20,12 @@ MESSAGE_ID_INEXISTENTE_DESCRIPCION = "Identificador de usuario inexistente";
 MESSAGE_SIN_TURNOS_RESERVADOS_HOY = "El afiliado no posee turnos reservados para hoy, o los mismos ya fueron considerados como ausente"
 MESSAGE_SIN_TURNOS_RESERVADOS_HOY_TITLE= "No se encuentran turnos reservados para hoy"
 MESSAGE_PRESENTISMO = "El afiliado ha faltado a muchos turnos en los ultimos meses";
-MESSAGES_NO_ASIGNADO = "No asignado"
+MESSAGES_NO_ASIGNADO = "No asignado";
+MESSAGE_RESERVAS = "Hay {0} turnos reservados";
+MESSAGE_NO_RESERVAS = "No hay turnos reservados para este día";
 DIA=["Domingo", "Lunes", "Martes", "Miércoles", "Jueves","Viernes","Sábado"];
 MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
-ESTADOS={C:"Completo",S:"Sobreturno"};
+ESTADOS={C:"Completo",S:"Sobreturno",X:"Cancelado"};
 
 
 //////////////////////////////////////////////////////////////////////////////////

@@ -23,6 +23,7 @@ c.save()
 
 r = Permission.objects.get(codename="reservar_turnos")
 c = Permission.objects.get(codename="crear_turnos")
+ct = Permission.objects.get(codename="cancelar_turnos")
 p = Permission.objects.get(codename="add_user")
 user = User.objects.create_user(username='operador',
                                  email='operador@ospical.org.ar',

@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Permission
-from turnos.models import Especialidad, Empleado
+from turnos.models import Especialidad, Empleado, Especialista
 from turnos.validators import PasswordValidator
 from django.utils.translation import ugettext_lazy as _
 import logging
@@ -32,10 +32,14 @@ class CrearTurnoForm(forms.Form):
 class RegistrarUsuarioForm(UserCreationForm):
     CREAR_TURNO = "crear_turnos"
     RESERVAR_TURNO = "reservar_turnos"
+    CANCELAR_RESERVA = "cancelar_reserva"
+    CANCELAR_TURNOS = "cancelar_turnos"
     CREAR_USUARIOS = "add_user"
-    PERMISOS = ((CREAR_TURNO,"Crear turnos"),
-                (RESERVAR_TURNO,"Reservar turnos"),
-                (CREAR_USUARIOS, "Crear usuarios"))
+    PERMISOS = ((RESERVAR_TURNO,"Reservar turnos"),
+                (CANCELAR_RESERVA,"Cancelar reservas"),
+                (CREAR_TURNO,"Crear turnos"),
+                (CANCELAR_TURNOS, "Cancelar turnos"),
+                (CREAR_USUARIOS, "Crear usuarios"),)
     password1 = forms.CharField(label=_("Password"),
                                 widget=forms.PasswordInput,
                                 validators=[PasswordValidator(lower=True,number=True,min_length=6)],
@@ -76,3 +80,8 @@ class CancelarReservaForm(forms.Form):
     # XXX:Esta asi para que no me valide lo que envio el usuario con las opciones especificadas
     # dado que lo completo mediante ajax
     turnos = forms.CharField(widget=forms.Select(choices=choices))
+class CancelarTurnoForm(forms.Form):
+    especialidad = forms.ModelChoiceField(queryset=Especialidad.objects.all())
+    especialista = forms.ModelChoiceField(queryset=Especialista.objects.all(),
+                                          widget=forms.Select(attrs={'disabled':'disabled'}))
+    fecha = forms.IntegerField(widget=forms.Select(attrs={'disabled':'disabled'}))

@@ -48,7 +48,8 @@ class Especialista(models.Model):
         return "%s" % model_to_dict(self)
     def full_name(self):
         return "%s, %s" % (self.apellido, self.nombre)
-    
+    def __unicode__(self):
+        return u'%s' % self.full_name()
 class EspecialistaEspecialidad(models.Model):
     unique_together = ("especialista", "especialidad")
     especialista = models.ForeignKey(Especialista)
@@ -117,6 +118,7 @@ class Turno (models.Model):
             # Permission identifier     human-readable permission name
             ("crear_turnos",                  "Crear turnos"),
             ("reservar_turnos",               "Reservar turnos"),
+            ("cancelar_turnos",               "Cancelar turnos"),
         )
         
 class LineaDeReserva (models.Model):

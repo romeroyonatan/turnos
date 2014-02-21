@@ -26,6 +26,12 @@
 						Crear turnos
 						</a>
 					{% endif %}
+					{% if perms.turnos.cancelar_turnos %}
+						<a href="{% url 'turnos.views.cancelar_turnos' %}"
+						   title="Permite cancelar turno de un especialista">
+						Cancelar turnos
+						</a>
+					{% endif %}
 				</li>
 				{% if perms.auth.add_user %}
 				<li class="menu-item-divided">

@@ -311,6 +311,7 @@ class CancelarTurnoTest(TestCase):
             t = Turno.objects.get(id=turno.id)
             self.assertEquals(t.estado, Turno.CANCELADO)
         self.assertFalse(cancelados)
+        self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
     def testCancelarTurnosUnoReservados(self):
         """Prueba cancelar turnos de un dia con un turno reservado. Debe devolver una lista con la reserva
         que relacionada con el turno reservado y los turnos de ese dia debe estar con el 
@@ -324,6 +325,7 @@ class CancelarTurnoTest(TestCase):
             t = Turno.objects.get(id=turno.id)
             self.assertEquals(t.estado, Turno.CANCELADO)
         self.assertEquals(reserva.id, cancelados[0].id)
+        self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
     def testCancelarTurnosTodosReservadosUnaReserva(self):
         """Prueba cancelar turnos de un diacon todos los turnos reservados en una reserva. Debe devolver una lista 
         con una unica reserva y los turnos de ese dia debe estar con el estado CANCELADO"""
@@ -337,6 +339,7 @@ class CancelarTurnoTest(TestCase):
             self.assertEquals(t.estado, Turno.CANCELADO)
         for cancelado in cancelados:
             self.assertEquals(reserva.id, cancelado.id)
+        self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
     def testCancelarTurnosTodosReservados(self):
         """Prueba cancelar turnos de un di acon todos los turnos reservados en varias reserva. Debe 
         devolver una lista con las reservas que esten relacionados con los turnos reservados y 
@@ -354,6 +357,7 @@ class CancelarTurnoTest(TestCase):
             self.assertEquals(t.estado, Turno.CANCELADO)
         for cancelado in cancelados:
             self.assertIn(cancelado.id, ids_reservas)
+        self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
     def testCancelarTurnosConPresentes(self):
         """Prueba cancelar turnos de un dia con algunos turnos con estado PRESENTE. 
         Debe devolver una lista con las reservas que esten relacionados con los turnos 
@@ -380,6 +384,7 @@ class CancelarTurnoTest(TestCase):
         self.assertNotIn(reservas[0].id, ids_cancelados)
         lr = LineaDeReserva.objects.get(reserva__id=reservas[0].id)
         self.assertEquals(lr.turno.estado, Turno.PRESENTE)
+        self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
     def testCancelarTurnosConCancelados(self):
         """Prueba cancelar turnos de un dia con todos los turnos con estado CANCELADO. 
         Debe devolver una lista vacia y los turnos no deben cambiar de estado"""
@@ -399,6 +404,7 @@ class CancelarTurnoTest(TestCase):
             t = Turno.objects.get(id=turno.id)
             self.assertEquals(t.estado, Turno.CANCELADO)
         self.assertFalse(cancelados)
+        self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
     def testCancelarTurnosConAusentes(self):
         """Prueba cancelar turnos de un dia con algunos turnos con estado AUSENTE. 
         Debe devolver una lista con las reservas de los turnos con estado RESERVADO 
@@ -427,6 +433,7 @@ class CancelarTurnoTest(TestCase):
         self.assertNotIn(reservas[0].id, ids_cancelados)
         lr = LineaDeReserva.objects.get(reserva__id=reservas[0].id)
         self.assertEquals(lr.turno.estado, Turno.AUSENTE)
+        self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
     def testCancelarTurnosDistintoDiaDisponible(self):
         """Prueba cancelar turnos de un dia distinto al dia que atiende el especialista"""
         fecha = timezone.now().date()
@@ -457,6 +464,7 @@ class CancelarTurnoTest(TestCase):
         for turno in turnos:
             t = Turno.objects.get(id=turno.id)
             self.assertEquals(t.estado, Turno.DISPONIBLE)
+        self.assertFalse(b._Bussiness__isCancelado(ee.id,fecha))
     def testFatiga(self):
         """Prueba cancelar la mayor cantidad de turnos de un especialista"""
         fecha = timezone.now()
@@ -474,6 +482,7 @@ class CancelarTurnoTest(TestCase):
         # Cancelo los turnos
         cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
         self.assertEquals(len(reservas), len(cancelados))
+        self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
 class CrearTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de crear turnos"""
     fixtures = ['turnos.json']

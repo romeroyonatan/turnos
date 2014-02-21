@@ -31,7 +31,7 @@ class MyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 def JSONResponse(response):
-    return HttpResponse(json.dumps(response, cls=MyEncoder), content_type="application/json")
+    return HttpResponse(json.dumps(response, cls=MyEncoder), content_type="application/json; charset=utf-8")
 
 @login_required
 @permission_required('turnos.reservar_turnos', raise_exception=True)
@@ -110,7 +110,7 @@ def getEspecialistas(request, especialidad_id):
 @login_required
 def getTurnosDisponibles(request, especialista_id, year, month, day):
     bussiness = Bussiness()
-    fecha = datetime.datetime(int(year), int(month), int(day))
+    fecha = datetime.date(int(year), int(month), int(day))
     data = bussiness.getTurnosDisponibles(especialista_id, fecha)
     return JSONResponse(data)
 
@@ -202,4 +202,40 @@ def cancelar_reserva(request):
             return HttpResponseRedirect(request.path)
     else:
         form = CancelarReservaForm()
-    return render(request, "turno/cancelar.html", locals())
+    return render(request, "turno/cancelar_reserva.html", locals())
+
+@login_required
+@permission_required('turnos.cancelar_turnos', raise_exception=True)
+def cancelar_turnos(request):
+    if request.method == 'POST':
+        form = CancelarTurnoForm(request.POST)
+        if form.is_valid():
+            ee = EspecialistaEspecialidad.objects.filter(especialidad=form.cleaned_data["especialista"],
+                                                         especialista=form.cleaned_data["especialidad"])
+            if ee:
+                ee = ee[0]
+                b = Bussiness()
+                fecha = datetime.date.fromtimestamp(form.cleaned_data["fecha"]/1000)
+                cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
+                messages.success(request, u'%s turnos cancelados' % len(cancelados))
+                return HttpResponseRedirect(request.path)
+            else:
+                messages.error(request, u'La combinacion de especialidad y especialista no coincide')
+    else:
+        form = CancelarTurnoForm()
+    return render(request, "turno/cancelar_turnos.html", locals())
+
+@login_required
+def get_reservas_especialista(request, especialidad, especialista, year, month, day):
+    b = Bussiness()
+    ee = EspecialistaEspecialidad.objects.filter(especialidad=especialidad,
+                                                 especialista=especialista)
+    fecha = datetime.date(int(year), int(month), int(day))
+    lineas = b.get_reserva_especialista(ee, fecha)
+    data = [{"fecha_reserva": lr.reserva.fecha,
+             "fecha_turno": lr.turno.fecha,
+             "afiliado":lr.reserva.afiliado.full_name(),
+             "numero": lr.reserva.afiliado.numero,
+             "telefono": lr.reserva.telefono,
+             } for lr in lineas]
+    return JSONResponse(data)

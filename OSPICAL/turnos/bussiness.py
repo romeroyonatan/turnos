@@ -63,10 +63,11 @@ class Bussiness():
                                         fecha__gte=timezone.now()).datetimes('fecha', 'day')[:self.DIAS*2]
         for fecha in queryset:
             estado = None
-            if self.__isCompleto(especialista, fecha):
+            if self.__isCancelado(especialista, fecha):
+                estado = 'X'
+            elif self.__isCompleto(especialista, fecha):
                 estado = 'C'
-            else:
-                if self.__haySobreturnos(especialista, fecha):
+            elif self.__haySobreturnos(especialista, fecha):
                     estado = 'S'
             data.append({'fecha':fecha, 'estado':estado})
         return data
@@ -76,6 +77,13 @@ class Bussiness():
         filtro = self.__getFiltroFecha(especialista, fecha)
         query = Turno.objects.filter(**filtro).only("id")
         return not query.exists()
+    def __isCancelado(self, especialista, fecha):
+        """ Verifica si los turnos del dia fueron cancelados 
+        el especialista"""
+        filtro = self.__getFiltroFecha(especialista, fecha)
+        filtro['estado'] = Turno.CANCELADO
+        query = Turno.objects.filter(**filtro).only("id")
+        return query.exists()
     def __getFiltroFecha(self, especialista, fecha):
         """Devuelve un filtro para buscar los turnos disponibles del especialista 
         en una fecha determinada"""
@@ -325,6 +333,14 @@ class Bussiness():
             e = CancelarReservaException(u"No se puede cancelar una reserva con estado distinto a reservado")
             self.__lanzar(e)
         return linea_reserva
+    def get_reserva_especialista(self, ee, dia):
+        """Obtiene las lineas de reservas de un especialista para una fecha particular"""
+        return LineaDeReserva.objects.filter(turno__fecha__day=dia.day,
+                                      turno__fecha__month=dia.month,
+                                      turno__fecha__year=dia.year,
+                                      turno__ee=ee,
+                                      turno__estado=Turno.RESERVADO,)
+        
     @transaction.commit_on_success()
     def cancelar_turnos(self, ee, dia, empleado=None):
         """Cancela los turnos del especialista para el dia especificado. Devuelve una lista de reservas
