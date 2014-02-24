@@ -22,7 +22,7 @@ c=Consultorio(numero='1',disponible=True)
 c.save()
 
 r = Permission.objects.get(codename="reservar_turnos")
-c = Permission.objects.get(codename="crear_turnos")
+creart = Permission.objects.get(codename="crear_turnos")
 ct = Permission.objects.get(codename="cancelar_turnos")
 p = Permission.objects.get(codename="add_user")
 user = User.objects.create_user(username='operador',
@@ -37,7 +37,7 @@ em.save()
 es=Especialista(nombre=u'María de los ángeles', apellido=u'Fernández',dni=11559977)
 es.save()
 
-ee=EspecialistaEspecialidad(especialista=es, especialidad=e)
+ee=EspecialistaEspecialidad(especialista=es, especialidad=e, frecuencia_turnos=15)
 ee.save()
 
 d=Disponibilidad(dia='0',horaDesde='12:30',horaHasta='19:00', ee = ee, consultorio=c)

@@ -14,7 +14,7 @@ b = Bussiness()
 
 class ReservarTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de reservar turnos"""
-    fixtures = ['turnos.json']
+    fixtures = ['test.json']
     def setUp(self):
         TestCase.setUp(self)
     def testGetDiasTurnos(self):
@@ -261,7 +261,7 @@ class ReservarTurnoTest(TestCase):
             b.confirmar_reserva([linea_inexistente])
 class CancelarReservaTest(TestCase):
     """Esta clase agrupa las pruebas de cancelacion de reservas"""
-    fixtures = ['turnos.json']
+    fixtures = ['test.json']
     def testCancelarReserva(self):
         """Verifica que se cancelen las reservas correctamente"""
         afiliado_id = 1
@@ -293,7 +293,7 @@ class CancelarReservaTest(TestCase):
 
 class CancelarTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de cancelacion de turnos"""
-    fixtures = ['turnos.json']
+    fixtures = ['test.json']
     def testCancelarTurnosSinTurnosCreados(self):
         """Prueba cancelar turnos de un dia antes de que se creen. Debe devolver una lista vacia"""
         ee = EspecialistaEspecialidad.objects.get(id=1)
@@ -485,7 +485,7 @@ class CancelarTurnoTest(TestCase):
         self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
 class CrearTurnoTest(TestCase):
     """Esta clase agrupa las pruebas de crear turnos"""
-    fixtures = ['turnos.json']
+    fixtures = ['test.json']
     def testUnDia(self):
         """Crea turnos para un dia. Debe devolver una lista con mas de un turno"""
         ee = EspecialistaEspecialidad.objects.get(id=1)
@@ -609,6 +609,21 @@ class CrearTurnoTest(TestCase):
         self.assertGreater(turnos, 0)
         self.assertGreater(len(t1), 0)
         self.assertGreater(len(t2), 0)
+    def testDistintaFrecuencia(self):
+        """Prueba el algoritmo de creacion de turnos cambiando la frecuencia en minutos de cada turno"""
+        FRECUENCIA = 1 # minutos
+        es=Especialidad.objects.create(descripcion="Oftamologia")
+        e=Especialista.objects.create(nombre='n2',apellido='n2',dni=12345)
+        ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es, frecuencia_turnos=FRECUENCIA)
+        Disponibilidad.objects.create(dia='0',horaDesde="10:00",horaHasta="13:00",ee=ee)
+        creados = b.crear_turnos()
+        turnos = Turno.objects.filter(ee__especialista=e).order_by('-fecha')
+        self.assertGreater(creados, 0)
+        # Verificamos la diferencia en minutos de cada turno
+        for i in range(len(turnos) - 1):
+            diff = turnos[i].fecha - turnos[i+1].fecha
+            minutos = (diff.seconds % 3600) // 60
+            self.assertEqual(minutos, FRECUENCIA)
 class TestValidadores(TestCase):
     def testLongitud(self):
         """Prueba que el validador funcione cuando una contraseña es menor a la longitud permitida"""

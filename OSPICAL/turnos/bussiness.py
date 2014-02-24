@@ -209,7 +209,7 @@ class Bussiness():
                                 sobreturno=False,
                                 consultorio=disponibilidad.consultorio,
                                 ee=disponibilidad.ee))
-            desde += timedelta(minutes=self.MINUTOS)
+            desde += timedelta(minutes=disponibilidad.ee.frecuencia_turnos)
         return turnos
     def __proximoDia(self, dia, desde = timezone.now().date()):
         """Obtiene el proximo dia de la semana a partir de otro dia"""

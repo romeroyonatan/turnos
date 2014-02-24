@@ -54,6 +54,7 @@ class EspecialistaEspecialidad(models.Model):
     unique_together = ("especialista", "especialidad")
     especialista = models.ForeignKey(Especialista)
     especialidad = models.ForeignKey(Especialidad)
+    frecuencia_turnos = models.SmallIntegerField()
     fechaBaja = models.DateField(null=True)
     def __str__(self):
         return "%s" % model_to_dict(self)

@@ -4,7 +4,7 @@
     "model": "turnos.afiliado", 
     "fields": {
         "nombre": "Yonatan", 
-        "dni": 12345678, 
+        "dni": 36542356, 
         "apellido": "Romero", 
         "numero": "000100020003"
     }
@@ -17,6 +17,16 @@
         "dni": 12345678, 
         "apellido": "Perez", 
         "numero": "000100020033"
+    }
+},
+{
+    "pk": 3, 
+    "model": "turnos.afiliado", 
+    "fields": {
+        "nombre": "Otro duplicado", 
+        "dni": 12345678, 
+        "apellido": "Lopez", 
+        "numero": "000100020004"
     }
 },
 {
@@ -46,174 +56,12 @@
     }
 },
 {
-    "pk": 2, 
-    "model": "turnos.empleado", 
-    "fields": {
-        "dni": 2332233, 
-        "user": 2
-    }
-},
-{
-    "pk": 3, 
-    "model": "turnos.empleado", 
-    "fields": {
-        "dni": 1122334455, 
-        "user": 3
-    }
-},
-{
-    "pk": 4, 
-    "model": "turnos.empleado", 
-    "fields": {
-        "dni": 12345678, 
-        "user": 4
-    }
-},
-{
-    "pk": 5, 
-    "model": "turnos.empleado", 
-    "fields": {
-        "dni": 12345674, 
-        "user": 5
-    }
-},
-{
-    "pk": 6, 
-    "model": "turnos.empleado", 
-    "fields": {
-        "dni": 36542356, 
-        "user": 6
-    }
-},
-{
-    "pk": 7, 
-    "model": "turnos.empleado", 
-    "fields": {
-        "dni": 123, 
-        "user": 7
-    }
-},
-{
-    "pk": 8, 
-    "model": "turnos.empleado", 
-    "fields": {
-        "dni": 1122332211, 
-        "user": 8
-    }
-},
-{
-    "pk": 9, 
-    "model": "turnos.empleado", 
-    "fields": {
-        "dni": 1231123, 
-        "user": 9
-    }
-},
-{
-    "pk": 10, 
-    "model": "turnos.empleado", 
-    "fields": {
-        "dni": 123456782, 
-        "user": 10
-    }
-},
-{
     "pk": 1, 
     "model": "turnos.reserva", 
     "fields": {
-        "fecha": "2014-01-21T17:02:44.094Z", 
+        "fecha": "2014-02-24T12:35:49.453Z", 
         "afiliado": 1, 
         "telefono": "41234345"
-    }
-},
-{
-    "pk": 2, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-01-27T17:10:26.480Z", 
-        "afiliado": 1, 
-        "telefono": "41234345"
-    }
-},
-{
-    "pk": 3, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-01-27T17:10:39.786Z", 
-        "afiliado": 1, 
-        "telefono": "41234345"
-    }
-},
-{
-    "pk": 4, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-01-30T12:35:38.590Z", 
-        "afiliado": 1, 
-        "telefono": "41234345"
-    }
-},
-{
-    "pk": 5, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-01-30T14:09:19.804Z", 
-        "afiliado": 1, 
-        "telefono": "46201009"
-    }
-},
-{
-    "pk": 6, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-01-30T16:20:51.704Z", 
-        "afiliado": 1, 
-        "telefono": "46201009"
-    }
-},
-{
-    "pk": 7, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-02-03T13:59:16.463Z", 
-        "afiliado": 1, 
-        "telefono": "46201009"
-    }
-},
-{
-    "pk": 8, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-02-03T15:36:11.361Z", 
-        "afiliado": 1, 
-        "telefono": "46201009"
-    }
-},
-{
-    "pk": 9, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-02-04T12:23:47.530Z", 
-        "afiliado": 1, 
-        "telefono": "46201009"
-    }
-},
-{
-    "pk": 10, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-02-04T12:30:50.490Z", 
-        "afiliado": 1, 
-        "telefono": "46201009"
-    }
-},
-{
-    "pk": 11, 
-    "model": "turnos.reserva", 
-    "fields": {
-        "fecha": "2014-02-04T12:51:40.864Z", 
-        "afiliado": 1, 
-        "telefono": "46201009"
     }
 },
 {
@@ -230,6 +78,7 @@
     "pk": 1, 
     "model": "turnos.especialistaespecialidad", 
     "fields": {
+        "frecuencia_turnos": 15, 
         "fechaBaja": null, 
         "especialidad": 1, 
         "especialista": 1
@@ -251,7 +100,7 @@
     "model": "turnos.disponibilidad", 
     "fields": {
         "horaHasta": "13:00:00", 
-        "consultorio": null, 
+        "consultorio": 1, 
         "ee": 1, 
         "horaDesde": "12:30:00", 
         "dia": "1"
@@ -262,7 +111,7 @@
     "model": "turnos.disponibilidad", 
     "fields": {
         "horaHasta": "13:00:00", 
-        "consultorio": null, 
+        "consultorio": 1, 
         "ee": 1, 
         "horaDesde": "12:30:00", 
         "dia": "2"
@@ -273,7 +122,7 @@
     "model": "turnos.disponibilidad", 
     "fields": {
         "horaHasta": "13:00:00", 
-        "consultorio": null, 
+        "consultorio": 1, 
         "ee": 1, 
         "horaDesde": "12:30:00", 
         "dia": "3"
@@ -284,7 +133,7 @@
     "model": "turnos.disponibilidad", 
     "fields": {
         "horaHasta": "13:00:00", 
-        "consultorio": null, 
+        "consultorio": 1, 
         "ee": 1, 
         "horaDesde": "12:30:00", 
         "dia": "4"
@@ -295,7 +144,7 @@
     "model": "turnos.disponibilidad", 
     "fields": {
         "horaHasta": "13:00:00", 
-        "consultorio": null, 
+        "consultorio": 1, 
         "ee": 1, 
         "horaDesde": "12:30:00", 
         "dia": "5"
@@ -306,7 +155,7 @@
     "model": "turnos.disponibilidad", 
     "fields": {
         "horaHasta": "13:00:00", 
-        "consultorio": null, 
+        "consultorio": 1, 
         "ee": 1, 
         "horaDesde": "12:30:00", 
         "dia": "6"
@@ -318,7 +167,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-02-03T13:44:20.283Z", 
+        "fecha": "2018-02-23T12:50:39.970Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -329,7 +178,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-02-03T13:59:20.283Z", 
+        "fecha": "2018-02-23T13:05:39.970Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -340,7 +189,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-02-03T14:14:20.283Z", 
+        "fecha": "2018-02-23T13:20:39.970Z", 
         "sobreturno": false, 
         "estado": "D"
     }
@@ -351,9 +200,18 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
-        "fecha": "2018-02-03T14:29:20.283Z", 
+        "fecha": "2018-02-23T13:35:39.970Z", 
         "sobreturno": false, 
         "estado": "D"
+    }
+},
+{
+    "pk": 1, 
+    "model": "turnos.lineadereserva", 
+    "fields": {
+        "reserva": 1, 
+        "estado": "C", 
+        "turno": 4
     }
 },
 {
@@ -361,7 +219,7 @@
     "model": "turnos.historialturno", 
     "fields": {
         "empleado": null, 
-        "fecha": "2014-02-04T13:29:21.459Z", 
+        "fecha": "2014-02-24T12:35:40.707Z", 
         "estadoNuevo": "D", 
         "turno": 1, 
         "descripcion": null, 
@@ -373,7 +231,7 @@
     "model": "turnos.historialturno", 
     "fields": {
         "empleado": null, 
-        "fecha": "2014-02-04T13:29:21.659Z", 
+        "fecha": "2014-02-24T12:35:40.891Z", 
         "estadoNuevo": "D", 
         "turno": 2, 
         "descripcion": null, 
@@ -385,7 +243,7 @@
     "model": "turnos.historialturno", 
     "fields": {
         "empleado": null, 
-        "fecha": "2014-02-04T13:29:21.836Z", 
+        "fecha": "2014-02-24T12:35:41.105Z", 
         "estadoNuevo": "D", 
         "turno": 3, 
         "descripcion": null, 
@@ -397,7 +255,7 @@
     "model": "turnos.historialturno", 
     "fields": {
         "empleado": null, 
-        "fecha": "2014-02-04T13:29:22.013Z", 
+        "fecha": "2014-02-24T12:35:41.310Z", 
         "estadoNuevo": "D", 
         "turno": 4, 
         "descripcion": null, 

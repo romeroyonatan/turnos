@@ -28,7 +28,7 @@ cancelar = {
 		$.getJSON(url, function(data) {
 			if(data.length > 0) {
 				destino.removeAttr('disabled');
-				var options = '<option value="">{0}</option>'.format(DEFAULT_MESSAGE);
+				var options = '<option>{0}</option>'.format(DEFAULT_MESSAGE);
 				$.each(data,function(index, value){
 					var milis = value.fecha * 1000;
 					var fecha = new Date(milis)
