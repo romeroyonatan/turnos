@@ -2,10 +2,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Permission
-from turnos.models import Especialidad, Empleado, Especialista
-from turnos.validators import PasswordValidator
+from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
+from turnos.models import *
+from turnos.validators import PasswordValidator
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 class ReservarTurnoForm(forms.Form):
@@ -85,3 +87,57 @@ class CancelarTurnoForm(forms.Form):
     especialista = forms.ModelChoiceField(queryset=Especialista.objects.all(),
                                           widget=forms.Select(attrs={'disabled':'disabled'}))
     fecha = forms.IntegerField(widget=forms.Select(attrs={'disabled':'disabled'}))
+class RegistarEspecialistaForm(forms.Form):
+    error_messages = {
+        'duplicate_dni': "Ya existe un especialista registrado con ese DNI",
+    }
+    nombre = forms.CharField(max_length="50", required=True)
+    apellido = forms.CharField(max_length="50")
+    dni = forms.CharField()
+    especialidad = forms.ModelChoiceField(queryset=Especialidad.objects.all())
+    consultorio = forms.ModelChoiceField(queryset=Consultorio.objects.all())
+    dia = forms.ChoiceField(choices=Disponibilidad.DIA)
+    desde = forms.CharField(max_length="7", label="Horario")
+    hasta = forms.CharField(max_length="7")
+    frecuencia = forms.IntegerField(label="Frecuencia entre turnos (en minutos)")
+    disponibilidades = forms.CharField(widget=forms.HiddenInput, required=False)
+    def clean_dni(self):
+        dni = self.cleaned_data["dni"]
+        try:
+            Especialista.objects.get(dni=dni)
+        except Especialista.DoesNotExist:
+            return dni
+        raise forms.ValidationError(
+            self.error_messages['duplicate_dni'],
+            code='duplicate_dni',
+        )
+    def clean_disponibilidades(self):
+        disponibilidades = list()
+        lista = json.loads(self.cleaned_data["disponibilidades"]) if self.cleaned_data["disponibilidades"] else None
+        if lista:
+            for item in lista:
+                disponibilidades.append(Disponibilidad(dia=item['dia_id'],
+                                       horaDesde=item['desde'],
+                                       horaHasta=item['hasta'],
+                                       consultorio=Consultorio.objects.get(id=item['consultorio'])))
+        else:
+            disponibilidades.append(Disponibilidad(dia=self.cleaned_data["dia"],
+                                   horaDesde=self.cleaned_data["desde"],
+                                   horaHasta=self.cleaned_data["hasta"],
+                                   consultorio=self.cleaned_data["consultorio"]))
+        return disponibilidades
+    @transaction.commit_on_success()
+    def save(self):
+        especialista = Especialista.objects.create(nombre=self.cleaned_data["nombre"],
+                                    apellido=self.cleaned_data["apellido"],
+                                    dni=self.cleaned_data.get("dni"))
+        logger.info("Registrando especialista %s" % especialista)
+        ee = EspecialistaEspecialidad.objects.create(especialista=especialista,
+                                                     especialidad=self.cleaned_data["especialidad"],
+                                                     frecuencia_turnos=self.cleaned_data["frecuencia"])
+        disponibilidades = self.cleaned_data["disponibilidades"]
+        for disponibilidad in disponibilidades:
+            disponibilidad.ee=ee
+        logger.debug("Guardando disponibilidades %s" % disponibilidades)
+        Disponibilidad.objects.bulk_create(disponibilidades)
+        return especialista

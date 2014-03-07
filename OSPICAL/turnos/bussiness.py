@@ -35,6 +35,7 @@ class Bussiness():
         logger.info("Resultado de busqueda de afiliado %s %s: %s" % (parametro, valor, data))
         return data
     def getTurnosDisponibles(self, especialista, fecha):
+        #FIXME: Esta dando turnos anteriores a la fecha actual
         disponibles = self.__buscarTurnosDisponibles(especialista, fecha)
         logger.debug("Turnos disponibles para el dia %s: %s" % (fecha, disponibles))
         if not disponibles and not self.__haySobreturnos(especialista, fecha):
@@ -236,7 +237,7 @@ class Bussiness():
         logger.debug("Creando historial de turnos")
         lista = list()
         for turno in turnos:
-            #TODO: tener en cuenta el empleado que hace la operacion
+            #FIXME: tener en cuenta el empleado que hace la operacion
             lista.append(HistorialTurno(estadoNuevo=Turno.DISPONIBLE,
                                         descripcion="Creación de turno",
                                         turno=turno,

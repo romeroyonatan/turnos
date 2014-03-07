@@ -11,39 +11,6 @@
 {% block content %}
 <form action="." method="post" class="pure-form pure-form-aligned pure-g-r">
 	{% csrf_token %}
-	<fieldset title="Datos personales" class="pure-u-1-2">
-		<legend>Datos personales</legend>
-		{{ form.afiliado }}
-		<div class="pure-control-group">
-			{{ form.dni.errors }}
-			<label for="id_dni">DNI</label>
-			{{ form.dni }}
-		</div>
-	
-		<div class="pure-control-group">
-			{{ form.numero.errors }}
-			<label for="id_numero">Numero afiliado</label>
-			{{ form.numero }}
-		</div>	
-	
-		<div class="pure-control-group">
-			<label for="id_nombre">Nombre</label>
-			{{ form.nombre }}
-		</div>	
-	
-		<div class="pure-control-group">
-			<label for="id_apellido">Apellido</label>
-			{{ form.apellido }}
-		</div>	
-	
-		<div class="pure-control-group">
-			{{ form.telefono.errors }}
-			<label for="id_telefono">Teléfono</label>
-			{{ form.telefono }}
-		</div>
-		
-	</fieldset>
-
 	<fieldset title="Datos de turno" class="pure-u-1-2">
 		<legend>Datos de turno</legend>
 		
@@ -76,7 +43,39 @@
 		</div>
 	</fieldset>
 
-
+	<fieldset title="Datos personales" class="pure-u-1-2">
+		<legend>Datos personales</legend>
+		{{ form.afiliado }}
+		<div class="pure-control-group">
+			{{ form.dni.errors }}
+			<label for="id_dni">DNI</label>
+			{{ form.dni }}
+		</div>
+	
+		<div class="pure-control-group">
+			{{ form.numero.errors }}
+			<label for="id_numero">Numero afiliado</label>
+			{{ form.numero }}
+		</div>	
+	
+		<div class="pure-control-group">
+			<label for="id_nombre">Nombre</label>
+			{{ form.nombre }}
+		</div>	
+	
+		<div class="pure-control-group">
+			<label for="id_apellido">Apellido</label>
+			{{ form.apellido }}
+		</div>	
+	
+		<div class="pure-control-group">
+			{{ form.telefono.errors }}
+			<label for="id_telefono">Teléfono</label>
+			{{ form.telefono }}
+		</div>
+		
+	</fieldset>
+	
 	<fieldset title="Lista de turnos" class="pure-u-1">
 		{{ form.turnos }}
 		<legend>Lista de turnos a reservar</legend>

@@ -26,6 +26,8 @@ class Consultorio (models.Model):
     descripcion = models.CharField(max_length=100, null=True)
     def __str__(self):
         return "%s" % model_to_dict(self)
+    def __unicode__(self):
+        return "%s" % self.numero
 class Empleado (models.Model):
     user = models.ForeignKey(User, unique=True)
     dni = models.IntegerField()
@@ -42,7 +44,7 @@ class Reserva(models.Model):
 class Especialista(models.Model):
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
-    dni = models.IntegerField()
+    dni = models.IntegerField(unique=True)
     fecha_baja = models.DateField(null=True)
     def __str__(self):
         return "%s" % model_to_dict(self)
@@ -54,7 +56,7 @@ class EspecialistaEspecialidad(models.Model):
     unique_together = ("especialista", "especialidad")
     especialista = models.ForeignKey(Especialista)
     especialidad = models.ForeignKey(Especialidad)
-    frecuencia_turnos = models.SmallIntegerField()
+    frecuencia_turnos = models.SmallIntegerField(default=15)
     fechaBaja = models.DateField(null=True)
     def __str__(self):
         return "%s" % model_to_dict(self)
@@ -85,7 +87,6 @@ class Disponibilidad(models.Model):
     ee = models.ForeignKey(EspecialistaEspecialidad)
     def __str__(self):
         return "%s" % model_to_dict(self)
-
 
 class Turno (models.Model):
     unique_together = ("fecha", "ee", "sobreturno")

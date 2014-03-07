@@ -63,7 +63,7 @@ function cambiaEspecialista() {
 function cambiaDia() {
 	$("#id_hora").prop({disabled: true});
 	var milis = parseInt($("#id_dia").val());
-	var id = $("#id_especialidad").val();
+	var id = $("#id_especialista").val();
 	if(!id || !milis)
 		return;
 	var d = new Date(milis);

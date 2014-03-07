@@ -8,6 +8,9 @@ body,
     font-family: "proxima-nova", sans-serif;
 }
 
+.compact input{
+	width:7em;
+}
 
 /* Add transition to containers so they can push in and out */
 #layout,

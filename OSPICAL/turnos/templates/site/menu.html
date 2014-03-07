@@ -33,14 +33,23 @@
 						</a>
 					{% endif %}
 				</li>
+				{# 				{% if perms.auth.add_user %} #}
+					<li class="menu-item-divided">
+						<a href="{% url 'turnos.views.registrar_especialista' %}"
+							   title="Permite crear un nuevo especialista">
+						Registrar especialista
+						</a>
+					</li>
+ 				{#	{% endif %} #}
 				{% if perms.auth.add_user %}
-				<li class="menu-item-divided">
-					<a href="{% url 'turnos.views.register' %}"
-						   title="Permite crear nuevas cuentas de usuario">
-					Crear cuenta
-					</a>
-				</li>
+					<li class="menu-item-divided">
+						<a href="{% url 'turnos.views.register' %}"
+							   title="Permite crear nuevas cuentas de usuario">
+						Crear cuenta
+						</a>
+					</li>
 				{% endif %}
+
 				<li class="menu-item-divided">
 					<a href="{% url 'django.contrib.auth.views.logout' %}"
 					   title="Permite salir del sistema de forma segura">

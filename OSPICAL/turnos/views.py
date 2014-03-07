@@ -210,8 +210,8 @@ def cancelar_turnos(request):
     if request.method == 'POST':
         form = CancelarTurnoForm(request.POST)
         if form.is_valid():
-            ee = EspecialistaEspecialidad.objects.filter(especialidad=form.cleaned_data["especialista"],
-                                                         especialista=form.cleaned_data["especialidad"])
+            ee = EspecialistaEspecialidad.objects.filter(especialidad=form.cleaned_data["especialidad"],
+                                                         especialista=form.cleaned_data["especialista"])
             if ee:
                 ee = ee[0]
                 b = Bussiness()
@@ -239,3 +239,17 @@ def get_reservas_especialista(request, especialidad, especialista, year, month, 
              "telefono": lr.reserva.telefono,
              } for lr in lineas]
     return JSONResponse(data)
+
+@login_required
+# @permission_required('turnos.registrar_especialista', raise_exception=True)
+def registrar_especialista(request):
+    b=Bussiness()
+    if request.method == 'POST':
+        form = RegistarEspecialistaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, u'La operación se realizó con éxito')
+            return HttpResponseRedirect(request.path)
+    else:
+        form = RegistarEspecialistaForm(initial={'frecuencia':b.MINUTOS})
+    return render(request, "especialista/registrar.html", locals())

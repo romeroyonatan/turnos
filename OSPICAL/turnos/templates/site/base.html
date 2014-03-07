@@ -11,6 +11,7 @@
 		<link rel="stylesheet" href="{% static 'css/pure-min.css' %}"/>
 		<link rel="stylesheet" href="{% static 'css/side-menu.css' %}" />
 		<link rel="stylesheet" href="{% static 'css/bootstrap.alert.css' %}" />
+		<link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}" />
 		<link rel="stylesheet" href="{% static 'css/redmond/jquery-ui.min.css' %}" />
 	{% endblock %}
 	{% block js %}
@@ -18,8 +19,9 @@
 		<script src="{% static 'js/jquery.mask.min.js' %}"></script>
 		<script src="{% static 'js/jquery-ui.min.js' %}"></script>
 		<script src="{% static 'js/jquery.number.min.js' %}"></script>
+		<script src="{% static 'js/jquery.timepicker.min.js' %}"></script>
 		<script src="{% static 'js/noty/packaged/jquery.noty.packaged.min.js' %}"></script>
- 		<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.js"></script>
+ 		<script src="{% static 'js/jquery.validate.js' %}"></script>
 		<script src="{% static 'js/localization/messages_es.js' %}"> </script>
 		<script src="{% static 'js/localization/jquery-ui-i18n.min.js' %}"> </script>
 	{% endblock %}

@@ -26,4 +26,5 @@ urlpatterns = patterns('turnos.views',
     (r'^confirmar/$', 'confirmar_reserva'),
     (r'^cancelar/$', 'cancelar_reserva'),
     (r'^cancelar/turnos/$', 'cancelar_turnos'),
+    (r'^especialista/registrar/$', 'registrar_especialista'),
 )

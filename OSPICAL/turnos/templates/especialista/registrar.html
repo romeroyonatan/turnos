@@ -1,0 +1,104 @@
+{% extends "site/application.html" %}
+{% load static %}
+{% block title %}Registrar especialista{% endblock %}
+
+{% block js %}
+	{{ block.super }}
+	<script src="{% static 'js/turno.especialista.registrar.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<form action="." method="post" enctype="multipart/form-data" class="pure-form pure-form-aligned pure-g-r">
+	{% csrf_token %}
+	<fieldset class="pure-u-1-2">
+		<legend>Datos personales</legend>
+
+		<div class="pure-control-group">
+			{{ form.dni.errors }}
+			<label for="id_dni">{{ form.dni.label }}</label>
+			{{ form.dni }}
+		</div>
+	
+		<div class="pure-control-group">
+			<label for="id_nombre">{{ form.nombre.label }}</label>
+			{{ form.nombre.errors }}
+			{{ form.nombre }}
+		</div>	
+	
+		<div class="pure-control-group">
+			<label for="id_apellido">{{ form.apellido.label }}</label>
+			{{ form.apellido.errors }}
+			{{ form.apellido }}
+		</div>
+	</fieldset>
+
+	<fieldset class="pure-u-1-2">
+		<legend>Disponibilidad</legend>
+		{{ form.disponibilidades }}
+		<div class="pure-control-group">
+			<label for="id_especialidad">{{ form.especialidad.label }}</label>
+			{{ form.especialidad.errors }}
+			{{ form.especialidad }}
+		</div>
+			
+		<div class="pure-control-group">
+			<label for="id_dia">{{ form.dia.label }}</label>
+			{{ form.dia.errors }}
+			{{ form.dia }}
+		</div>
+		
+		<div class="pure-control-group">
+			<label for="id_consultorio">{{ form.consultorio.label }}</label>
+			{{ form.consultorio.errors }}
+			{{ form.consultorio }}
+		</div>
+		
+		<div class="pure-control-group">
+			<label for="id_desde">{{ form.desde.label }}</label>
+			{{ form.desde.errors }}
+			{{ form.hasta.errors }}
+			<span class="compact">
+				{{ form.desde }} a
+				{{ form.hasta }}
+			</span>
+		</div>
+		
+		<div class="pure-control-group">
+			<label for="id_frecuencia">{{ form.frecuencia.label }}</label>
+			{{ form.frecuencia.errors }}
+			{{ form.frecuencia }}
+		</div>
+		
+		<div class="pure-controls">		
+			<input id="id_agregar" type="button" value="Agregar" class="pure-button pure-button-primary"/>
+		</div>
+	</fieldset>
+
+
+	<fieldset title="Lista de turnos" class="pure-u-1">
+		<legend>Lista de disponibilidades</legend>
+		<table id="table_disponibilidades" class="pure-table">
+			<thead>
+				<tr>
+					<th>Especialidad</th>
+					<th>Consultorio</th>
+					<th>Día</th>
+					<th>Horario</th>
+					<th>Eliminar</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</fieldset>
+	
+	<div class="pure-u-1-2">
+	</div>
+	<div class="pure-u-1-2">
+		<div class="pure-controls">
+		<input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
+		<input type="submit" value="Guardar" class="pure-button pure-button-primary"/>
+		</div>
+	</div>
+</form>
+{% endblock %}

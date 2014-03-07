@@ -23,6 +23,13 @@ MESSAGE_PRESENTISMO = "El afiliado ha faltado a muchos turnos en los ultimos mes
 MESSAGES_NO_ASIGNADO = "No asignado";
 MESSAGE_RESERVAS = "Hay {0} turnos reservados";
 MESSAGE_NO_RESERVAS = "No hay turnos reservados para este día";
+MESSAGE_ELEMENTO_EXISTENTE_TITLE = "Elemento existente";
+MESSAGE_ELEMENTO_EXISTENTE = "El elemento que desea agregar ya existe";
+MESSAGE_ERROR_ESPECIALIDAD="Seleccione una especialidad válida";
+MESSAGE_ERROR_CONSULTORIO="Seleccione un consultorio válido";
+MESSAGE_ERROR_DIA="Seleccione un día válido";
+MESSAGE_ERROR_HORA_DESDE="Seleccione un horario desde válido";
+MESSAGE_ERROR_HORA_HASTA="Seleccione un horario hasta válido";
 DIA=["Domingo", "Lunes", "Martes", "Miércoles", "Jueves","Viernes","Sábado"];
 MES=["enero", "febrero","marzo", "abril","mayo", "junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];	
 ESTADOS={C:"Completo",S:"Sobreturno",X:"Cancelado"};
@@ -60,14 +67,17 @@ function n(n){
 }
 
 function mostrarMensaje(mensaje,options) {
+	var DEFAULT_TITLE="Error";
+	var DEFAULT_TYPE="error";
+	var DEFAULT_POSITION="bottom";
 	if(options && options.element) {
 		options.element.addClass('error');
 		options.element.attr({'title':mensaje});
 	}
-	title = options && options.title ? options.title : "";
+	title = options && options.title ? options.title : DEFAULT_TITLE;
 	text = "<div><h1>{0}</h1><p>{1}</p></div>".format(title, mensaje);
-	tipo = options && options.type ? options.type : "error";
-	noty({text: text, type:tipo, layout:'bottom'});
+	tipo = options && options.type ? options.type : DEFAULT_TYPE;
+	noty({text: text, type:tipo, layout:DEFAULT_POSITION});
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -84,8 +94,8 @@ function Lista(contenedor, options) {
 	this.load();
 	/* Si existen objetos cargados en la lista, llama a una funcion 
 	 * para que los reconstruya y los muestre en el DOM */
-	if(this.objects.length > 0 && typeof(options.rebuild) !== 'undefined')
-		options.rebuild(this.objects);
+	if(this.objects.length > 0)
+		this.__rebuild(this.objects);
 }
 
 /**
@@ -118,26 +128,50 @@ Lista.prototype.save = function (){
 	this.container.val(json);
 }
 
+Lista.prototype.__rebuild = function(object) {
+}
+
 /**
  * Agrega un objeto a la lista
  */
 Lista.prototype.add = function(obj) {
-	if(this.objects.indexOf(obj.id) == -1) {
-		this.objects.push(obj.id);
+	if(this.__validate(obj) && !this.__exists(obj)) {
+		this.__push(obj);
 		this.save();
 		this.addDOM(obj);
 		return true;
 	} else {
+		console.log("El elemento ya existe");
 		return false;
 	}
 }
 
+/**
+ * Agrega un objeto a la lista
+ */
+Lista.prototype.__push = function(obj) {
+	this.objects.push(obj.id);
+}
+/**
+ * Verifica si el objeto es valido
+ * @returns true si el objeto es valido
+ */
+Lista.prototype.__validate = function(obj) {
+	return obj.id && obj.id != null;
+}
+/**
+ * Devuelve la posicion el objeto, -1 en caso que no exista
+ */
+Lista.prototype.__exists = function(obj) {
+	return this.objects.indexOf(obj.id) != -1;
+}
 /**
  * Agrega un elemento al DOM
  */
 Lista.prototype.addDOM = function(obj) {
 	t = this.template.format(obj)
 	this.listContainer.append(t);
+	l = this;
 	$('#rem-tr-{id}'.format(obj)).click(function(e) {
 		e.preventDefault();
 		var id = /rem-tr-(\d+)/i.exec(this.id)[1];
@@ -156,6 +190,10 @@ Lista.prototype.remove = function (id) {
 	var index = this.objects.indexOf(id);
 	this.objects.splice(index, 1);
 	this.save();
+}
+
+Lista.prototype.length = function() {
+	return this.objects.length;
 }
 //////////////////////////////////////////////////////////////////////////////////
 
