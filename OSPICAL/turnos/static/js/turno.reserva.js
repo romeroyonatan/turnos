@@ -7,8 +7,8 @@ function cambiaEspecialidad() {
 	var destino = $('#id_especialista');
 	$.getJSON(url, function(data) {
 		if(data.length > 0) {
+			var options = data.length > 1 ? '<option>{0}</option>'.format(DEFAULT_MESSAGE) : '';
 			destino.removeAttr('disabled');
-			var options = "";
 			$.each(data,function(index, value){
 				options += '<option value="{0}">{1}, {2}</option>'.format(value.id,
 																		 value.apellido,

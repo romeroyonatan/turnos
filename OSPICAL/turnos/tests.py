@@ -92,15 +92,53 @@ class ReservarTurnoTest(TestCase):
         p = b.presentismoOK(afiliado_id)
         self.assertTrue(p)
     def testCrearSobreturno(self):
-        """Verifica que pasa si no hay mas turnos y se deben crear sobreturnos"""
-        #TODO: Hacer test crear sobreturno
-        #self.assertTrue(False)
-        pass
+        """Verifica que pasa si no hay mas turnos y se deben crear sobreturnos.
+        Se reservan todos los turnos de un dia, luego se consultan los turnos disponibles
+        y debe devolver los turnos con estado SOBRETURNO"""
+        afiliado_id = 1
+        listaTurnos = range(1000,1100)
+        fecha = timezone.now()
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        for i in listaTurnos:
+            Turno.objects.create(fecha=fecha,
+                                 estado=Turno.DISPONIBLE,
+                                 sobreturno=False,
+                                 consultorio=Consultorio.objects.get(id=1),
+                                 ee=ee,
+                                 id = i,)
+        # Reservamos todos los turnos
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        # Consultamos turnos disponibles
+        disponibles = b.getTurnosDisponibles(ee.id, fecha)
+        self.assertGreater(len(disponibles), 0)
+        for turno in disponibles:
+            self.assertTrue(turno.sobreturno)
     def testSinSobreturno(self):
-        """Verifica que pasa si no hay mas sobreturnos para un dia"""
-        #TODO: Hacer test sin sobreturno
-        #self.assertTrue(False)
-        pass
+        """Verifica que pasa si no hay mas sobreturnos para un dia. Se reservan
+        todos los turnos de un dia, luego se crean sobreturnos y tambien se reservan.
+        Se consulta una vez mas por los turnos disponibles y debe devolver una lista vacia"""
+        afiliado_id = 1
+        listaTurnos = range(1000,1100)
+        fecha = timezone.now()
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        for i in listaTurnos:
+            Turno.objects.create(fecha=fecha,
+                                 estado=Turno.DISPONIBLE,
+                                 sobreturno=False,
+                                 consultorio=Consultorio.objects.get(id=1),
+                                 ee=ee,
+                                 id = i,)
+        # Reservamos todos los turnos
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        # Consultamos turnos disponibles, debe devolver sobreturnos
+        disponibles = b.getTurnosDisponibles(ee.id, fecha)
+        # Reservamos los sobreturnos
+        listaTurnos=[turno.id for turno in disponibles]
+        logger.debug("listaTurnos %s"%listaTurnos)
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        # Consultamos los turnos disponibles de nuevo
+        disponibles = b.getTurnosDisponibles(ee.id, fecha)
+        self.assertEqual(len(disponibles), 0)
     def testPresentismoNotOK(self):
         """Verifica el funcionamiento del algoritmo de presentismo con un afiliado que falta mucho.
         Debe devolver falso, indicando que el afiliado falta mucho a los turnos"""
@@ -198,6 +236,7 @@ class ReservarTurnoTest(TestCase):
             self.assertEquals(linea.turno.ee.especialidad.descripcion, reservado['especialidad'])
             self.assertEquals(linea.turno.consultorio.id, int(reservado['consultorio']))
             self.assertEquals(linea.reserva.fecha, reservado['fecha_reserva'])
+class ConfirmarReservaTest:
     def testConfirmarReserva(self):
         """Verifica que se confirmen las reservas correctamente"""
         afiliado_id = 1
@@ -572,7 +611,6 @@ class CrearTurnoTest(TestCase):
         self.assertTrue(turno not in creados)
         # verifico que se hayan creado en la base de datos correctamente
         self.assertEqual(antes + len(creados), despues)
-        
     def testProximoDia(self):
         """Prueba para obtener el proximo dia a partir de una fecha conocida.
         Debe devolver mismo dia conocido"""
@@ -624,6 +662,24 @@ class CrearTurnoTest(TestCase):
             diff = turnos[i].fecha - turnos[i+1].fecha
             minutos = (diff.seconds % 3600) // 60
             self.assertEqual(minutos, FRECUENCIA)
+    def testCrearSobreturnos(self):
+        """Prueba el proceso de creacion de sobreturnos"""
+        FRECUENCIA = 10 # minutos
+        es=Especialidad.objects.create(descripcion="Oftamologia")
+        e=Especialista.objects.create(nombre='n2',apellido='n2',dni=12345)
+        ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es, frecuencia_turnos=FRECUENCIA)
+        Disponibilidad.objects.create(dia='0',horaDesde="10:00",horaHasta="11:10",ee=ee)
+        fecha = b._Bussiness__proximoDia(0, timezone.now())
+        creados = b._Bussiness__crearSobreturnos(ee.id,fecha)
+        self.assertGreater(len(creados), 0)
+        turnos = Turno.objects.filter(ee__especialista=e, sobreturno=True).order_by('-fecha')
+        self.assertTrue(turnos.exists())
+        self.assertEqual(turnos.count(), b.MAX_SOBRETURNOS)
+        # Verificamos la diferencia en minutos de cada turno
+        for i in range(len(turnos) - 1):
+            diff = turnos[i].fecha - turnos[i+1].fecha
+            minutos = (diff.seconds % 3600) // 60
+            self.assertEqual(minutos, FRECUENCIA * 2)
 class TestValidadores(TestCase):
     def testLongitud(self):
         """Prueba que el validador funcione cuando una contraseña es menor a la longitud permitida"""

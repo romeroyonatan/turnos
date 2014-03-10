@@ -1,5 +1,6 @@
 # coding=utf-8
 from dateutil.relativedelta import relativedelta
+import dateutil.tz
 from datetime import date, timedelta, datetime, time
 from django.utils import timezone
 from django.db import transaction
@@ -19,6 +20,7 @@ class Bussiness():
         self.AUSENTES_MESES = int(self.__getSetting('ausente_meses', 6))
         self.MINUTOS = int(self.__getSetting('minutos_entre_turnos', 15))
         self.DIAS = int(self.__getSetting('cantidad_dias_crear_turnos', 7))
+        self.MAX_SOBRETURNOS = int(self.__getSetting('max_sobreturnos', 3))
     def __getSetting(self, key, default_value=None):
         setting = Settings.objects.filter(key=key)
         return setting[0].value if setting else default_value
@@ -34,32 +36,45 @@ class Bussiness():
             pass
         logger.info("Resultado de busqueda de afiliado %s %s: %s" % (parametro, valor, data))
         return data
-    def getTurnosDisponibles(self, especialista, fecha):
-        #FIXME: Esta dando turnos anteriores a la fecha actual
-        disponibles = self.__buscarTurnosDisponibles(especialista, fecha)
+    def getTurnosDisponibles(self, especialista_id, fecha):
+        disponibles = self.__buscarTurnosDisponibles(especialista_id, fecha)
         logger.debug("Turnos disponibles para el dia %s: %s" % (fecha, disponibles))
-        if not disponibles and not self.__haySobreturnos(especialista, fecha):
-            disponibles = self.crearSobreturnos(especialista, fecha)
+        if not disponibles and not self.__haySobreturnos(especialista_id, fecha):
+            disponibles = self.__crearSobreturnos(especialista_id, fecha)
         return disponibles
-    def __buscarTurnosDisponibles(self, especialista, fecha):
-        logger.debug("Obteniendo turnos disponibles especialista_id:%s fecha:%s" % (especialista, fecha))
-        filtro = self.__getFiltroFecha(especialista, fecha)
+    def __buscarTurnosDisponibles(self, especialista_id, fecha):
+        logger.debug("Obteniendo turnos disponibles especialista_id:%s fecha:%s" % (especialista_id, fecha))
+        filtro = self.__getFiltroFecha(especialista_id, fecha)
         queryset = Turno.objects.filter(**filtro)
         return [item for item in queryset.values()]
     def __haySobreturnos(self, especialista, fecha):
         """ Verifica si hay sobreturnos en un dia para un especialista """
         filtro = self.__getFiltroFecha(especialista, fecha)
         filtro['sobreturno'] = True
+        del filtro['estado']
         query = Turno.objects.filter(**filtro).only("id")
         return query.exists()
-    def crearSobreturnos(self, especialista, fecha):
-        logger.info("Creando sobreturnos para el dia:%s" % fecha)
-        # TODO: Crear sobreturnos
-        return {}
+    def __crearSobreturnos(self, especialista_id, fecha):
+        logger.info("Creando sobreturnos para el ee:%s dia:%s" % (especialista_id, fecha))
+        ee = EspecialistaEspecialidad.objects.get(id=especialista_id)
+        disponibilidad = Disponibilidad.objects.get(ee=ee, dia=fecha.weekday())
+        tz = dateutil.tz.tzoffset(None, -3*60*60)
+        fecha = datetime.combine(fecha, disponibilidad.horaDesde).replace(tzinfo=tz)
+        sobreturnos = list()
+        while len(sobreturnos) < self.MAX_SOBRETURNOS and fecha.time() < disponibilidad.horaHasta:
+            turno = Turno.objects.create(fecha=fecha,
+                                         estado=Turno.DISPONIBLE,
+                                         sobreturno=True,
+                                         consultorio=disponibilidad.consultorio,
+                                         ee=ee)
+            fecha += timedelta(minutes=ee.frecuencia_turnos * 2)
+            sobreturnos.append(turno)
+        logger.info("Sobreturnos creados %s"%len(sobreturnos))
+        return sobreturnos
     def getDiaTurnos(self, especialista):
         """Devuelve una lista de dias y el estado (Completo, Sobreturno)"""
         logger.debug("Obteniendo dias de turnos para el especialista_id:%s " % especialista)
-        data = []
+        data = list()
         queryset = Turno.objects.filter(ee__especialista__id=especialista,
                                         fecha__gte=timezone.now()).datetimes('fecha', 'day')[:self.DIAS*2]
         for fecha in queryset:
@@ -67,9 +82,13 @@ class Bussiness():
             if self.__isCancelado(especialista, fecha):
                 estado = 'X'
             elif self.__isCompleto(especialista, fecha):
-                estado = 'C'
-            elif self.__haySobreturnos(especialista, fecha):
+                if self.__haySobreturnos(especialista, fecha):
+                    estado = 'C'
+                else: 
+                    self.__crearSobreturnos(especialista, fecha)
                     estado = 'S'
+            elif self.__haySobreturnos(especialista, fecha):
+                estado = 'S'
             data.append({'fecha':fecha, 'estado':estado})
         return data
     def __isCompleto(self, especialista, fecha):
@@ -85,10 +104,10 @@ class Bussiness():
         filtro['estado'] = Turno.CANCELADO
         query = Turno.objects.filter(**filtro).only("id")
         return query.exists()
-    def __getFiltroFecha(self, especialista, fecha):
+    def __getFiltroFecha(self, especialista_id, fecha):
         """Devuelve un filtro para buscar los turnos disponibles del especialista 
         en una fecha determinada"""
-        filtro = {'ee__especialista__id':especialista,
+        filtro = {'ee__especialista__id':especialista_id,
                   'fecha__day':fecha.day,
                   'fecha__month':fecha.month,
                   'fecha__year':fecha.year,
@@ -199,7 +218,6 @@ class Bussiness():
         # Si lo uso de la forma
         # tz = timezone.get_default_timezone() 
         # me da un offset -04:17 para America/Argentina/Buenos_Aires
-        import dateutil.tz
         tz = dateutil.tz.tzoffset(None, -3*60*60)
         desde = datetime.combine(dia, disponibilidad.horaDesde).replace(tzinfo=tz)
         hasta = datetime.combine(dia, disponibilidad.horaHasta).replace(tzinfo=tz)
