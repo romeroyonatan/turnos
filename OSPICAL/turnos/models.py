@@ -14,7 +14,7 @@ class Afiliado(models.Model):
 
 class Especialidad(models.Model):
     descripcion = models.CharField(max_length=50)
-    fecha_baja = models.DateField(null=True)
+    fecha_baja = models.DateField(null=True, blank=True)
     def __str__(self):
         return u'%s' % self.descripcion
     def __unicode__(self):
@@ -22,8 +22,8 @@ class Especialidad(models.Model):
 class Consultorio (models.Model):
     numero = models.CharField(max_length=4)
     disponible = models.BooleanField()
-    ubicacion = models.CharField(max_length=50, null=True)
-    descripcion = models.CharField(max_length=100, null=True)
+    ubicacion = models.CharField(max_length=50, null=True, blank=True)
+    descripcion = models.CharField(max_length=100, null=True, blank=True)
     def __str__(self):
         return "%s" % model_to_dict(self)
     def __unicode__(self):

@@ -187,29 +187,34 @@ class Bussiness():
             creados = self.crear_turnos_del_especialista(ee, dias)
             cantidad += len(creados)
         return cantidad
+
     def crear_turnos_del_especialista(self, especialista_especialidad, 
                                       cantidad_dias=None, 
                                       a_partir_de = timezone.now()):
         """Crea turnos para un especialista y una especialidad a partir del dia especificado"""
-        logger.info("Creando turnos para el especialista <%s:%s>" % 
-                     (especialista_especialidad.especialista.id,
-                      especialista_especialidad.especialista.full_name()))
+        from dateutil import rrule
+        
         cantidad_dias = self.DIAS if cantidad_dias == None else cantidad_dias
-        turnos = list()
-        disponibilidades = Disponibilidad.objects.filter(ee=especialista_especialidad)
-        base = a_partir_de = a_partir_de.date()
-        aux = cantidad_dias
-        today = date.today()
-        while aux >= 0:
-            for disponibilidad in disponibilidades:
-                dia = self.__proximoDia(int(disponibilidad.dia), base)
-                diff = dia - today
-                if diff.days < cantidad_dias:
-                    turnos += self.__crear_turnos_del_dia(disponibilidad, dia)
-            # Avanzamos de semana
-            aux -= 7
-            base += timedelta(days=7)
-        return self.__guardarTurnos(especialista_especialidad, turnos, a_partir_de) if turnos else []
+        if cantidad_dias > 0:
+            desde = datetime.now()
+            hasta = desde + timedelta(days=cantidad_dias-1)
+            turnos = list()
+            disponibilidades = {}
+            logger.info("Creando turnos para el especialista <%s:%s> cantidad de dias=%s desde=%s hasta=%s" % 
+                         (especialista_especialidad.especialista.id,
+                          especialista_especialidad.especialista.full_name(), 
+                          cantidad_dias,
+                          desde,
+                          hasta))
+            for disp in Disponibilidad.objects.filter(ee=especialista_especialidad):
+                disponibilidades[int(disp.dia)] = disp
+            
+            for day in rrule.rrule(rrule.DAILY, dtstart=desde, until=hasta):
+                logger.debug("weekday=%s dias=%s"%(day.weekday(),disponibilidades.keys()))
+                if day.weekday() in disponibilidades.keys():
+                    turnos += self.__crear_turnos_del_dia(disponibilidades[day.weekday()], day)
+            return self.__guardarTurnos(especialista_especialidad, turnos, a_partir_de) if turnos else []
+
     def __crear_turnos_del_dia(self, disponibilidad, dia):
         """Crea turnos para una disponibilidad de un especialista en un dia determinado"""
         logger.debug("Creando turnos para el dia <%s> para el especialista <%s:%s>" % 
@@ -389,6 +394,22 @@ class Bussiness():
         if (dia - date.today()).days < 0:
             e = CancelarTurnoException(u"No se puede cancelar turnos de un día anterior ala fecha actual")
             self.__lanzar(e)
+    def consultar_reservas(self, especialidad=None, especialista=None, afiliado=None, fecha=None):
+        """Obtiene una lista de LINEAS DE RESERVA que cumplan con los parametros especificados"""
+        logger.debug("Consultando lineas de reserva especialidad=%s, especialista=%s, afiliado=%s, fecha=%s"%
+                     (especialidad,especialista,afiliado,fecha))
+        filtro = {}
+        if especialidad is not None:
+            filtro['turno__ee__especialidad__id'] = especialidad.id
+        if especialista is not None:
+            filtro['turno__ee__especialista__id'] = especialista.id
+        if afiliado is not None:
+            filtro['reserva__afiliado__id'] = afiliado.id
+        if fecha is not None:
+            filtro['reserva__fecha__day'] = fecha.day
+            filtro['reserva__fecha__month'] = fecha.month
+            filtro['reserva__fecha__year'] = fecha.year
+        return LineaDeReserva.objects.filter(**filtro)
 class TurnosAppException(Exception):
     def __init__(self, message=None, more_info=None, prev=None):
         self.message = message

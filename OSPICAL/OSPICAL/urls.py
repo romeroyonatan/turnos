@@ -1,10 +1,10 @@
-from django.conf.urls import patterns
+from django.conf.urls import patterns,include
 from django.views.generic import RedirectView
 from django.contrib.auth.views import login, logout
 
 # Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
 urlpatterns = patterns('turnos.views',
     (r'^$', RedirectView.as_view(url='/reservar/')),
@@ -27,4 +27,5 @@ urlpatterns = patterns('turnos.views',
     (r'^cancelar/$', 'cancelar_reserva'),
     (r'^cancelar/turnos/$', 'cancelar_turnos'),
     (r'^especialista/registrar/$', 'registrar_especialista'),
+    (r'^admin/', include(admin.site.urls)),
 )

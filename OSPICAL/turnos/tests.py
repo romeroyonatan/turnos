@@ -537,8 +537,8 @@ class CrearTurnoTest(TestCase):
         turnos = b.crear_turnos_del_especialista(ee, DIAS)
         exito = False
         for turno in turnos:
-            diff = turno.fecha.replace(tzinfo=None) - (datetime.now() + timedelta(days=DIAS - 1))
-            exito = exito or diff.days == 0
+            diff = turno.fecha - timezone.now()
+            exito = exito or diff.days == DIAS - 1
             #Verifico que exista el historial
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
         self.assertTrue(exito)
@@ -549,8 +549,8 @@ class CrearTurnoTest(TestCase):
         turnos = b.crear_turnos_del_especialista(ee, DIAS)
         exito = False
         for turno in turnos:
-            diff = turno.fecha.replace(tzinfo=None) - (datetime.now() + timedelta(days=DIAS - 1))
-            exito = exito or diff.days == 0
+            diff = turno.fecha - timezone.now()
+            exito = exito or diff.days == DIAS - 1
             #Verifico que exista el historial
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
         self.assertTrue(exito)
@@ -561,8 +561,9 @@ class CrearTurnoTest(TestCase):
         turnos = b.crear_turnos_del_especialista(ee, DIAS)
         exito = False
         for turno in turnos:
-            diff = turno.fecha.replace(tzinfo=None) - (datetime.now() + timedelta(days=DIAS - 1))
-            exito = exito or diff.days == 0
+            diff = turno.fecha - timezone.now()
+            exito = exito or diff.days == DIAS - 2
+            logger.debug(diff.days)
             #Verifico que exista el historial
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
         self.assertTrue(exito)
@@ -731,3 +732,93 @@ class TestValidadores(TestCase):
         self.assertFalse(validator(valid_password))
         with self.assertRaises(ValidationError):
             validator(invalid_password)
+class ConsultaReservaTest(TestCase):
+    """Esta clase agrupa las pruebas de consulta de reservas"""
+    fixtures = ['test.json']
+    def testSinReservas(self):
+        '''Consulta las reservas sin que haya ninguna cargada.
+        Debe devolver una lista vacia'''
+        LineaDeReserva.objects.all().delete()
+        reservas = b.consultar_reservas()
+        self.assertFalse(reservas)
+    def testSinFiltro(self):
+        '''Trae todas las reservas cargadas'''
+        afiliado_id = 1
+        listaTurnos = [2,3,4]
+        reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        lreservas = b.consultar_reservas()
+        id_reservas = [linea.reserva.id for linea in lreservas]
+        self.assertIn(reserva.id, id_reservas)
+    def testEspecialidad(self):
+        '''Obtiene las reservas de una especialidad en particular'''
+        turno = Turno.objects.get(id=2)
+        b.reservarTurnos(1, '12345678', [turno.id])
+        lreservas = b.consultar_reservas(especialidad=turno.ee.especialidad)
+        id_reservas = [linea.turno.id for linea in lreservas]
+        self.assertIn(turno.id, id_reservas)
+    def testEspecialista(self):
+        '''Obtiene las reservas de un especialista en particular'''
+        turno = Turno.objects.get(id=2)
+        b.reservarTurnos(1, '12345678', [turno.id])
+        lreservas = b.consultar_reservas(especialista=turno.ee.especialista)
+        id_turnos = [linea.turno.id for linea in lreservas]
+        self.assertIn(turno.id, id_turnos)
+    def testAfiliado(self):
+        '''Obtiene todas las reservas de un afiliado en particular'''
+        afiliado = Afiliado.objects.get(id=1)
+        b.reservarTurnos(afiliado.id, '12345678', [2])
+        lreservas = b.consultar_reservas(afiliado=afiliado)
+        id_afiliados = [linea.reserva.afiliado.id for linea in lreservas]
+        self.assertIn(afiliado.id, id_afiliados)
+    def testFecha(self):
+        '''Obtiene todas las reservas de una fecha en particular'''
+        turno = Turno.objects.get(id=2)
+        b.reservarTurnos(1, '12345678', [turno.id])
+        lreservas = b.consultar_reservas(fecha=timezone.now())
+        id_turnos = [linea.turno.id for linea in lreservas]
+        self.assertIn(turno.id, id_turnos)
+    def testMuchasReservasSinFiltro(self):
+        '''Fatiga: Se reservan muchos turnos y se obtienen todas las reservas.
+        Debe devolver el resultado en un tiempo razonable'''
+        listaTurnos = range(1000,1100)
+        for i in listaTurnos:
+            Turno.objects.create(fecha=timezone.now(),
+                                 estado=Turno.DISPONIBLE,
+                                 sobreturno=False,
+                                 consultorio=Consultorio.objects.get(id=1),
+                                 ee=EspecialistaEspecialidad.objects.get(id=1),
+                                 id = i,)
+        b.reservarTurnos(1, '12345678', listaTurnos)
+        lreservas = b.consultar_reservas()
+        self.assertTrue(lreservas)
+    def testSinCoincidencia(self):
+        '''Se filtran de forma tal que ninguna reserva coincida'''
+        especialidad = Especialidad.objects.create(descripcion='dummy')
+        afiliado = Afiliado.objects.create(numero='1',dni=1,nombre='1',apellido='1')
+        especialista = Especialista.objects.create(nombre='a',apellido='a',dni=1)
+        self.assertFalse(b.consultar_reservas(especialidad=especialidad))
+        self.assertFalse(b.consultar_reservas(afiliado=afiliado))
+        self.assertFalse(b.consultar_reservas(especialista=especialista))
+    def testVariosFiltrosDisjuntos(self):
+        '''Se filtra de manera que los filtros generen conjuntos disjuntos 
+        (ej un especialista y una especialidad que no corresponde)'''
+        especialidad = Especialidad.objects.create(descripcion='dummy')
+        afiliado = Afiliado.objects.create(numero='1',dni=1,nombre='1',apellido='1')
+        especialista = Especialista.objects.create(nombre='a',apellido='a',dni=1)
+        self.assertFalse(b.consultar_reservas(especialidad=especialidad,especialista=especialista))
+        self.assertFalse(b.consultar_reservas(afiliado=afiliado,especialista=especialista))
+        self.assertFalse(b.consultar_reservas(afiliado=afiliado,
+                                              especialista=especialista,
+                                              especialidad=especialidad))        
+    def testVariosFiltrosUnion(self):
+        '''Se filtran por varios filtros simultaneamente'''
+        turno = Turno.objects.get(id=2)
+        afiliado = Afiliado.objects.get(id=1)
+        reserva = b.reservarTurnos(afiliado.id, '12345678', [turno.id])
+        lreservas = b.consultar_reservas(especialista=turno.ee.especialista,
+                                         especialidad=turno.ee.especialidad,
+                                         afiliado=afiliado,
+                                         fecha=timezone.now())
+        id_turnos = [linea.reserva.id for linea in lreservas]
+        self.assertIn(reserva.id, id_turnos)
+        self.assertEqual(len(lreservas), 1)
