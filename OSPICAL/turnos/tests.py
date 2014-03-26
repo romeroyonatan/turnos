@@ -9,6 +9,8 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 import logging
+from models import *
+from bussiness import *
 logger = logging.getLogger(__name__)
 b = Bussiness()
 
@@ -535,38 +537,37 @@ class CrearTurnoTest(TestCase):
         DIAS = 8
         ee = EspecialistaEspecialidad.objects.get(id=1)
         turnos = b.crear_turnos_del_especialista(ee, DIAS)
-        exito = False
+        maximo = 0
         for turno in turnos:
             diff = turno.fecha - timezone.now()
-            exito = exito or diff.days == DIAS - 1
+            maximo = diff.days if diff.days > maximo else maximo
             #Verifico que exista el historial
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
-        self.assertTrue(exito)
+        self.assertEqual(maximo, DIAS-2)
     def test365Dias(self):
         """Crea un año de turnos y verifica que sea correcto. Debe devolver una lista de turnos creados"""
         DIAS = 365
         ee = EspecialistaEspecialidad.objects.get(id=1)
         turnos = b.crear_turnos_del_especialista(ee, DIAS)
-        exito = False
+        maximo = 0
         for turno in turnos:
             diff = turno.fecha - timezone.now()
-            exito = exito or diff.days == DIAS - 1
+            maximo = diff.days if diff.days > maximo else maximo
             #Verifico que exista el historial
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
-        self.assertTrue(exito)
+        self.assertEqual(maximo, DIAS-2)
     def testDosAnos(self):
         """Crea turnos a dos años. Debe devolver una lista de turnos creados"""
         DIAS = 365 * 2
         ee = EspecialistaEspecialidad.objects.get(id=1)
         turnos = b.crear_turnos_del_especialista(ee, DIAS)
-        exito = False
+        maximo = 0
         for turno in turnos:
             diff = turno.fecha - timezone.now()
-            exito = exito or diff.days == DIAS - 2
-            logger.debug(diff.days)
+            maximo = diff.days if diff.days > maximo else maximo
             #Verifico que exista el historial
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
-        self.assertTrue(exito)
+        self.assertEqual(maximo, DIAS-2)
     def testDiasNegativos(self):
         """Prueba que pasa si se pasan dias negativos a crear turnos. Debe devolver una lista vacia"""
         DIAS = -7
