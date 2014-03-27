@@ -187,13 +187,11 @@ class Bussiness():
             creados = self.crear_turnos_del_especialista(ee, dias)
             cantidad += len(creados)
         return cantidad
-
     def crear_turnos_del_especialista(self, especialista_especialidad, 
                                       cantidad_dias=None, 
                                       a_partir_de = timezone.now()):
         """Crea turnos para un especialista y una especialidad a partir del dia especificado"""
         from dateutil import rrule
-        
         cantidad_dias = self.DIAS if cantidad_dias == None else cantidad_dias
         if cantidad_dias > 0:
             desde = datetime.now()
@@ -210,11 +208,9 @@ class Bussiness():
                 disponibilidades[int(disp.dia)] = disp
             
             for day in rrule.rrule(rrule.DAILY, dtstart=desde, until=hasta):
-                logger.debug("weekday=%s dias=%s"%(day.weekday(),disponibilidades.keys()))
                 if day.weekday() in disponibilidades.keys():
                     turnos += self.__crear_turnos_del_dia(disponibilidades[day.weekday()], day)
             return self.__guardarTurnos(especialista_especialidad, turnos, a_partir_de) if turnos else []
-
     def __crear_turnos_del_dia(self, disponibilidad, dia):
         """Crea turnos para una disponibilidad de un especialista en un dia determinado"""
         logger.debug("Creando turnos para el dia <%s> para el especialista <%s:%s>" % 

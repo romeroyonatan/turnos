@@ -159,6 +159,8 @@ $(document).ready(function(){
 	});
 	
 	$('form').validate({
+		errorElement:'span',
+		errorClass:'error triangle-right left',
 		rules: {
 			numero: "required",
 			dni: "required",
