@@ -82,6 +82,10 @@ class CancelarReservaForm(forms.Form):
     # XXX:Esta asi para que no me valide lo que envio el usuario con las opciones especificadas
     # dado que lo completo mediante ajax
     turnos = forms.CharField(widget=forms.Select(choices=choices))
+    def __init__(self, lr=None, *args, **kwargs):
+        super(CancelarReservaForm, self).__init__(*args, **kwargs)
+        if lr is not None:
+            self.fields['turnos'].widget = forms.Select(choices=[(lr.id, lr.turno.ee.especialidad.descripcion)])
 class CancelarTurnoForm(forms.Form):
     especialidad = forms.ModelChoiceField(queryset=Especialidad.objects.all())
     especialista = forms.ModelChoiceField(queryset=Especialista.objects.all(),
@@ -147,9 +151,12 @@ class ConsultarReservaForm(forms.Form):
             return "%s" % obj.full_name()
     choices = [('',"---------"),
                (Turno.RESERVADO,'Reservado'),
-               (Turno.CANCELADO,'Cancelado')]
+               (Turno.CANCELADO,'Cancelado'),
+               (Turno.AUSENTE,'Ausente'),
+               (Turno.PRESENTE,'Presente'),]
     especialidad = forms.ModelChoiceField(queryset=Especialidad.objects.all(), required=False)
     especialista = forms.ModelChoiceField(queryset=Especialista.objects.all(), required=False)
-    fecha = forms.DateField(required=False)
+    fecha_turno = forms.DateField(required=False)
+    fecha_reserva = forms.DateField(required=False)
     afiliado = FullNameModelChoiceField(queryset=Afiliado.objects.all(), required=False)
     estado = forms.ChoiceField(choices=choices,required=False)

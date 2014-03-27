@@ -380,6 +380,9 @@ class CancelarTurnoTest(TestCase):
             self.assertEquals(t.estado, Turno.CANCELADO)
         for cancelado in cancelados:
             self.assertEquals(reserva.id, cancelado.id)
+        # Verifico que se haya cancelado la linea de reserva
+        for lr in LineaDeReserva.objects.filter(reserva__id=reserva.id):
+            self.assertEqual(lr.estado, Turno.CANCELADO)
         self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
     def testCancelarTurnosTodosReservados(self):
         """Prueba cancelar turnos de un di acon todos los turnos reservados en varias reserva. Debe 
@@ -771,11 +774,18 @@ class ConsultaReservaTest(TestCase):
         lreservas = b.consultar_reservas(afiliado=afiliado)
         id_afiliados = [linea.reserva.afiliado.id for linea in lreservas]
         self.assertIn(afiliado.id, id_afiliados)
-    def testFecha(self):
+    def testFechaReserva(self):
         '''Obtiene todas las reservas de una fecha en particular'''
         turno = Turno.objects.get(id=2)
         b.reservarTurnos(1, '12345678', [turno.id])
-        lreservas = b.consultar_reservas(fecha=timezone.now())
+        lreservas = b.consultar_reservas(fecha_reserva=timezone.now())
+        id_turnos = [linea.turno.id for linea in lreservas]
+        self.assertIn(turno.id, id_turnos)
+    def testFechaTurno(self):
+        '''Obtiene todas las reservas de una fecha en particular'''
+        turno = Turno.objects.get(id=2)
+        b.reservarTurnos(1, '12345678', [turno.id])
+        lreservas = b.consultar_reservas(fecha_turno=turno.fecha.date())
         id_turnos = [linea.turno.id for linea in lreservas]
         self.assertIn(turno.id, id_turnos)
     def testEstado(self):
@@ -830,7 +840,7 @@ class ConsultaReservaTest(TestCase):
         lreservas = b.consultar_reservas(especialista=turno.ee.especialista,
                                          especialidad=turno.ee.especialidad,
                                          afiliado=afiliado,
-                                         fecha=timezone.now())
+                                         fecha_reserva=timezone.now())
         id_turnos = [linea.reserva.id for linea in lreservas]
         self.assertIn(reserva.id, id_turnos)
         self.assertEqual(len(lreservas), 1)

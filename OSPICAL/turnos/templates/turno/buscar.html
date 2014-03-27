@@ -55,7 +55,7 @@
 				        {% if item.estado != 'R' %} red{% endif %}">
 				        <td>{{ forloop.counter }}</td>
 				        <td>{{ item.reserva.fecha|date:"SHORT_DATE_FORMAT" }} {{ item.reserva.fecha|time:'H:i' }}</td>
-				        <td>{{ item.turno.fecha|date:"SHORT_DATE_FORMAT"  }} {{ item.turno.fecha|time:'H:i' }}</td>
+				        <td>{{ item.turno.fecha|date:"SHORT_DATE_FORMAT" }} {{ item.turno.fecha|time:'H:i' }}</td>
 				        <td>{{ item.turno.ee.especialidad.descripcion }}</td>
 				        <td>{{ item.turno.ee.especialista.full_name }}</td>
 				        <td>{{ item.reserva.afiliado.numero }}</td>
@@ -66,7 +66,7 @@
 				            {% if item.estado == 'R' %}
 				            <a href="#">
 				                <span class="ui-icon ui-icon-pencil" title="Editar reserva"></span></a>
-				            <a href="#">
+				            <a href="{% url 'turnos.views.cancelar_reserva' lr_id=item.id%}">
 				                <span class="ui-icon ui-icon-closethick" title="Cancelar reserva"></span></a>
 				            {% endif %}
 				        </td>

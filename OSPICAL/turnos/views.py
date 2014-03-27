@@ -190,18 +190,25 @@ def get_turnos_afiliado(request,afiliado_id,today=False):
 
 @login_required
 @permission_required('turnos.reservar_turnos', raise_exception=True)
-def cancelar_reserva(request):
+def cancelar_reserva(request, lr_id=None):
     b = Bussiness()
     if request.method == 'POST':
-        form = CancelarReservaForm(request.POST)
+        form = CancelarReservaForm(data=request.POST)
         if form.is_valid():
             reserva = form.cleaned_data["turnos"]
             motivo = form.cleaned_data["motivo"]
             if b.cancelar_reserva(reserva, motivo, request.user.get_profile()):
                 messages.success(request, u'Reserva cancelada con éxito')
             return HttpResponseRedirect(request.path)
+    elif lr_id and LineaDeReserva.objects.filter(id=lr_id).exists():
+        lr = LineaDeReserva.objects.get(id=lr_id)
+        form = CancelarReservaForm(initial={'afiliado':lr.reserva.afiliado.id,
+                                            'numero':lr.reserva.afiliado.numero,
+                                            'dni':lr.reserva.afiliado.dni,
+                                            },
+                                   lr=lr)
     else:
-        form = CancelarReservaForm()
+        form = CancelarReservaForm(initial=request.GET)
     return render(request, "turno/cancelar_reserva.html", locals())
 
 @login_required
@@ -264,8 +271,9 @@ def consultar_reservas(request):
             resultado = b.consultar_reservas(especialidad=form.cleaned_data['especialidad'], 
                                              especialista=form.cleaned_data['especialista'], 
                                              afiliado=form.cleaned_data['afiliado'], 
-                                             fecha=form.cleaned_data['fecha'],
+                                             fecha_turno=form.cleaned_data['fecha_turno'],
+                                             fecha_reserva=form.cleaned_data['fecha_reserva'],
                                              estado=form.cleaned_data['estado'],)
     else:
-        form = ConsultarReservaForm()
+        form = ConsultarReservaForm(initial=request.GET)
     return render(request, "turno/buscar.html", locals())

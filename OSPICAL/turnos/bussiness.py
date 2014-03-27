@@ -382,7 +382,11 @@ class Bussiness():
                                           turno=turno,
                                           empleado=empleado)
         cancelados = turnos.update(estado=Turno.CANCELADO)
+        reservas_canceladas = lineas.update(estado=Turno.CANCELADO)
+        logger.debug('LR: %s'%lineas)
+        logger.debug('Reservas: %s'%reservas)
         logger.info('Se cancelaron %s turnos'%cancelados)
+        logger.info('Se cancelaron %s reservas'%reservas_canceladas)
         return reservas
     def __validar_cancelacion_turno(self, ee, dia):
         if isinstance(dia, datetime):
@@ -390,11 +394,11 @@ class Bussiness():
         if (dia - date.today()).days < 0:
             e = CancelarTurnoException(u"No se puede cancelar turnos de un día anterior ala fecha actual")
             self.__lanzar(e)
-    def consultar_reservas(self, especialidad=None, especialista=None, afiliado=None, fecha=None, 
-                           estado=None):
+    def consultar_reservas(self, especialidad=None, especialista=None, afiliado=None, fecha_turno=None, 
+                           estado=None, fecha_reserva=None):
         """Obtiene una lista de LINEAS DE RESERVA que cumplan con los parametros especificados"""
-        logger.debug("Consultando lineas de reserva especialidad=%s, especialista=%s, afiliado=%s, fecha=%s,\
-                     estado=%s"%(especialidad,especialista,afiliado,fecha,estado))
+        logger.debug("Consultando lineas de reserva especialidad=%s, especialista=%s, afiliado=%s, fecha_reserva=%s,\
+                     fecha_turno=%s,estado=%s"%(especialidad,especialista,afiliado,fecha_reserva,fecha_turno,estado))
         filtro = {}
         if especialidad is not None and especialidad:
             filtro['turno__ee__especialidad__id'] = especialidad.id
@@ -402,10 +406,14 @@ class Bussiness():
             filtro['turno__ee__especialista__id'] = especialista.id
         if afiliado is not None and afiliado:
             filtro['reserva__afiliado__id'] = afiliado.id
-        if fecha is not None and fecha:
-            filtro['reserva__fecha__day'] = fecha.day
-            filtro['reserva__fecha__month'] = fecha.month
-            filtro['reserva__fecha__year'] = fecha.year
+        if fecha_turno is not None and fecha_turno:
+            filtro['turno__fecha__day'] = fecha_turno.day
+            filtro['turno__fecha__month'] = fecha_turno.month
+            filtro['turno__fecha__year'] = fecha_turno.year
+        if fecha_reserva is not None and fecha_reserva:
+            filtro['reserva__fecha__day'] = fecha_reserva.day
+            filtro['reserva__fecha__month'] = fecha_reserva.month
+            filtro['reserva__fecha__year'] = fecha_reserva.year
         if estado is not None and estado:
             filtro['estado'] = estado
         return LineaDeReserva.objects.filter(**filtro)
