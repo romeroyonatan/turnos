@@ -1,0 +1,77 @@
+{% extends "site/application.html" %}
+{% load static %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/turno.buscar.js' %}"></script>
+{% endblock %}
+
+{% block title %}Consultar reservas{% endblock %}
+
+{% block content %}
+<form method="post" action="." class="pure-form pure-form-aligned">
+	{% csrf_token %}
+	{% for hidden in form.hidden_fields %}
+	    {{ hidden }}
+	{% endfor %}
+	<fieldset>
+	    <legend>Parámetros de búsqueda</legend>
+	    {% for field in form.visible_fields %}
+		    <div class="pure-control-group">
+			    {{ field.label_tag }}
+			    {{ field }}
+			    {{ field.errors }}
+	        </div>
+	    {% endfor %}
+	    <div class="pure-controls">
+		    <input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
+		    <input type="submit" value="Consultar" class="pure-button pure-button-primary"/>
+	    </div>
+	</fieldset>
+</form>
+
+{% if mostrar_resultados %}
+	<div id="resultados">
+	{% if resultado %}
+		    <h2>Lista de turnos</h2>
+		    <table class="pure-table">
+			    <thead>
+					<tr>
+					   <th>Nº</th>     
+					   <th>Fecha de la reserva</th>
+					   <th>Fecha del turno</th>
+					   <th>Especialidad</th>
+					   <th>Especialista</th>
+					   <th>Nº afiliado</th>
+					   <th>Nombre y apellido</th>
+					   <th>Telefono</th>
+					   <th>Accion</th>
+					</tr>
+			    </thead>
+			    <tbody>
+				    {% for item in resultado %}
+				    <tr class="pure-table-{% if forloop.counter|divisibleby:2 %}odd{% else %}even{% endif %}">
+				        <td>{{ forloop.counter }}</td>
+				        <td>{{ item.reserva.fecha|date:"SHORT_DATE_FORMAT" }} {{ item.reserva.fecha|time:'H:i' }}</td>
+				        <td>{{ item.turno.fecha|date:"SHORT_DATE_FORMAT"  }} {{ item.turno.fecha|time:'H:i' }}</td>
+				        <td>{{ item.turno.ee.especialidad.descripcion }}</td>
+				        <td>{{ item.turno.ee.especialista.full_name }}</td>
+				        <td>{{ item.reserva.afiliado.numero }}</td>
+				        <td>{{ item.reserva.afiliado.full_name }}</td>
+				        <td>{{ item.reserva.telefono }}</td>
+				        <td>  
+				            <a href="#">
+				                <span class="ui-icon ui-icon-pencil" title="Editar reserva"></span></a>
+				            <a href="#">
+				                <span class="ui-icon ui-icon-closethick" title="Cancelar reserva"></span></a>
+				        </td>
+				    </tr>
+				    {% endfor %}
+			    </tbody>
+		    </table>
+	{% else %}
+	    <p>No hay reservas que cumplan con su patrón de búsqueda</p>
+	{% endif %}
+	</div>
+{% endif %}
+{% endblock %}

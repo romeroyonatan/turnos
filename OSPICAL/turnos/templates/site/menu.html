@@ -19,7 +19,13 @@
 						title="Permite cancelar una reserva, indicando que el afiliado no asistirá al turno">
 							Cancelar reserva
 						</a>
+                       <a href="{% url 'turnos.views.consultar_reservas' %}"
+                        title="Permite consultar las reservas realizadas">
+                            Consultar reservas
+                        </a>
 					{% endif %}
+				</li>
+				<li class="menu-item-divided">
 					{% if perms.turnos.crear_turnos %}
 						<a href="{% url 'turnos.views.crear_turnos' %}"
 						   title="Permite crear turnos manualmente">
