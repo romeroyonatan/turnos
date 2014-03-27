@@ -396,17 +396,17 @@ class Bussiness():
         logger.debug("Consultando lineas de reserva especialidad=%s, especialista=%s, afiliado=%s, fecha=%s,\
                      estado=%s"%(especialidad,especialista,afiliado,fecha,estado))
         filtro = {}
-        if especialidad is not None:
+        if especialidad is not None and especialidad:
             filtro['turno__ee__especialidad__id'] = especialidad.id
-        if especialista is not None:
+        if especialista is not None and especialista:
             filtro['turno__ee__especialista__id'] = especialista.id
-        if afiliado is not None:
+        if afiliado is not None and afiliado:
             filtro['reserva__afiliado__id'] = afiliado.id
-        if fecha is not None:
+        if fecha is not None and fecha:
             filtro['reserva__fecha__day'] = fecha.day
             filtro['reserva__fecha__month'] = fecha.month
             filtro['reserva__fecha__year'] = fecha.year
-        if estado is not None:
+        if estado is not None and estado:
             filtro['estado'] = estado
         return LineaDeReserva.objects.filter(**filtro)
 class TurnosAppException(Exception):
@@ -430,4 +430,3 @@ class CancelarReservaException(TurnosAppException):
     pass
 class CancelarTurnoException(TurnosAppException):
     pass
-

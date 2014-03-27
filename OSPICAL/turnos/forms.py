@@ -142,7 +142,14 @@ class RegistarEspecialistaForm(forms.Form):
         Disponibilidad.objects.bulk_create(disponibilidades)
         return especialista
 class ConsultarReservaForm(forms.Form):
+    class FullNameModelChoiceField(forms.ModelChoiceField):
+        def label_from_instance(self, obj):
+            return "%s" % obj.full_name()
+    choices = [('',"---------"),
+               (Turno.RESERVADO,'Reservado'),
+               (Turno.CANCELADO,'Cancelado')]
     especialidad = forms.ModelChoiceField(queryset=Especialidad.objects.all(), required=False)
     especialista = forms.ModelChoiceField(queryset=Especialista.objects.all(), required=False)
     fecha = forms.DateField(required=False)
-    afiliado =forms.ModelChoiceField(queryset=Afiliado.objects.all(), required=False)
+    afiliado = FullNameModelChoiceField(queryset=Afiliado.objects.all(), required=False)
+    estado = forms.ChoiceField(choices=choices,required=False)

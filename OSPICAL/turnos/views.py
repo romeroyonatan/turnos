@@ -264,7 +264,8 @@ def consultar_reservas(request):
             resultado = b.consultar_reservas(especialidad=form.cleaned_data['especialidad'], 
                                              especialista=form.cleaned_data['especialista'], 
                                              afiliado=form.cleaned_data['afiliado'], 
-                                             fecha=form.cleaned_data['fecha'])
+                                             fecha=form.cleaned_data['fecha'],
+                                             estado=form.cleaned_data['estado'],)
     else:
         form = ConsultarReservaForm()
     return render(request, "turno/buscar.html", locals())

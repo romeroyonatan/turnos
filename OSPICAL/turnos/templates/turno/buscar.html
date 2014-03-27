@@ -45,12 +45,14 @@
 					   <th>Nº afiliado</th>
 					   <th>Nombre y apellido</th>
 					   <th>Telefono</th>
+					   <th>Estado</th>
 					   <th>Accion</th>
 					</tr>
 			    </thead>
 			    <tbody>
 				    {% for item in resultado %}
-				    <tr class="pure-table-{% if forloop.counter|divisibleby:2 %}odd{% else %}even{% endif %}">
+				    <tr class="pure-table-{% if forloop.counter|divisibleby:2 %}odd{% else %}even{% endif %} 
+				        {% if item.estado != 'R' %} red{% endif %}">
 				        <td>{{ forloop.counter }}</td>
 				        <td>{{ item.reserva.fecha|date:"SHORT_DATE_FORMAT" }} {{ item.reserva.fecha|time:'H:i' }}</td>
 				        <td>{{ item.turno.fecha|date:"SHORT_DATE_FORMAT"  }} {{ item.turno.fecha|time:'H:i' }}</td>
@@ -59,11 +61,14 @@
 				        <td>{{ item.reserva.afiliado.numero }}</td>
 				        <td>{{ item.reserva.afiliado.full_name }}</td>
 				        <td>{{ item.reserva.telefono }}</td>
+				        <td>{{ item.estado }}</td>
 				        <td>  
+				            {% if item.estado == 'R' %}
 				            <a href="#">
 				                <span class="ui-icon ui-icon-pencil" title="Editar reserva"></span></a>
 				            <a href="#">
 				                <span class="ui-icon ui-icon-closethick" title="Cancelar reserva"></span></a>
+				            {% endif %}
 				        </td>
 				    </tr>
 				    {% endfor %}
