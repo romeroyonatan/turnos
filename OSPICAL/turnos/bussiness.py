@@ -390,10 +390,11 @@ class Bussiness():
         if (dia - date.today()).days < 0:
             e = CancelarTurnoException(u"No se puede cancelar turnos de un día anterior ala fecha actual")
             self.__lanzar(e)
-    def consultar_reservas(self, especialidad=None, especialista=None, afiliado=None, fecha=None):
+    def consultar_reservas(self, especialidad=None, especialista=None, afiliado=None, fecha=None, 
+                           estado=None):
         """Obtiene una lista de LINEAS DE RESERVA que cumplan con los parametros especificados"""
-        logger.debug("Consultando lineas de reserva especialidad=%s, especialista=%s, afiliado=%s, fecha=%s"%
-                     (especialidad,especialista,afiliado,fecha))
+        logger.debug("Consultando lineas de reserva especialidad=%s, especialista=%s, afiliado=%s, fecha=%s,\
+                     estado=%s"%(especialidad,especialista,afiliado,fecha,estado))
         filtro = {}
         if especialidad is not None:
             filtro['turno__ee__especialidad__id'] = especialidad.id
@@ -405,6 +406,8 @@ class Bussiness():
             filtro['reserva__fecha__day'] = fecha.day
             filtro['reserva__fecha__month'] = fecha.month
             filtro['reserva__fecha__year'] = fecha.year
+        if estado is not None:
+            filtro['estado'] = estado
         return LineaDeReserva.objects.filter(**filtro)
 class TurnosAppException(Exception):
     def __init__(self, message=None, more_info=None, prev=None):

@@ -543,7 +543,7 @@ class CrearTurnoTest(TestCase):
             maximo = diff.days if diff.days > maximo else maximo
             #Verifico que exista el historial
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
-        self.assertEqual(maximo, DIAS-2)
+        self.assertEqual(maximo, DIAS-1)
     def test365Dias(self):
         """Crea un año de turnos y verifica que sea correcto. Debe devolver una lista de turnos creados"""
         DIAS = 365
@@ -555,7 +555,7 @@ class CrearTurnoTest(TestCase):
             maximo = diff.days if diff.days > maximo else maximo
             #Verifico que exista el historial
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
-        self.assertEqual(maximo, DIAS-2)
+        self.assertEqual(maximo, DIAS-1)
     def testDosAnos(self):
         """Crea turnos a dos años. Debe devolver una lista de turnos creados"""
         DIAS = 365 * 2
@@ -567,7 +567,7 @@ class CrearTurnoTest(TestCase):
             maximo = diff.days if diff.days > maximo else maximo
             #Verifico que exista el historial
             self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
-        self.assertEqual(maximo, DIAS-2)
+        self.assertEqual(maximo, DIAS-1)
     def testDiasNegativos(self):
         """Prueba que pasa si se pasan dias negativos a crear turnos. Debe devolver una lista vacia"""
         DIAS = -7
@@ -776,6 +776,17 @@ class ConsultaReservaTest(TestCase):
         turno = Turno.objects.get(id=2)
         b.reservarTurnos(1, '12345678', [turno.id])
         lreservas = b.consultar_reservas(fecha=timezone.now())
+        id_turnos = [linea.turno.id for linea in lreservas]
+        self.assertIn(turno.id, id_turnos)
+    def testEstado(self):
+        '''Obtiene todas las reservas con un estado particular'''
+        turno = Turno.objects.get(id=2)
+        b.reservarTurnos(1, '12345678', [turno.id])
+        lreservas = b.consultar_reservas(estado=Turno.RESERVADO)
+        id_turnos = [linea.turno.id for linea in lreservas]
+        self.assertIn(turno.id, id_turnos)
+        b.cancelar_reserva(lreservas, '', None)
+        lreservas = b.consultar_reservas(estado=Turno.CANCELADO)
         id_turnos = [linea.turno.id for linea in lreservas]
         self.assertIn(turno.id, id_turnos)
     def testMuchasReservasSinFiltro(self):
