@@ -141,3 +141,8 @@ class RegistarEspecialistaForm(forms.Form):
         logger.debug("Guardando disponibilidades %s" % disponibilidades)
         Disponibilidad.objects.bulk_create(disponibilidades)
         return especialista
+class ConsultarReservaForm(forms.Form):
+    especialidad = forms.ModelChoiceField(queryset=Especialidad.objects.all(), required=False)
+    especialista = forms.ModelChoiceField(queryset=Especialista.objects.all(), required=False)
+    fecha = forms.DateField(required=False)
+    afiliado =forms.ModelChoiceField(queryset=Afiliado.objects.all(), required=False)

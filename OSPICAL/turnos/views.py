@@ -253,3 +253,18 @@ def registrar_especialista(request):
     else:
         form = RegistarEspecialistaForm(initial={'frecuencia':b.MINUTOS})
     return render(request, "especialista/registrar.html", locals())
+
+@permission_required('turnos.consultar_reservas', raise_exception=True)
+def consultar_reservas(request):
+    b=Bussiness()
+    if request.method == 'POST':
+        form = ConsultarReservaForm(request.POST)
+        if form.is_valid():
+            mostrar_resultados=True
+            resultado = b.consultar_reservas(especialidad=form.cleaned_data['especialidad'], 
+                                             especialista=form.cleaned_data['especialista'], 
+                                             afiliado=form.cleaned_data['afiliado'], 
+                                             fecha=form.cleaned_data['fecha'])
+    else:
+        form = ConsultarReservaForm()
+    return render(request, "turno/buscar.html", locals())
