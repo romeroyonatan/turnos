@@ -202,6 +202,9 @@ def cancelar_reserva(request, lr_id=None):
             return HttpResponseRedirect(request.path)
     elif lr_id and LineaDeReserva.objects.filter(id=lr_id).exists():
         lr = LineaDeReserva.objects.get(id=lr_id)
+        if lr.estado != Turno.RESERVADO or lr.turno.estado != Turno.RESERVADO:
+            messages.warning(request, u'No puede cancelar una reserva con un estado distinto a reservado')
+            logger.warning('Intentando cancelar la linea de reserva %s con estado %s'%(lr.id,lr.estado))
         form = CancelarReservaForm(initial={'afiliado':lr.reserva.afiliado.id,
                                             'numero':lr.reserva.afiliado.numero,
                                             'dni':lr.reserva.afiliado.dni,

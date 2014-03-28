@@ -401,6 +401,9 @@ class CancelarTurnoTest(TestCase):
             self.assertEquals(t.estado, Turno.CANCELADO)
         for cancelado in cancelados:
             self.assertIn(cancelado.id, ids_reservas)
+        # Verifico que se haya cancelado la linea de reserva
+        for lr in LineaDeReserva.objects.filter(reserva__id__in=ids_reservas):
+            self.assertEqual(lr.estado, Turno.CANCELADO)
         self.assertTrue(b._Bussiness__isCancelado(ee.id,fecha))
     def testCancelarTurnosConPresentes(self):
         """Prueba cancelar turnos de un dia con algunos turnos con estado PRESENTE. 
@@ -425,6 +428,9 @@ class CancelarTurnoTest(TestCase):
         for turno in turnos[1:]:
             t = Turno.objects.get(id=turno.id)
             self.assertEquals(t.estado, Turno.CANCELADO)
+        # Verifico que se haya cancelado la linea de reserva
+        for lr in LineaDeReserva.objects.filter(reserva__in=reservas):
+            self.assertIn(lr.estado, (Turno.CANCELADO,Turno.PRESENTE))
         self.assertNotIn(reservas[0].id, ids_cancelados)
         lr = LineaDeReserva.objects.get(reserva__id=reservas[0].id)
         self.assertEquals(lr.turno.estado, Turno.PRESENTE)

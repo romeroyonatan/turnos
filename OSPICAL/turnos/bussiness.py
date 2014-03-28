@@ -381,10 +381,8 @@ class Bussiness():
                                           descripcion="Se cancelaron todos los turnos del dia",
                                           turno=turno,
                                           empleado=empleado)
-        cancelados = turnos.update(estado=Turno.CANCELADO)
         reservas_canceladas = lineas.update(estado=Turno.CANCELADO)
-        logger.debug('LR: %s'%lineas)
-        logger.debug('Reservas: %s'%reservas)
+        cancelados = turnos.update(estado=Turno.CANCELADO)
         logger.info('Se cancelaron %s turnos'%cancelados)
         logger.info('Se cancelaron %s reservas'%reservas_canceladas)
         return reservas
