@@ -9,8 +9,7 @@
 {% block title %}Consultar reservas{% endblock %}
 
 {% block content %}
-<form method="post" action="." class="pure-form pure-form-aligned">
-	{% csrf_token %}
+<form method="get" action="." class="pure-form pure-form-aligned">
 	{% for hidden in form.hidden_fields %}
 	    {{ hidden }}
 	{% endfor %}
@@ -30,36 +29,34 @@
 	</fieldset>
 </form>
 
-{% if mostrar_resultados %}
-	<div id="resultados">
-	{% if resultado %}
+{% if request.GET|length > 0 %}
+	<div id="object_lists">
+	{% if object_list %}
 		    <h2>Lista de turnos</h2>
 		    <table class="pure-table">
 			    <thead>
 					<tr>
-					   <th>Nº</th>     
+					   <th>Nombre y apellido</th>
 					   <th>Fecha de la reserva</th>
 					   <th>Fecha del turno</th>
 					   <th>Especialidad</th>
 					   <th>Especialista</th>
 					   <th>Nº afiliado</th>
-					   <th>Nombre y apellido</th>
 					   <th>Telefono</th>
 					   <th>Estado</th>
 					   <th>Accion</th>
 					</tr>
 			    </thead>
 			    <tbody>
-				    {% for item in resultado %}
+				    {% for item in object_list %}
 				    <tr class="pure-table-{% if forloop.counter|divisibleby:2 %}odd{% else %}even{% endif %} 
 				        {% if item.estado != 'R' %} red{% endif %}">
-				        <td>{{ forloop.counter }}</td>
+				        <td>{{ item.reserva.afiliado.full_name|upper }}</td>
 				        <td>{{ item.reserva.fecha|date:"SHORT_DATE_FORMAT" }} {{ item.reserva.fecha|time:'H:i' }}</td>
 				        <td>{{ item.turno.fecha|date:"SHORT_DATE_FORMAT" }} {{ item.turno.fecha|time:'H:i' }}</td>
 				        <td>{{ item.turno.ee.especialidad.descripcion }}</td>
 				        <td>{{ item.turno.ee.especialista.full_name }}</td>
 				        <td>{{ item.reserva.afiliado.numero }}</td>
-				        <td>{{ item.reserva.afiliado.full_name }}</td>
 				        <td>{{ item.reserva.telefono }}</td>
 				        <td>{{ item.estado }}</td>
 				        <td>  
@@ -74,9 +71,30 @@
 				    {% endfor %}
 			    </tbody>
 		    </table>
+			    <ul class="pure-paginator">
+			    	{% if object_list.has_previous %}
+				    <li><a class="pure-button prev" 
+				    		href="?page={{ object_list.previous_page_number }}&amp;{{ queries.urlencode }}">&#171;</a></li>
+		    		{% endif %}
+		    		
+			        {% for page in object_list.paginator.page_range %}
+			        	{% if page == object_list.number %}
+					    <li><a class="pure-button pure-button-active" 
+					    		href="?page={{ page }}&amp;{{ queries.urlencode }}">{{ page }}</a></li>
+					    {% else %}
+					    <li><a class="pure-button" href="?page={{ page }}&amp;{{ queries.urlencode }}">{{ page }}</a></li>
+					    {% endif %}
+					{% endfor %}
+					
+					{% if object_list.has_next %}
+					    <li><a class="pure-button next" href="?page={{ object_list.next_page_number }}&amp;{{ queries.urlencode }}">&#187;</a></li>
+			        {% endif %}
+				</ul>
+			</div>
 	{% else %}
 	    <p>No hay reservas que cumplan con su patrón de búsqueda</p>
 	{% endif %}
+	
 	</div>
 {% endif %}
 {% endblock %}

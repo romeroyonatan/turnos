@@ -414,7 +414,7 @@ class Bussiness():
             filtro['reserva__fecha__year'] = fecha_reserva.year
         if estado is not None and estado:
             filtro['estado'] = estado
-        return LineaDeReserva.objects.filter(**filtro)
+        return LineaDeReserva.objects.filter(**filtro).order_by('-reserva__fecha')
 class TurnosAppException(Exception):
     def __init__(self, message=None, more_info=None, prev=None):
         self.message = message
