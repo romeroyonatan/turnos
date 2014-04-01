@@ -13,11 +13,12 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.template.response import TemplateResponse
 
 from turnos.forms import *
 from turnos.models import *
-from turnos.bussiness import Bussiness
+from bussiness import Bussiness
+from decorators import Paginar
 import logging
 
 logger = logging.getLogger(__name__)
@@ -266,32 +267,18 @@ def registrar_especialista(request):
     return render(request, "especialista/registrar.html", locals())
 
 @permission_required('turnos.consultar_reservas', raise_exception=True)
+@Paginar
 def consultar_reservas(request):
     b=Bussiness()
     if len(request.GET) > 0:
         form = ConsultarReservaForm(request.GET)
         if form.is_valid():
-            lista_reservas = b.consultar_reservas(especialidad=form.cleaned_data['especialidad'], 
+            object_list = b.consultar_reservas(especialidad=form.cleaned_data['especialidad'], 
                                              especialista=form.cleaned_data['especialista'], 
                                              afiliado=form.cleaned_data['afiliado'], 
                                              fecha_turno=form.cleaned_data['fecha_turno'],
                                              fecha_reserva=form.cleaned_data['fecha_reserva'],
                                              estado=form.cleaned_data['estado'],)
-            # TODO: Hacer esto mas lindo, quedo feo ¿decorador?
-            page = request.GET.get('page')
-            paginator = Paginator(lista_reservas, 10) # Show 25 contacts per page
-            try:
-                object_list = paginator.page(page)
-            except PageNotAnInteger:
-                # If page is not an integer, deliver first page.
-                object_list = paginator.page(1)
-            except EmptyPage:
-                # If page is out of range (e.g. 9999), deliver last page of results.
-                object_list = paginator.page(paginator.num_pages)
-            queries_without_page = request.GET.copy()
-            if queries_without_page.has_key('page'):
-                del queries_without_page['page']
-            queries = queries_without_page
     else:
         form = ConsultarReservaForm(initial=request.GET)
-    return render(request, "turno/buscar.html", locals())
+    return TemplateResponse(request, "turno/buscar.html", locals())
