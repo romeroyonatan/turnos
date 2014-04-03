@@ -2,7 +2,14 @@
 from django.template.response import TemplateResponse
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 class Paginar(object):
+    """Decorador que simplifica la paginacion de contenidos. Para que funcione
+    la vista debe devolver un TemplateResponse y en el contexto de la response debe
+    declarar 'object_list' que contendra una lista de los elementos y el decorador 
+    genera en el contexto las variables 'paginator' que contiene las paginas y 'queries'
+    que es la url actual de la vista sin el atributo 'page' para que pueda ser usado en los 
+    botones anterior, siguiente, etc."""
     def __init__(self, view):
         self.view = view
         self.per_page = 10
