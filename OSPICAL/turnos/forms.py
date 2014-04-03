@@ -1,11 +1,13 @@
 # coding=utf-8
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import Permission
 from django.db import transaction
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
-from turnos.models import *
-from turnos.validators import PasswordValidator
+from django.core.exceptions import MultipleObjectsReturned
+from models import *
+from validators import PasswordValidator
 import logging
 import json
 
@@ -146,9 +148,10 @@ class RegistarEspecialistaForm(forms.Form):
         Disponibilidad.objects.bulk_create(disponibilidades)
         return especialista
 class ConsultarReservaForm(forms.Form):
-    class FullNameModelChoiceField(forms.ModelChoiceField):
-        def label_from_instance(self, obj):
-            return "%s" % obj.full_name()
+    error_messages = {
+        'multiple_object_returned': "DNI duplicado. Intente buscar por numero de afiliado",
+        'does_not_exists': "Afiliado inexistente"
+    }
     choices = [('',"---------"),
                (Turno.RESERVADO,'Reservado'),
                (Turno.CANCELADO,'Cancelado'),
@@ -158,5 +161,20 @@ class ConsultarReservaForm(forms.Form):
     especialista = forms.ModelChoiceField(queryset=Especialista.objects.all(), required=False)
     fecha_turno = forms.DateField(required=False)
     fecha_reserva = forms.DateField(required=False)
-    afiliado = FullNameModelChoiceField(queryset=Afiliado.objects.all(), required=False)
+    afiliado = forms.IntegerField(required=False, help_text="Puede ingresar numero de afiliado o DNI")
     estado = forms.ChoiceField(choices=choices,required=False)
+    def clean_afiliado(self):
+            try:
+                parametro = self.cleaned_data["afiliado"]
+                afiliado = Afiliado.objects.get(Q(dni=parametro)|Q(numero=parametro)) if parametro else None
+                return afiliado
+            except Afiliado.DoesNotExist:
+                raise forms.ValidationError(
+                    self.error_messages['does_not_exists'],
+                    code='does_not_exists',
+                )
+            except MultipleObjectsReturned:
+                raise forms.ValidationError(
+                    self.error_messages['multiple_object_returned'],
+                    code='multiple_object_returned',
+                )

@@ -10,7 +10,7 @@ from django.conf import settings
 from turnos.models import *
 
 import logging
-from models import EspecialistaEspecialidad, HistorialTurno, Afiliado
+from models import EspecialistaEspecialidad, HistorialTurno, Afiliado, LineaDeReserva
 logger = logging.getLogger(__name__)
 
 class Bussiness():
@@ -414,7 +414,7 @@ class Bussiness():
             filtro['reserva__fecha__year'] = fecha_reserva.year
         if estado is not None and estado:
             filtro['estado'] = estado
-        return LineaDeReserva.objects.filter(**filtro).order_by('-reserva__fecha')
+        return LineaDeReserva.objects.filter(**filtro).order_by('-turno__fecha', '-reserva__fecha')
 class TurnosAppException(Exception):
     def __init__(self, message=None, more_info=None, prev=None):
         self.message = message

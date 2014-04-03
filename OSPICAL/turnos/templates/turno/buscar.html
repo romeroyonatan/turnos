@@ -16,7 +16,7 @@
 	<fieldset>
 	    <legend>Parámetros de búsqueda</legend>
 	    {% for field in form.visible_fields %}
-		    <div class="pure-control-group">
+		    <div class="pure-control-group" title="{{ field.help_text }}">
 			    {{ field.label_tag }}
 			    {{ field }}
 			    {{ field.errors }}
@@ -33,6 +33,7 @@
 	<div id="object_lists">
 	{% if object_list %}
 		    <h2>Lista de turnos</h2>
+		    <p>{{ paginator.count }} resultados encontrados</p>
 		    <table class="pure-table">
 			    <thead>
 					<tr>
