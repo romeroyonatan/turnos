@@ -37,11 +37,11 @@
 		    <table class="pure-table">
 			    <thead>
 					<tr>
-					   <th>Nombre y apellido</th>
-					   <th>Fecha de la reserva</th>
 					   <th>Fecha del turno</th>
 					   <th>Especialidad</th>
 					   <th>Especialista</th>
+					   <th>Fecha de la reserva</th>
+					   <th>Nombre y apellido</th>
 					   <th>Nº afiliado</th>
 					   <th>Telefono</th>
 					   <th>Estado</th>
@@ -52,11 +52,11 @@
 				    {% for item in object_list %}
 				    <tr class="pure-table-{% if forloop.counter|divisibleby:2 %}odd{% else %}even{% endif %} 
 				        {% if item.estado != 'R' %} red{% endif %}">
-				        <td>{{ item.reserva.afiliado.full_name|upper }}</td>
-				        <td>{{ item.reserva.fecha|date:"SHORT_DATE_FORMAT" }} {{ item.reserva.fecha|time:'H:i' }}</td>
 				        <td>{{ item.turno.fecha|date:"SHORT_DATE_FORMAT" }} {{ item.turno.fecha|time:'H:i' }}</td>
 				        <td>{{ item.turno.ee.especialidad.descripcion }}</td>
 				        <td>{{ item.turno.ee.especialista.full_name }}</td>
+				        <td>{{ item.reserva.fecha|date:"SHORT_DATE_FORMAT" }} {{ item.reserva.fecha|time:'H:i' }}</td>
+				        <td>{{ item.reserva.afiliado.full_name|upper }}</td>
 				        <td>{{ item.reserva.afiliado.numero }}</td>
 				        <td>{{ item.reserva.telefono }}</td>
 				        <td>{{ item.estado }}</td>
@@ -64,7 +64,7 @@
 				            {% if item.estado == 'R' %}
 				            <a href="#">
 				                <span class="ui-icon ui-icon-pencil" title="Editar reserva"></span></a>
-				            <a href="{% url 'turnos.views.cancelar_reserva' lr_id=item.id%}">
+				            <a href="{% url 'turnos.views.cancelar_reserva' lr_id=item.id %}?next={{ request.get_full_path|urlencode }}">
 				                <span class="ui-icon ui-icon-closethick" title="Cancelar reserva"></span></a>
 				            {% endif %}
 				        </td>

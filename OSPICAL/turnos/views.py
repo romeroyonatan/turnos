@@ -201,7 +201,8 @@ def cancelar_reserva(request, lr_id=None):
             motivo = form.cleaned_data["motivo"]
             if b.cancelar_reserva(reserva, motivo, request.user.get_profile()):
                 messages.success(request, u'Reserva cancelada con éxito')
-            return HttpResponseRedirect(request.path)
+            siguiente = form.cleaned_data['next'] if form.cleaned_data['next'] else request.path
+            return HttpResponseRedirect(siguiente)
     elif lr_id and LineaDeReserva.objects.filter(id=lr_id).exists():
         lr = LineaDeReserva.objects.get(id=lr_id)
         if lr.estado != Turno.RESERVADO or lr.turno.estado != Turno.RESERVADO:
@@ -210,6 +211,7 @@ def cancelar_reserva(request, lr_id=None):
         form = CancelarReservaForm(initial={'afiliado':lr.reserva.afiliado.id,
                                             'numero':lr.reserva.afiliado.numero,
                                             'dni':lr.reserva.afiliado.dni,
+                                            'next':request.GET.get('next')
                                             },
                                    lr=lr)
     else:

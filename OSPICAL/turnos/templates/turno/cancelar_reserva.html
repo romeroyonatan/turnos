@@ -8,59 +8,46 @@
 {% endblock %}
 
 {% block content %}
-<form method="post" action="." enctype="multipart/form-data" class="pure-form pure-form-aligned">
-	{% csrf_token %}
-	<fieldset title="Cancelar Turno">	
-		<legend>Cancelar reserva</legend>
-		{{ form.afiliado }}	
-		<div class="pure-control-group">
-			<label for="id_dni">{{ form.dni.label }}</label>
-			{{ form.dni.errors }}
-			{{ form.dni }}
-		</div>	
-	
-		<div class="pure-control-group">
-			<label for="id_numero">{{ form.numero.label }}</label>
-			{{ form.numero.errors }}
-			{{ form.numero }}
-		</div>	
-			
-		<div class="pure-control-group">
-			<label for="id_turnos">{{ form.turnos.label }}</label>
-			{{ form.turnos.errors }}
-			{{ form.turnos }}
-		</div>	
-		
-		<div class="pure-control-group">
-			<label for="id_motivo">{{ form.motivo.label }}</label>
-			{{ form.motivo.errors }}
-			{{ form.motivo }}
-		</div>	
-		
-		<div id="id_info">
-			<h2>Datos de la reserva</h2>
-			<table class="pure-table">
-				<thead>
-					<tr>
-						<th>Nombre y apellido del afiliado</th>
-						<th>Fecha de reserva</th>
-						<th>Consultorio</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td id="id_nya">{{ item.dia }}</td>
-						<td id="id_fecha_r">{{ item.responsable }}</td>
-						<td id="id_consultorio">{{ item.cantidad }}</td>
-					</tr>
-				</tbody>
-			</table>
+<form method="post" action="." class="pure-form pure-form-aligned">
+    {% csrf_token %}
+    {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+    {% endfor %}
+    <fieldset>
+        <legend>Datos de la reserva</legend>
+        {% for field in form.visible_fields %}
+            <div class="pure-control-group" title="{{ field.help_text }}">
+                {{ field.label_tag }}
+                {{ field }}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+        <div class="pure-controls">
+			<input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
+    		<input type="submit" value="Cancelar reserva" class="pure-button pure-button-primary"/>
 		</div>
-		
-		<div class="pure-controls">
-		<input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
-		<input type="submit" value="Cancelar reserva" class="pure-button pure-button-primary"/>
-		</div>
-	</fieldset>
+    </fieldset>
 </form>
+		
+<div id="id_info">
+	<h2>Datos de la reserva</h2>
+	<table class="pure-table">
+		<thead>
+			<tr>
+				<th>Nombre y apellido del afiliado</th>
+				<th>Fecha de reserva</th>
+				<th>Consultorio</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td id="id_nya">{{ item.dia }}</td>
+				<td id="id_fecha_r">{{ item.responsable }}</td>
+				<td id="id_consultorio">{{ item.cantidad }}</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+
 {% endblock %}

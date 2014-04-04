@@ -10,6 +10,7 @@ from models import *
 from validators import PasswordValidator
 import logging
 import json
+from django.forms.widgets import Widget
 
 logger = logging.getLogger(__name__)
 class ReservarTurnoForm(forms.Form):
@@ -77,13 +78,14 @@ class ConfirmarTurnoForm(forms.Form):
     turnos = forms.CharField(widget=forms.Select(choices=choices))
 class CancelarReservaForm(forms.Form):
     choices = [('','Ingrese el número de afiliado')]
+    next = forms.CharField(widget=forms.HiddenInput)
     afiliado = forms.IntegerField(widget=forms.HiddenInput)
     numero = forms.CharField(label="Número de afiliado")
     dni = forms.IntegerField(label="DNI", widget=forms.TextInput())
-    motivo = forms.CharField(widget=forms.Textarea,label="Motivo",required=False)
     # XXX:Esta asi para que no me valide lo que envio el usuario con las opciones especificadas
     # dado que lo completo mediante ajax
     turnos = forms.CharField(widget=forms.Select(choices=choices))
+    motivo = forms.CharField(widget=forms.Textarea,label="Motivo",required=False)
     def __init__(self, lr=None, *args, **kwargs):
         super(CancelarReservaForm, self).__init__(*args, **kwargs)
         if lr is not None:
