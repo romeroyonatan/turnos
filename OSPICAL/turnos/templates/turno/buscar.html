@@ -62,7 +62,7 @@
 				        <td>{{ item.estado }}</td>
 				        <td>  
 				            {% if item.estado == 'R' %}
-				            <a href="#">
+				            <a href="{% url 'turnos.views.modificar_reserva' lr_id=item.id %}?next={{ request.get_full_path|urlencode }}">
 				                <span class="ui-icon ui-icon-pencil" title="Editar reserva"></span></a>
 				            <a href="{% url 'turnos.views.cancelar_reserva' lr_id=item.id %}?next={{ request.get_full_path|urlencode }}">
 				                <span class="ui-icon ui-icon-closethick" title="Cancelar reserva"></span></a>

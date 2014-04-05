@@ -20,6 +20,8 @@ from turnos.models import *
 from bussiness import Bussiness
 from decorators import Paginar
 import logging
+from models import LineaDeReserva
+from django.http.response import Http404
 
 logger = logging.getLogger(__name__)
 
@@ -257,7 +259,6 @@ def get_reservas_especialista(request, especialidad, especialista, year, month, 
 @login_required
 # @permission_required('turnos.registrar_especialista', raise_exception=True)
 def registrar_especialista(request):
-    b=Bussiness()
     if request.method == 'POST':
         form = RegistarEspecialistaForm(request.POST)
         if form.is_valid():
@@ -265,16 +266,17 @@ def registrar_especialista(request):
             messages.success(request, u'La operación se realizó con éxito')
             return HttpResponseRedirect(request.path)
     else:
+        b=Bussiness()
         form = RegistarEspecialistaForm(initial={'frecuencia':b.MINUTOS})
     return render(request, "especialista/registrar.html", locals())
 
 @permission_required('turnos.consultar_reservas', raise_exception=True)
 @Paginar
 def consultar_reservas(request):
-    b=Bussiness()
     if len(request.GET) > 0:
         form = ConsultarReservaForm(request.GET)
         if form.is_valid():
+            b=Bussiness()
             object_list = b.consultar_reservas(especialidad=form.cleaned_data['especialidad'], 
                                              especialista=form.cleaned_data['especialista'], 
                                              afiliado=form.cleaned_data['afiliado'], 
@@ -284,3 +286,20 @@ def consultar_reservas(request):
     else:
         form = ConsultarReservaForm(initial=request.GET)
     return TemplateResponse(request, "turno/buscar.html", locals())
+@permission_required('turnos.change_reservas', raise_exception=True)
+def modificar_reserva(request, lr_id):
+    try:
+        lr = LineaDeReserva.objects.get(id=lr_id)
+    except LineaDeReserva.DoesNotExist:
+        raise Http404
+    if request.method == 'POST':
+        form = ModificarReservaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, u'Reserva modificada con éxito')
+            siguiente = form.cleaned_data['next'] if form.cleaned_data['next'] else request.path
+            return HttpResponseRedirect(siguiente)
+    else:
+        form = ModificarReservaForm(initial={'next':request.GET.get('next')})
+    return render(request, "turno/modificar_reserva.html", {'form':form,
+                                                            'lr':lr})

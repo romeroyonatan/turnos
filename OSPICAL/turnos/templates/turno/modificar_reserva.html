@@ -1,0 +1,48 @@
+{% extends "site/application.html" %}
+{% load static %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/turno.modificar_reserva.js' %}"></script>
+{% endblock %}
+
+{% block title %}Modificar reserva{% endblock %}
+
+{% block content %}
+<div class="pure-g-r">
+	<div class="pure-u-1-2">
+		<h1>Datos de la reserva</h1>
+		<table class="pure-table">
+			<tbody>
+				<tr><td>Afiliado</td>		<td>{{ lr.reserva.afiliado.full_name|upper }}</td></tr>
+				<tr><td>Especialidad</td>	<td>{{ lr.turno.ee.especialidad.descripcion }}</td></tr>
+				<tr><td>Especialista</td>	<td>{{ lr.turno.ee.especialista.full_name }}</td></tr>
+				<tr><td>Día</td>			<td>{{ lr.turno.fecha|date:"SHORT_DATE_FORMAT" }}</td></tr>
+				<tr><td>Hora</td>			<td>{{ lr.turno.fecha|time:"H:i" }}</td></tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="pure-u-1-2">
+		<form method="post" enctype="multipart/form-data" class="pure-form pure-form-aligned">
+			{% csrf_token %}
+			{% for hidden in form.hidden_fields %}
+			    {{ hidden }}
+			{% endfor %}
+			<fieldset>
+				<legend>Modificar reserva</legend>
+			    {% for field in form.visible_fields %}
+				    <div class="pure-control-group" title="{{ field.help_text }}">
+					    {{ field.label_tag }}
+					    {{ field }}
+					    {{ field.errors }}
+			        </div>
+			    {% endfor %}
+			    <div class="pure-controls">
+				    <input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
+				    <input type="submit" value="Guardar" class="pure-button pure-button-primary"/>
+			    </div>
+			</fieldset>
+		</form>
+	</div>l
+</div>
+{% endblock %}

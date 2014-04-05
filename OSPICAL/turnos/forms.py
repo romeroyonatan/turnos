@@ -180,3 +180,37 @@ class ConsultarReservaForm(forms.Form):
                     self.error_messages['multiple_object_returned'],
                     code='multiple_object_returned',
                 )
+class ModificarReservaForm(forms.Form):
+    error_messages = {
+        'turno_not_disponible': "Turno no disponible",
+        'turno_not_exists': "Turno inexistente",
+    }
+    dia = forms.CharField()
+    hora = forms.CharField()
+    telefono = forms.CharField()
+    next = forms.CharField(widget=forms.HiddenInput)
+    def __init__(self, lr=None, *args, **kwargs):
+        super(ModificarReservaForm, self).__init__(*args, **kwargs)
+        self.lr = lr
+    def clean_turno(self):
+        try:
+            turno = Turno.objects.get(self.cleaned_data['hora'])
+            if turno.estado != Turno.DISPONIBLE:
+                raise forms.ValidationError(
+                    self.error_messages['turno_not_disponible'],
+                    code='turno_not_disponible',
+                )
+            return turno
+        except Turno.DoesNotExist:
+            raise forms.ValidationError(
+                    self.error_messages['turno_not_exists'],
+                    code='turno_not_exists',
+                )
+    @transaction.commit_on_success()
+    def save(self):
+        lr = self.lr
+        lr.turno = self.cleaned_data['turno']
+        lr.reserva.telefono = self.cleaned_data['telefono']
+        lr.save()
+        return lr
+    

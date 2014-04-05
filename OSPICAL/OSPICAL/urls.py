@@ -29,5 +29,6 @@ urlpatterns = patterns('turnos.views',
     (r'^cancelar/turnos/$', 'cancelar_turnos'),
     (r'^especialista/registrar/$', 'registrar_especialista'),
     (r'^buscar/$', 'consultar_reservas'),
+    (r'^modificar/(?P<lr_id>\d+)/$', 'modificar_reserva'),
     (r'^admin/', include(admin.site.urls)),
 )
