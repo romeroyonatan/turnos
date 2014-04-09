@@ -37,6 +37,7 @@ class Bussiness():
         logger.info("Resultado de busqueda de afiliado %s %s: %s" % (parametro, valor, data))
         return data
     def getTurnosDisponibles(self, especialista_id, fecha):
+        #FIXME: Si no hay turnos para un dia determinado tira una excepcion xq quiere crear sobreturnos
         disponibles = self.__buscarTurnosDisponibles(especialista_id, fecha)
         logger.debug("Turnos disponibles para el dia %s: %s" % (fecha, disponibles))
         if not disponibles and not self.__haySobreturnos(especialista_id, fecha):
@@ -415,6 +416,40 @@ class Bussiness():
         if estado is not None and estado:
             filtro['estado'] = estado
         return LineaDeReserva.objects.filter(**filtro).order_by('-turno__fecha', '-reserva__fecha')
+    @transaction.commit_on_success()
+    def modificar_linea_reserva(self, lr, turno=None, telefono=None, empleado=None):
+        logger.info("Modificando reserva. lr=%s turno=%s telefono=%s empleado=%s"%
+                    (lr,turno,telefono,empleado))
+        modificado = False
+        if turno:
+            # Cambiando el turno
+            anterior = lr.turno
+            lr.turno = turno
+            # Registrando los cambios
+            HistorialTurno.objects.create(turno=lr.turno,
+                                          estadoAnterior=lr.turno.estado,
+                                          estadoNuevo=Turno.RESERVADO,
+                                          descripcion="Modificación de linea de reserva %s"%lr.id,
+                                          empleado=empleado)
+            HistorialTurno.objects.create(turno=anterior,
+                                          estadoAnterior=anterior.estado,
+                                          estadoNuevo=Turno.DISPONIBLE,
+                                          descripcion="Modificación de linea de reserva %s"%lr.id,
+                                          empleado=empleado)
+            lr.turno.estado = Turno.RESERVADO
+            anterior.estado = Turno.DISPONIBLE
+            # Guardando cambios
+            lr.turno.save()
+            anterior.save()
+            lr.save()
+            modificado = True
+        if telefono and lr.reserva.telefono != telefono:
+            # Cambiando el telefono
+            lr.reserva.telefono = telefono
+            # Guardando cambios
+            lr.reserva.save()
+            modificado = True
+        return modificado
 class TurnosAppException(Exception):
     def __init__(self, message=None, more_info=None, prev=None):
         self.message = message

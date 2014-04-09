@@ -3,6 +3,7 @@
 
 {% block js %}
     {{ block.super }}
+    <script>id = {{ lr.turno.ee.especialista.id }}</script>
     <script src="{% static 'js/turno.modificar_reserva.js' %}"></script>
 {% endblock %}
 
@@ -30,19 +31,27 @@
 			{% endfor %}
 			<fieldset>
 				<legend>Modificar reserva</legend>
-			    {% for field in form.visible_fields %}
-				    <div class="pure-control-group" title="{{ field.help_text }}">
-					    {{ field.label_tag }}
-					    {{ field }}
-					    {{ field.errors }}
-			        </div>
-			    {% endfor %}
+			    <div class="pure-control-group" title="{{ form.dia.help_text }}">
+				    {{ form.dia.label_tag }}
+				    {{ form.dia }}
+				    {{ form.dia.errors }}
+		        </div>
+		        <div class="pure-control-group" title="{{ form.hora.help_text }}">
+				    {{ form.hora.label_tag }}
+				    {{ form.hora }}
+				    {{ form.hora.errors }}
+		        </div>
+		        <div class="pure-control-group" title="{{ form.telefono.help_text }}">
+				    {{ form.telefono.label_tag }}
+				    {{ form.telefono }}
+				    {{ form.telefono.errors }}
+		        </div>
 			    <div class="pure-controls">
 				    <input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
 				    <input type="submit" value="Guardar" class="pure-button pure-button-primary"/>
 			    </div>
 			</fieldset>
 		</form>
-	</div>l
+	</div>
 </div>
 {% endblock %}

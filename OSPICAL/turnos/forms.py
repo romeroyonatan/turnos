@@ -11,6 +11,7 @@ from validators import PasswordValidator
 import logging
 import json
 from django.forms.widgets import Widget
+from bussiness import Bussiness
 
 logger = logging.getLogger(__name__)
 class ReservarTurnoForm(forms.Form):
@@ -168,6 +169,7 @@ class ConsultarReservaForm(forms.Form):
     def clean_afiliado(self):
             try:
                 parametro = self.cleaned_data["afiliado"]
+                #FIXME: No funciona con numero de afiliado
                 afiliado = Afiliado.objects.get(Q(dni=parametro)|Q(numero=parametro)) if parametro else None
                 return afiliado
             except Afiliado.DoesNotExist:
@@ -185,16 +187,26 @@ class ModificarReservaForm(forms.Form):
         'turno_not_disponible': "Turno no disponible",
         'turno_not_exists': "Turno inexistente",
     }
-    dia = forms.CharField()
-    hora = forms.CharField()
+    hora = forms.CharField(widget=forms.Select(choices=[('','Sin modificar')]),
+                           required=False)
     telefono = forms.CharField()
     next = forms.CharField(widget=forms.HiddenInput)
     def __init__(self, lr=None, *args, **kwargs):
         super(ModificarReservaForm, self).__init__(*args, **kwargs)
+        import calendar
         self.lr = lr
-    def clean_turno(self):
+        b = Bussiness()
+        dias = [(calendar.timegm(dia['fecha'].utctimetuple()), 
+                 dia['fecha'].strftime('%d %b %Y')) 
+                for dia in b.getDiaTurnos(lr.turno.ee.especialista.id) 
+                if dia['estado'] is None]
+        dias.insert(0,('',"Seleccionar dia para modificar"))
+        self.fields['dia'] = forms.CharField(widget=forms.Select(choices=dias), required=False)
+    def clean_hora(self):
+        if not self.cleaned_data['hora']:
+            return None
         try:
-            turno = Turno.objects.get(self.cleaned_data['hora'])
+            turno = Turno.objects.get(id=self.cleaned_data['hora'])
             if turno.estado != Turno.DISPONIBLE:
                 raise forms.ValidationError(
                     self.error_messages['turno_not_disponible'],
@@ -206,11 +218,11 @@ class ModificarReservaForm(forms.Form):
                     self.error_messages['turno_not_exists'],
                     code='turno_not_exists',
                 )
-    @transaction.commit_on_success()
     def save(self):
-        lr = self.lr
-        lr.turno = self.cleaned_data['turno']
-        lr.reserva.telefono = self.cleaned_data['telefono']
-        lr.save()
-        return lr
+        b = Bussiness()
+        turno = self.cleaned_data['hora']
+        telefono = self.cleaned_data['telefono']
+        modificado = b.modificar_linea_reserva(self.lr, turno, telefono)
+        logger.debug("Modificado %s"%modificado)
+        return modificado
     

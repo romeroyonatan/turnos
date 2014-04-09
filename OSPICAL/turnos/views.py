@@ -293,13 +293,19 @@ def modificar_reserva(request, lr_id):
     except LineaDeReserva.DoesNotExist:
         raise Http404
     if request.method == 'POST':
-        form = ModificarReservaForm(request.POST)
+        form = ModificarReservaForm(lr=lr, data=request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, u'Reserva modificada con éxito')
+            if form.save():
+                messages.success(request, u'Reserva modificada con éxito')
+            else:
+                messages.warning(request, u'No se modificó ningún dato')
             siguiente = form.cleaned_data['next'] if form.cleaned_data['next'] else request.path
             return HttpResponseRedirect(siguiente)
+        else:
+            logger.debug("Hay un problema")
     else:
-        form = ModificarReservaForm(initial={'next':request.GET.get('next')})
+        form = ModificarReservaForm(initial={'next': request.GET.get('next'),
+                                             'telefono': lr.reserva.telefono,},
+                                    lr=lr)
     return render(request, "turno/modificar_reserva.html", {'form':form,
                                                             'lr':lr})
