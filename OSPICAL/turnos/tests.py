@@ -538,9 +538,15 @@ class CrearTurnoTest(TestCase):
     fixtures = ['test.json']
     def testUnDia(self):
         """Crea turnos para un dia. Debe devolver una lista con mas de un turno"""
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crear_turnos_del_especialista(ee, 1)
+        #ee = EspecialistaEspecialidad.objects.get(id=1)
+        #turnos1 = b.crear_turnos_del_especialista(ee, 1)
+        #self.assertGreater(len(turnos), 1)
+        from negocio.managers import TurnoManager
+        manager = TurnoManager()
+        turnos = manager.crear_turnos(timezone.now(), 
+                                      timezone.now() + timedelta(days=1))
         self.assertGreater(len(turnos), 1)
+        
     def test8Dias(self):
         """Crea una semana de turnos. Debe devolver una lista de turnos creados"""
         DIAS = 8

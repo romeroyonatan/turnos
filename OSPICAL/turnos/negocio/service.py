@@ -7,17 +7,26 @@ Created on 30/07/2014
 import managers
 import commands
 
+#===============================================================================
+# ReservaTurnosService
+#===============================================================================
 class ReservaTurnosService(object):
     '''
     Muestra una interfaz para la manipulacion de turnos y reservas 
     '''
 
+    #===========================================================================
+    # constructor
+    #===========================================================================
     def __init__(self):
         '''
         Constructor
         '''
         self.turno_manager = managers.TurnoManager()
     
+    #===========================================================================
+    # crear_turno
+    #===========================================================================
     def crear_turno(self, fecha, ee):
         '''Permite crear un turno para un especialista y una especialidad.
         
@@ -32,6 +41,9 @@ class ReservaTurnosService(object):
         self.last_command = comando
         return comando.turno
     
+    #===========================================================================
+    # deshacer
+    #===========================================================================
     def deshacer(self):
         '''Deshace la accion del ultimo comando ejecutado'''
         self.last_command.undo()

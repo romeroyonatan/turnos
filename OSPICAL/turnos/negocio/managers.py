@@ -1,14 +1,17 @@
+# coding=utf-8
 '''
+Este modulo agrupa los manipuladores de los servicios que brinda la aplicacion
 Created on 30/07/2014
 
 @author: romeroy
 '''
 import logging
 from django.db import transaction
-# from turnos.models import Turno, Disponibilidad
 from django.utils import timezone
-from models import Turno, Disponibilidad
-import datetime
+# from turnos.models import Turno, Disponibilidad
+from turnos.models import Turno, Disponibilidad, Settings
+from datetime import datetime, timedelta
+import dateutil
 
 #===============================================================================
 # TurnoManager
@@ -92,6 +95,11 @@ class TurnoManager():
         -------------
         @return: Lista de turnos creados 
         '''
+        # verifico que se esten creando turnos para el futuro
+        if fecha_inicio < timezone.now():
+            # TODO: translate
+            raise ValueError('No puede crear turnos en una fecha anterior \
+                              a la actual')
         # inicializo la lista que contendra a los turnos creados
         creados = []
         # defino la fecha en la que se crearan los turnos
@@ -102,9 +110,9 @@ class TurnoManager():
             for disponibilidad in (Disponibilidad.
                                    objects.filter(dia=fecha.weekday())):
                 # creo los turnos del dia y los agrego a la lista de creados
-                creados += self.__crear_turnos_del_dia(disponibilidad.ee, fecha)
+                creados += self.__crear_turnos_del_dia(disponibilidad, fecha)
             # pasamos al siguiente dia
-            fecha += datetime.timedelta(days=1)
+            fecha += timedelta(days=1)
         return creados
     
     #===========================================================================
@@ -128,10 +136,10 @@ class TurnoManager():
         # Si lo uso de la forma
         # tz = timezone.get_default_timezone() 
         # me da un offset -04:17 para America/Argentina/Buenos_Aires
-        tz = dateutil.tz.tzoffset(None, -3*60*60)
+        tz = dateutil.tz.tzoffset(None, -3 * 60 * 60)
         # configuro la hora que empezara a atender el especialista
-        desde = (datetime.combine(dia, disponibilidad.horaDesde)
-                 .replace(tzinfo=tz))
+        fecha_hora = (datetime.combine(dia, disponibilidad.horaDesde)
+                      .replace(tzinfo=tz))
         # configuro la hora que dejara a atender el especialista
         hasta = (datetime.combine(dia, disponibilidad.horaHasta)
                  .replace(tzinfo=tz))
@@ -139,14 +147,14 @@ class TurnoManager():
         creados = []
         # recorremos el rango de horarios desde que empieza a atender hasta
         # que finaliza
-        while desde < hasta:
+        while fecha_hora < hasta:
             # creamos el turno
-            turno = self.crear_turno(fecha=fecha,
+            turno = self.crear_turno(fecha=fecha_hora,
                                      ee=disponibilidad.ee,
                                      consultorio=disponibilidad.consultorio)
             # agregamos el turno a la lista de creados
             creados.append(turno)
             # avanzamos al siguiente turno (depende de la frecuencia de cada
             # especialista)
-            desde += timedelta(minutes=disponibilidad.ee.frecuencia_turnos)
+            fecha_hora += timedelta(minutes=disponibilidad.ee.frecuencia_turnos)
         return creados
