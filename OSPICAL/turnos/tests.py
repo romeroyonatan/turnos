@@ -603,13 +603,14 @@ class CrearTurnoTestSuite(TestCase):
         self.assertEqual(diferencia_dias, DIAS - 1)
         
     #===========================================================================
-    # test_dos_anos
+    # test_un_ano
     #===========================================================================
-    def test_dos_anos(self):
+    def test_un_ano(self):
         """
-        Crea turnos a dos años. Debe devolver una lista de turnos creados.
+        Crea turnos a un año para ver cuanto tarda. Debe devolver una lista de 
+        turnos creados.
         """
-        DIAS = 365 * 2
+        DIAS = 365
         # seteo rango de fechas
         fecha_inicio = timezone.now()
         fecha_fin = timezone.now() + timedelta(days=DIAS)
@@ -761,9 +762,20 @@ class CrearTurnoTestSuite(TestCase):
 #             diff = turnos[i].fecha - turnos[i + 1].fecha
 #             minutos = (diff.seconds % 3600) // 60
 #             self.assertEqual(minutos, FRECUENCIA * 2)
-class TestValidadores(TestCase):
-    def testLongitud(self):
-        """Prueba que el validador funcione cuando una contraseña es menor a la longitud permitida"""
+
+
+#===============================================================================
+# ValidadoresTestSuite
+#===============================================================================
+class ValidadoresTestSuite(TestCase):
+    #===========================================================================
+    # test_longitud
+    #===========================================================================
+    def test_longitud(self):
+        """
+        Prueba que el validador funcione cuando una contraseña es menor a la 
+        longitud permitida.
+        """
         invalid_password = '12345'
         valid_password = '123456'
         other_valid_password = '1234567'
@@ -772,7 +784,11 @@ class TestValidadores(TestCase):
         self.assertFalse(validator(other_valid_password))
         with self.assertRaises(ValidationError):
             validator(invalid_password)
-    def testCaracterMinuscula(self):
+            
+    #===========================================================================
+    # test_caracter_minuscula
+    #===========================================================================
+    def test_caracter_minuscula(self):
         """Prueba una contraseña con y sin caracteres minusculas"""
         invalid_password = '12345ASD'
         valid_password = '123456asd'
@@ -780,7 +796,11 @@ class TestValidadores(TestCase):
         self.assertFalse(validator(valid_password))
         with self.assertRaises(ValidationError):
             validator(invalid_password)
-    def testCaracterMayuscula(self):
+            
+    #===========================================================================
+    # test_caracter_mayuscula
+    #===========================================================================
+    def test_caracter_mayuscula(self):
         """Prueba una contraseña con y sin caracter mayuscula"""
         invalid_password = '12345asd'
         valid_password = '123456ASD'
@@ -788,7 +808,11 @@ class TestValidadores(TestCase):
         self.assertFalse(validator(valid_password))
         with self.assertRaises(ValidationError):
             validator(invalid_password)
-    def testCaracterEspecial(self):
+            
+    #===========================================================================
+    # test_caracter_especial
+    #===========================================================================
+    def test_caracter_especial(self):
         """Prueba una contraseña con y sin caracteres especiales"""
         invalid_password = '12345ASD'
         valid_password = '123456asd_*'
@@ -796,7 +820,11 @@ class TestValidadores(TestCase):
         self.assertFalse(validator(valid_password))
         with self.assertRaises(ValidationError):
             validator(invalid_password)
-    def testNumero(self):
+            
+    #===========================================================================
+    # test_numero
+    #===========================================================================
+    def test_numero(self):
         """Prueba una contraseña con y sin numeros"""
         invalid_password = 'ASDasdf'
         valid_password = '123456asd'
@@ -804,14 +832,22 @@ class TestValidadores(TestCase):
         self.assertFalse(validator(valid_password))
         with self.assertRaises(ValidationError):
             validator(invalid_password)
-    def testCaracterMinusculayNumero(self):
-        """Prueba una contraseña con varias politicas juntas. En este caso minuscula y numero"""
+            
+    #===========================================================================
+    # test_caracter_minuscula_y_numero
+    #===========================================================================
+    def test_caracter_minuscula_y_numero(self):
+        """
+        Prueba una contraseña con varias politicas juntas. En este caso 
+        minuscula y numero.
+        """
         invalid_password = '12345ASD'
         valid_password = '123456asd'
         validator = PasswordValidator(lower=True, number=True)
         self.assertFalse(validator(valid_password))
         with self.assertRaises(ValidationError):
             validator(invalid_password)
+            
 class ConsultaReservaTest(TestCase):
     """Esta clase agrupa las pruebas de consulta de reservas"""
     fixtures = ['test.json']
@@ -1120,8 +1156,8 @@ class CommandTestSuite(TestCase):
     #===========================================================================
     def test_crear_turno(self):
         '''
-        Verifica que la command de crear turno funcione correctamente. Debe crear
-        solo un turno
+        Verifica que la command de crear turno funcione correctamente. Debe 
+        crear solo un turno
         '''
         # creo la command
         receiver = TurnoManager()
@@ -1247,3 +1283,40 @@ class CommandTestSuite(TestCase):
         # verifico que los turnos creados no existan en la base de datos
         for turno in creados:
             self.assertFalse(Turno.objects.filter(id=turno.id).exists())
+            
+    #===========================================================================
+    # test_crear_turnos_sin_parametros
+    #===========================================================================
+    def test_crear_turnos_sin_parametros(self):
+        '''
+        Verifica que la validacion de la command de crear turnos funcione 
+        correctamente. Debe lanzar una error ValueError
+        '''
+        # creo la command
+        receiver = TurnoManager()
+        command = OrdenCrearTurnos(receiver)
+        # verifico cuantos turnos hay antes de ejecutar la command
+        antes = Turno.objects.all().count()
+       
+        # espero que lanze la excepcion
+        with self.assertRaises(ValueError):
+            # ejecuto la command
+            command.execute()
+            
+        # agrego solo fecha de inicio
+        command.fecha_inicio = timezone.now()
+        with self.assertRaises(ValueError):
+            # ejecuto la command
+            command.execute()
+            
+        # agrego solo fecha de fin
+        command.fecha_inicio = None
+        command.fecha_fin = timezone.now()
+        with self.assertRaises(ValueError):
+            # ejecuto la command
+            command.execute()
+        
+        # verifico cuantos turnos hay despues de ejecutar la command
+        despues = Turno.objects.all().count()
+        # verifico que despues haya la misma cantidad que antes
+        self.assertEquals(despues, antes)
