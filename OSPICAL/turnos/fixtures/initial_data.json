@@ -167,6 +167,7 @@
     "fields": {
         "consultorio": 1, 
         "ee": 1, 
+        "creado": "2018-02-23T12:50:39.970Z",
         "fecha": "2018-02-23T12:50:39.970Z", 
         "sobreturno": false, 
         "estado": "D"
@@ -177,7 +178,8 @@
     "model": "turnos.turno", 
     "fields": {
         "consultorio": 1, 
-        "ee": 1, 
+        "ee": 1,  
+        "creado": "2018-02-23T12:50:39.970Z",
         "fecha": "2018-02-23T13:05:39.970Z", 
         "sobreturno": false, 
         "estado": "D"
@@ -188,7 +190,8 @@
     "model": "turnos.turno", 
     "fields": {
         "consultorio": 1, 
-        "ee": 1, 
+        "ee": 1,  
+        "creado": "2018-02-23T12:50:39.970Z",
         "fecha": "2018-02-23T13:20:39.970Z", 
         "sobreturno": false, 
         "estado": "D"
@@ -199,7 +202,8 @@
     "model": "turnos.turno", 
     "fields": {
         "consultorio": 1, 
-        "ee": 1, 
+        "ee": 1,  
+        "creado": "2018-02-23T12:50:39.970Z",
         "fecha": "2018-02-23T13:35:39.970Z", 
         "sobreturno": false, 
         "estado": "D"
