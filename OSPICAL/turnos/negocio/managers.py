@@ -11,7 +11,6 @@ from django.utils import timezone
 # from turnos.models import Turno, Disponibilidad
 from turnos.models import Turno, Disponibilidad, Settings
 from datetime import datetime, timedelta
-import dateutil
 
 #===============================================================================
 # TurnoManager
@@ -49,14 +48,20 @@ class TurnoManager():
                    Es la combinacion del especialista con su especialidad
         
         Retorna:
-        @return:  Instancia del turno creado
+        @return:  Instancia del turno creado. None en caso que el turno a crear
+        esté repetido
         '''
-        turno = Turno(fecha=fecha,
-                      ee=ee,
-                      consultorio=consultorio,
-                      sobreturno=sobreturno)
-        turno.save()
-        return turno
+        # valido que el turno no exista
+        if not Turno.objects.filter(fecha=fecha,
+                                    ee=ee,
+                                    sobreturno=sobreturno).exists():
+            turno = Turno(fecha=fecha,
+                          ee=ee,
+                          estado=Turno.DISPONIBLE,
+                          consultorio=consultorio,
+                          sobreturno=sobreturno)
+            turno.save()
+            return turno
     
     #===========================================================================
     # borrar_turno
@@ -95,11 +100,9 @@ class TurnoManager():
         -------------
         @return: Lista de turnos creados 
         '''
-        # verifico que se esten creando turnos para el futuro
-        if fecha_inicio < timezone.now():
-            # TODO: translate
-            raise ValueError('No puede crear turnos en una fecha anterior \
-                              a la actual')
+        # valido las fechas ingresadas por parametro
+        self.__crear_turnos_validate(fecha_inicio, fecha_fin)
+        
         # inicializo la lista que contendra a los turnos creados
         creados = []
         # defino la fecha en la que se crearan los turnos
@@ -114,6 +117,37 @@ class TurnoManager():
             # pasamos al siguiente dia
             fecha += timedelta(days=1)
         return creados
+    
+    #===========================================================================
+    # __crear_turnos_validate
+    #===========================================================================
+    def __crear_turnos_validate(self, fecha_inicio, fecha_fin):
+        '''
+        Valida los parametros incresados en el metodo __crear_turnos_validate
+        Parametros
+        ------------------
+        @param fecha_inicio:  
+        @param fecha_fin:
+        
+        Retorna
+        -----------
+        @return: nada si todo es valido, en caso que no lanza excepciones
+        
+        Excepciones
+        ------------
+        ValueError -- Lanzada si los argumentos no superan la validacion
+        '''
+        # valido que la fecha de inicio no sea posterior a la fecha de fin
+        if fecha_inicio > fecha_fin:
+            raise ValueError("La fecha fin debe ser posterior a la fecha \
+                             inicio")
+        
+        # defino un tiempo de gracia de un minuto para evitar problemas 
+        # de retrasos
+        ahora = timezone.now() - timedelta(minutes=1)
+        # valido que no se quiera crear turnos en el pasado
+        if fecha_inicio < ahora:
+            raise ValueError("La fecha inicio no debe ser en el pasado")
     
     #===========================================================================
     # __crear_turnos_del_dia
@@ -132,29 +166,26 @@ class TurnoManager():
         ------------
         @return: Lista de turnos creados
         '''
-        # XXX: Para solucionar problema de timezone :s
-        # Si lo uso de la forma
-        # tz = timezone.get_default_timezone() 
-        # me da un offset -04:17 para America/Argentina/Buenos_Aires
-        tz = dateutil.tz.tzoffset(None, -3 * 60 * 60)
+        # configuro la zona horaria
+        tz = timezone.get_default_timezone() 
         # configuro la hora que empezara a atender el especialista
-        fecha_hora = (datetime.combine(dia, disponibilidad.horaDesde)
-                      .replace(tzinfo=tz))
+        desde = tz.localize(datetime.combine(dia, disponibilidad.horaDesde))
         # configuro la hora que dejara a atender el especialista
-        hasta = (datetime.combine(dia, disponibilidad.horaHasta)
-                 .replace(tzinfo=tz))
+        hasta = tz.localize(datetime.combine(dia, disponibilidad.horaHasta))
         # inicializo la lista de turnos creados
         creados = []
         # recorremos el rango de horarios desde que empieza a atender hasta
         # que finaliza
-        while fecha_hora < hasta:
+        while desde < hasta:
             # creamos el turno
-            turno = self.crear_turno(fecha=fecha_hora,
+            turno = self.crear_turno(fecha=desde,
                                      ee=disponibilidad.ee,
                                      consultorio=disponibilidad.consultorio)
-            # agregamos el turno a la lista de creados
-            creados.append(turno)
+            # si el turno fue creado
+            if turno:
+                # agregamos el turno a la lista de creados
+                creados.append(turno)
             # avanzamos al siguiente turno (depende de la frecuencia de cada
             # especialista)
-            fecha_hora += timedelta(minutes=disponibilidad.ee.frecuencia_turnos)
+            desde += timedelta(minutes=disponibilidad.ee.frecuencia_turnos)
         return creados

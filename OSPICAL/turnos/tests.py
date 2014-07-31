@@ -1,16 +1,28 @@
 # coding=utf-8
-from dateutil.relativedelta import relativedelta
 from datetime import timedelta, datetime
-from turnos.models import *
-from turnos.bussiness import *
-from turnos.validators import PasswordValidator
+import logging
+
+from dateutil.relativedelta import relativedelta
+from django.core.exceptions import ValidationError
+from django.template.defaultfilters import time
 from django.test import TestCase
 from django.utils import timezone
-from django.core.exceptions import ValidationError
 
-import logging
-from models import *
-from bussiness import *
+from bussiness import Bussiness, TurnoNotExistsException, \
+    AfiliadoNotExistsException, TurnoReservadoException, ConfirmarReservaException, \
+    CancelarReservaException, CancelarTurnoException
+from models import Turno, Consultorio, EspecialistaEspecialidad, LineaDeReserva, \
+    HistorialTurno, Especialidad, Especialista, Disponibilidad, Afiliado
+
+from negocio.managers import TurnoManager
+from negocio.service import ReservaTurnosService
+from negocio.commands import OrdenCrearTurno, OrdenCrearTurnos
+
+from turnos.bussiness import *
+from turnos.models import *
+from turnos.validators import PasswordValidator
+
+
 logger = logging.getLogger(__name__)
 b = Bussiness()
 
@@ -533,170 +545,222 @@ class CancelarTurnoTest(TestCase):
         cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
         self.assertEquals(len(reservas), len(cancelados))
         self.assertTrue(b._Bussiness__isCancelado(ee.id, fecha))
-class CrearTurnoTest(TestCase):
+#===============================================================================
+# CrearTurnoTestSuite
+#===============================================================================
+class CrearTurnoTestSuite(TestCase):
     """Esta clase agrupa las pruebas de crear turnos"""
+    # defino las clases que estaran en la base de datos de prueba
     fixtures = ['test.json']
+    # configuro el manager
+    manager = TurnoManager()
+    #===========================================================================
+    # testUnDia
+    #===========================================================================
     def testUnDia(self):
-        """Crea turnos para un dia. Debe devolver una lista con mas de un turno"""
-        #ee = EspecialistaEspecialidad.objects.get(id=1)
-        #turnos1 = b.crear_turnos_del_especialista(ee, 1)
-        #self.assertGreater(len(turnos), 1)
-        from negocio.managers import TurnoManager
-        manager = TurnoManager()
-        turnos = manager.crear_turnos(timezone.now(), 
-                                      timezone.now() + timedelta(days=1))
+        """
+        Crea turnos para un dia. Debe devolver una lista con mas de un turno
+        """
+        DIAS = 1
+        # seteo rango de fechas
+        fecha_inicio = timezone.now()
+        fecha_fin = timezone.now() + timedelta(days=DIAS)
+        # creo los turnos
+        turnos = self.manager.crear_turnos(fecha_inicio, fecha_fin)
+        # valido que haya al menos un turno creado
         self.assertGreater(len(turnos), 1)
+        # valido que los turnos se hayan creado en el rango de fechas
+        for turno in turnos:
+            self.assertGreaterEqual(turno.fecha.date(), fecha_inicio.date())
+            self.assertLessEqual(turno.fecha.date(), fecha_fin.date())
         
-    def test8Dias(self):
-        """Crea una semana de turnos. Debe devolver una lista de turnos creados"""
-        DIAS = 8
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crear_turnos_del_especialista(ee, DIAS)
-        maximo = 0
+    #===========================================================================
+    # test8Dias
+    #===========================================================================
+    def test_una_semana(self):
+        """
+        Crea una semana de turnos. Debe devolver una lista de turnos creados
+        """
+        DIAS = 7
+        # seteo rango de fechas
+        fecha_inicio = timezone.now()
+        fecha_fin = timezone.now() + timedelta(days=DIAS)
+        # creo los turnos
+        turnos = self.manager.crear_turnos(fecha_inicio, fecha_fin)
+        # valido que haya al menos un turno creado
+        self.assertGreater(len(turnos), 1)
+        # diferencia_dias: valida que la diferencia dias entre el primer y
+        # ultimo turno se cumplan
+        diferencia_dias = 0
+        # valido que los turnos se hayan creado en el rango de fechas
         for turno in turnos:
-            diff = turno.fecha - timezone.now()
-            maximo = diff.days if diff.days > maximo else maximo
-            # Verifico que exista el historial
-            self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
-        self.assertEqual(maximo, DIAS - 1)
-    def test365Dias(self):
-        """Crea un año de turnos y verifica que sea correcto. Debe devolver una lista de turnos creados"""
-        DIAS = 365
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crear_turnos_del_especialista(ee, DIAS)
-        maximo = 0
-        for turno in turnos:
-            diff = turno.fecha - timezone.now()
-            maximo = diff.days if diff.days > maximo else maximo
-            # Verifico que exista el historial
-            self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
-        self.assertEqual(maximo, DIAS - 1)
-    def testDosAnos(self):
-        """Crea turnos a dos años. Debe devolver una lista de turnos creados"""
+            self.assertGreaterEqual(turno.fecha.date(), fecha_inicio.date())
+            self.assertLessEqual(turno.fecha.date(), fecha_fin.date())
+            diff = turno.fecha - fecha_inicio
+            diferencia_dias = (diff.days if diff.days > diferencia_dias 
+                                         else diferencia_dias)
+        # valido que la diferencia de dias entre primer y ultimo turno se cumpla
+        self.assertEqual(diferencia_dias, DIAS - 1)
+        
+    #===========================================================================
+    # test_dos_anos
+    #===========================================================================
+    def test_dos_anos(self):
+        """
+        Crea turnos a dos años. Debe devolver una lista de turnos creados.
+        """
         DIAS = 365 * 2
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crear_turnos_del_especialista(ee, DIAS)
-        maximo = 0
+        # seteo rango de fechas
+        fecha_inicio = timezone.now()
+        fecha_fin = timezone.now() + timedelta(days=DIAS)
+        # creo los turnos
+        turnos = self.manager.crear_turnos(fecha_inicio, fecha_fin)
+        # valido que haya al menos un turno creado
+        self.assertGreater(len(turnos), 1)
+        # diferencia_dias: valida que la diferencia dias entre el primer y
+        # ultimo turno se cumplan
+        diferencia_dias = 0
+        # valido que los turnos se hayan creado en el rango de fechas
         for turno in turnos:
-            diff = turno.fecha - timezone.now()
-            maximo = diff.days if diff.days > maximo else maximo
-            # Verifico que exista el historial
-            self.assertTrue(HistorialTurno.objects.filter(turno=turno).exists())
-        self.assertEqual(maximo, DIAS - 1)
-    def testDiasNegativos(self):
-        """Prueba que pasa si se pasan dias negativos a crear turnos. Debe devolver una lista vacia"""
+            self.assertGreaterEqual(turno.fecha.date(), fecha_inicio.date())
+            self.assertLessEqual(turno.fecha.date(), fecha_fin.date())
+            diff = turno.fecha - fecha_inicio
+            diferencia_dias = (diff.days if diff.days > diferencia_dias 
+                                         else diferencia_dias)
+        # valido que la diferencia de dias entre primer y ultimo turno se cumpla
+        self.assertEqual(diferencia_dias, DIAS - 1)
+        
+    #===========================================================================
+    # test_dias_negativos
+    #===========================================================================
+    def test_dias_negativos(self):
+        """
+        Prueba que pasa si se pasan dias negativos a crear turnos. Debe devolver
+        una lista vacia.
+        """
         DIAS = -7
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crear_turnos_del_especialista(ee, DIAS)
+        # seteo rango de fechas
+        fecha_inicio = timezone.now()
+        fecha_fin = timezone.now() + timedelta(days=DIAS)
+        # esperemos que lanze una excepcion por los dias
+        with self.assertRaises(ValueError):
+            # creo los turnos
+            self.manager.crear_turnos(fecha_inicio, fecha_fin)
+        
+    #===========================================================================
+    # test_rango_cero
+    #===========================================================================
+    def test_rango_cero(self):
+        '''
+        Prueba que pasa si se pasa el mismo dia de inicio y de fin. Debe 
+        devolver una lista vacia.
+        '''
+        # seteo rango de fechas
+        fecha_inicio = timezone.now()
+        fecha_fin = fecha_inicio
+        # creo los turnos
+        turnos = self.manager.crear_turnos(fecha_inicio, fecha_fin)
         self.assertFalse(turnos)
-    def testDiasCero(self):
-        """Prueba que pasa si se pasan cero dias a crear turnos. Debe devolver una lista vacia"""
-        DIAS = 0
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crear_turnos_del_especialista(ee, DIAS)
-        self.assertFalse(turnos)
-    def testSinDias(self):
-        """Prueba que pasa si se llama a la funcion de crear sin indicarle el numero de dias. 
-        Debe devolver una lista de turnos creados"""
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        turnos = b.crear_turnos_del_especialista(ee)
-        self.assertTrue(turnos)
-    def testTurnosExistentes(self):
-        """Prueba de crear turnos si todos los turnos a crear ya existen (doble llamada a la funcion).
-        Debe devolver una lista vacia de turnos creados, fallando silenciosamente"""
-        fecha = datetime(2014, 1, 20, 12, 30, tzinfo=timezone.utc)
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        b.crear_turnos_del_especialista(ee, 1, fecha)  # Creamos los turnos
-        antes = Turno.objects.all().count()  # contamos la cantidad de elementos antes de crear
-        creados = b.crear_turnos_del_especialista(ee, 1, fecha)  # No deberia dejarlo crear nuevamente. Falla silenciosa
-        despues = Turno.objects.all().count()  # contamos la cantidad de elementos despues de crear
-        self.assertFalse(creados)
-        # verifico que se hayan creado en la base de datos correctamente
+
+    #===========================================================================
+    # test_turnos_existentes
+    #===========================================================================
+    def test_turnos_existentes(self):
+        """
+        Prueba de crear turnos si todos los turnos a crear ya existen (doble 
+        llamada a la funcion). Debe devolver una lista vacia de turnos creados, 
+        fallando silenciosamente.
+        """
+        # seteo rango de fechas
+        fecha_inicio = timezone.now()
+        fecha_fin = timezone.now() + timedelta(days=1)
+        # creo los turnos
+        self.manager.crear_turnos(fecha_inicio, fecha_fin)
+        # contamos la cantidad de elementos antes de crear por segunda vez
+        antes = Turno.objects.all().count()  
+        # intentamos crear turnos nuevamente. Falla silenciosa
+        creados = self.manager.crear_turnos(fecha_inicio, fecha_fin) 
+        # contamos la cantidad de elementos despues de crear
+        despues = Turno.objects.all().count()
+        # verifico que la cantidad de turnos antes y despues de crearlos
+        # por segunda vez sea la misma
         self.assertEqual(antes, despues)
-    def testAlgunosExistentes(self):
-        """Prueba de crear turnos si hay un turno existente.
-        Debe devolver una lista de turnos creados y el turno existente no debe estar en esa lista"""
-        fecha = datetime(2014, 1, 20, 12, 30, tzinfo=timezone.utc)
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        turno = Turno.objects.create(fecha=fecha,
+        # no deberia haber creado ningun turno repetido
+        self.assertFalse(creados)
+        
+    #===========================================================================
+    # test_algunos_existentes
+    #===========================================================================
+    def test_algunos_existentes(self):
+        """
+        Prueba de crear turnos si hay un turno existente. Debe devolver una 
+        lista de turnos creados y el turno existente no debe estar en esa lista.
+        """
+        # seteo rango de fechas
+        fecha_inicio = timezone.now()
+        fecha_fin = timezone.now() + timedelta(days=1)
+        # creamos el turno existente
+        ee = EspecialistaEspecialidad.objects.all().first()
+        turno = Turno.objects.create(fecha=fecha_inicio,
                                      ee=ee,
                                      sobreturno=False,
                                      estado=Turno.RESERVADO)
-        antes = Turno.objects.all().count()  # contamos la cantidad de elementos antes de crear
-        creados = b.crear_turnos_del_especialista(ee, a_partir_de=fecha)
-        despues = Turno.objects.all().count()  # contamos la cantidad de elementos despues de crear
+        # cuento la cantidad de elementos antes de crear
+        antes = Turno.objects.all().count()
+        # creo los turnos
+        creados = self.manager.crear_turnos(fecha_inicio, fecha_fin)
+        # cuento la cantidad de elementos despues de crear
+        despues = Turno.objects.all().count()
+        # verifico que el turno existente no este en la lista de turnos creados
         self.assertTrue(turno not in creados)
         # verifico que se hayan creado en la base de datos correctamente
         self.assertEqual(antes + len(creados), despues)
-    def testProximoDia(self):
-        """Prueba para obtener el proximo dia a partir de una fecha conocida.
-        Debe devolver mismo dia conocido"""
-        base = datetime(2014, 01, 01)  # miercoles
-        target = datetime(2014, 01, 04)  # sabado
-        dia = 5  # sabado
-        fecha = b._Bussiness__proximoDia(dia, base)
-        self.assertEquals(target, fecha)
-    def testSinDisponibilidad(self):
-        """Prueba que pasa si se crean turnos de un especialista que no posee disponibilidad.
-        Debe devolver una lista vacia, fallando silenciosamente"""
-        es = Especialidad.objects.get(id=1)
+
+    #===========================================================================
+    # test_sin_disponibilidad
+    #===========================================================================
+    def test_sin_disponibilidad(self):
+        """
+        Prueba que pasa si se crean turnos de un especialista que no posee 
+        disponibilidad. Debe devolver una lista que no posea un turno del
+        especialista en cuestion.
+        """
+        # creo un especialista mock
+        es = Especialidad.objects.all().first()
         e = Especialista.objects.create(nombre='n', apellido='n', dni=1234)
-        ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es)
-        turnos = b.crear_turnos_del_especialista(ee)
-        self.assertFalse(turnos)
-    def testGetHistorialCreacion(self):
-        """Prueba que se obtenga el historial de turnos creados"""
-        historial = b.get_historial_creacion_turnos()
-        self.assertTrue(historial)
-    def testVariosEspecialistas(self):
-        """Prueba que pasa si se crean turnos de varios especialistas"""
-        es1 = Especialidad.objects.create(descripcion="Clinico")
-        es2 = Especialidad.objects.create(descripcion="Oftamologia")
-        e1 = Especialista.objects.create(nombre='n1', apellido='n1', dni=1234)
-        e2 = Especialista.objects.create(nombre='n2', apellido='n2', dni=12345)
-        ee1 = EspecialistaEspecialidad.objects.create(especialista=e1, especialidad=es1)
-        ee2 = EspecialistaEspecialidad.objects.create(especialista=e2, especialidad=es2)
-        Disponibilidad.objects.create(dia='0', horaDesde="10:00", horaHasta="13:00", ee=ee1)
-        Disponibilidad.objects.create(dia='1', horaDesde="15:00", horaHasta="20:00", ee=ee2)
-        turnos = b.crear_turnos()
-        t1 = Turno.objects.filter(ee__especialista=e1)
-        t2 = Turno.objects.filter(ee__especialista=e2)
-        self.assertGreater(turnos, 0)
-        self.assertGreater(len(t1), 0)
-        self.assertGreater(len(t2), 0)
-    def testDistintaFrecuencia(self):
-        """Prueba el algoritmo de creacion de turnos cambiando la frecuencia en minutos de cada turno"""
-        FRECUENCIA = 1  # minutos
-        es = Especialidad.objects.create(descripcion="Oftamologia")
-        e = Especialista.objects.create(nombre='n2', apellido='n2', dni=12345)
-        ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es, frecuencia_turnos=FRECUENCIA)
-        Disponibilidad.objects.create(dia='0', horaDesde="10:00", horaHasta="13:00", ee=ee)
-        creados = b.crear_turnos()
-        turnos = Turno.objects.filter(ee__especialista=e).order_by('-fecha')
-        self.assertGreater(creados, 0)
-        # Verificamos la diferencia en minutos de cada turno
-        for i in range(len(turnos) - 1):
-            diff = turnos[i].fecha - turnos[i + 1].fecha
-            minutos = (diff.seconds % 3600) // 60
-            self.assertEqual(minutos, FRECUENCIA)
-    def testCrearSobreturnos(self):
-        """Prueba el proceso de creacion de sobreturnos"""
-        FRECUENCIA = 10  # minutos
-        es = Especialidad.objects.create(descripcion="Oftamologia")
-        e = Especialista.objects.create(nombre='n2', apellido='n2', dni=12345)
-        ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es, frecuencia_turnos=FRECUENCIA)
-        Disponibilidad.objects.create(dia='0', horaDesde="10:00", horaHasta="11:10", ee=ee)
-        fecha = b._Bussiness__proximoDia(0, timezone.now())
-        creados = b._Bussiness__crearSobreturnos(ee.id, fecha)
-        self.assertGreater(len(creados), 0)
-        turnos = Turno.objects.filter(ee__especialista=e, sobreturno=True).order_by('-fecha')
-        self.assertTrue(turnos.exists())
-        self.assertEqual(turnos.count(), b.MAX_SOBRETURNOS)
-        # Verificamos la diferencia en minutos de cada turno
-        for i in range(len(turnos) - 1):
-            diff = turnos[i].fecha - turnos[i + 1].fecha
-            minutos = (diff.seconds % 3600) // 60
-            self.assertEqual(minutos, FRECUENCIA * 2)
+        ee = EspecialistaEspecialidad.objects.create(especialista=e,
+                                                     especialidad=es)
+        # seteo rango de fechas
+        fecha_inicio = timezone.now()
+        fecha_fin = timezone.now() + timedelta(days=1)
+        # creo los turnos de todos los especialistas
+        creados = self.manager.crear_turnos(fecha_inicio, fecha_fin)
+        # verifico que no se haya creado ningun turno para el especialista en 
+        # cuestion
+        for turno in creados:
+            self.assertNotEqual(turno.ee.id, ee.id)
+        
+#      #==========================================================================
+#      # testCrearSobreturnos
+#      #==========================================================================
+#      def testCrearSobreturnos(self):
+#         """Prueba el proceso de creacion de sobreturnos"""
+#         FRECUENCIA = 10  # minutos
+#         es = Especialidad.objects.create(descripcion="Oftamologia")
+#         e = Especialista.objects.create(nombre='n2', apellido='n2', dni=12345)
+#         ee = EspecialistaEspecialidad.objects.create(especialista=e, especialidad=es, frecuencia_turnos=FRECUENCIA)
+#         Disponibilidad.objects.create(dia='0', horaDesde="10:00", horaHasta="11:10", ee=ee)
+#         fecha = b._Bussiness__proximoDia(0, timezone.now())
+#         creados = b._Bussiness__crearSobreturnos(ee.id, fecha)
+#         self.assertGreater(len(creados), 0)
+#         turnos = Turno.objects.filter(ee__especialista=e, sobreturno=True).order_by('-fecha')
+#         self.assertTrue(turnos.exists())
+#         self.assertEqual(turnos.count(), b.MAX_SOBRETURNOS)
+#         # Verificamos la diferencia en minutos de cada turno
+#         for i in range(len(turnos) - 1):
+#             diff = turnos[i].fecha - turnos[i + 1].fecha
+#             minutos = (diff.seconds % 3600) // 60
+#             self.assertEqual(minutos, FRECUENCIA * 2)
 class TestValidadores(TestCase):
     def testLongitud(self):
         """Prueba que el validador funcione cuando una contraseña es menor a la longitud permitida"""
@@ -860,8 +924,10 @@ class ConsultaReservaTest(TestCase):
 #===============================================================================
 # Test utilizando servicios y comandos
 #===============================================================================
-from negocio.service import ReservaTurnosService
 class ServiceTestSuite(TestCase):
+    # defino las clases que estaran en la base de datos de prueba
+    fixtures = ['test.json']
+    # defino el servicio a probar
     service = ReservaTurnosService()
     def setup(self):
         TestCase.setUp(self)
@@ -880,7 +946,7 @@ class ServiceTestSuite(TestCase):
     # test_deshacer_creacion
     #===========================================================================
     def test_deshacer_creacion(self):
-        ' Crea un turno en la aplicacion y deshace la ultima operacion.' 
+        ' Crea un turno en la aplicacion y deshace la ultima operacion. ' 
         # Creamos un turno para ver si lo deshace
         turno = self.service.crear_turno(timezone.now(),
                             EspecialistaEspecialidad.objects.get(id=1))
@@ -895,8 +961,10 @@ class ServiceTestSuite(TestCase):
     # test_deshacer_ultima_creacion
     #===========================================================================
     def test_deshacer_ultima_creacion(self):
-        ''' Crea varios turnos en la aplicacion y deshace la ultima operacion.
-        Solo debe deshacer el ultimo turno creado''' 
+        '''
+        Crea varios turnos en la aplicacion y deshace la ultima operacion.
+        Solo debe deshacer el ultimo turno creado
+        ''' 
         # Creamos el primer turno
         turno1 = self.service.crear_turno(timezone.now(),
                             EspecialistaEspecialidad.objects.get(id=1))
@@ -917,9 +985,265 @@ class ServiceTestSuite(TestCase):
         self.assertFalse(Turno.objects.filter(id=turno2.id).exists())
     
     #===========================================================================
-    # testUnDia
+    # test_crear_turnos_rango_un_dia
     #===========================================================================
-    def testUnDia(self):
-        """Crea turnos para un dia. Debe devolver una lista con mas de un turno"""
+    def test_crear_turnos_rango_un_dia(self):
+        """
+        Crea turnos para un dia. Debe devolver una lista con mas de un turno
+        """
+        # creo los turnos
         turnos = self.service.crear_turnos(dias=1)
+        # valido que se hayan creado
         self.assertGreater(len(turnos), 1)
+    
+    #===========================================================================
+    # test_crear_turnos_rango_fechas
+    #===========================================================================
+    def test_crear_turnos_rango_fechas(self):
+        '''
+        Crea turnos para un rango de fechas. 
+        Debe devolver una lista con mas de un turno y estos deben tener fecha
+        entre los rangos especificados.
+        '''
+        # defino fecha de inicio y fecha de fin
+        fecha_inicio = timezone.now()
+        fecha_fin = timezone.now() + timedelta(days=7)  # una semana
+        # creo los turnos
+        turnos = self.service.crear_turnos(fecha_inicio=fecha_inicio,
+                                           fecha_fin=fecha_fin)
+        # valido que se hayan creado al menos un turno
+        self.assertGreater(len(turnos), 1)
+        # valido que los turnos creados esten en el rango de fechas definidos
+        for turno in turnos:
+            self.assertGreaterEqual(turno.fecha.date(), fecha_inicio.date())
+            self.assertLessEqual(turno.fecha.date(), fecha_fin.date())
+    
+    #===========================================================================
+    # test_crear_turnos_sin_dias
+    #===========================================================================
+    def test_crear_turnos_sin_dias(self):
+        """
+        Prueba que pasa si se llama a la funcion de crear sin indicarle el 
+        numero de dias. Debe devolver una lista de turnos creados. Debe tomar
+        la cantidad de dias por defecto
+        """
+        # creo los turnos sin indicar la cantida de dias. Debe tomar el valor
+        # por defecto
+        turnos = self.service.crear_turnos()
+        # valido la salida
+        self.assertGreater(len(turnos), 1)
+    
+    #===========================================================================
+    # test_varios_especialistas
+    #===========================================================================
+    def test_varios_especialistas(self):
+        """
+        Prueba que pasa si se crean turnos de varios especialistas.
+        """
+        # creo especialidades
+        es1 = Especialidad.objects.create(descripcion="Clinico")
+        es2 = Especialidad.objects.create(descripcion="Oftamologia")
+        # creo especialistas
+        e1 = Especialista.objects.create(nombre='n1', apellido='n1', dni=1234)
+        e2 = Especialista.objects.create(nombre='n2', apellido='n2', dni=12345)
+        # creo asociacion entre especialistas y especialidades
+        ee1 = EspecialistaEspecialidad.objects.create(especialista=e1,
+                                                      especialidad=es1)
+        ee2 = EspecialistaEspecialidad.objects.create(especialista=e2,
+                                                      especialidad=es2)
+        # creo las disponibilidades
+        Disponibilidad.objects.create(dia='0', horaDesde="10:00",
+                                      horaHasta="13:00", ee=ee1)
+        Disponibilidad.objects.create(dia='1', horaDesde="15:00",
+                                      horaHasta="20:00", ee=ee2)
+        # creo los turnos para una semana
+        turnos = self.service.crear_turnos(dias=7)
+        # verifico que que se hayan creado los turnos
+        self.assertGreater(turnos, 0)
+        # obtengo los turnos de los especialistas
+        t1 = Turno.objects.filter(ee__especialista=e1)
+        t2 = Turno.objects.filter(ee__especialista=e2)
+        # verifico que se hayan creado turnos para cada especialista
+        self.assertGreater(len(t1), 0)
+        self.assertGreater(len(t2), 0)
+        
+    #===========================================================================
+    # test_distinta_frecuencia
+    #===========================================================================
+    def test_distinta_frecuencia(self):
+        """
+        Prueba el algoritmo de creacion de turnos cambiando la frecuencia en 
+        minutos de cada turno.
+        """
+        FRECUENCIA = 1  # minutos
+        # obtengo especialidad
+        es = Especialidad.objects.all().first()
+        # obtengo especialista
+        e = Especialista.objects.all().first()
+        # creo asociacion entre especialista y especialidad y le seteo la 
+        # frecuencia
+        ee = (EspecialistaEspecialidad.objects
+              .create(especialista=e, especialidad=es,
+                      frecuencia_turnos=FRECUENCIA))
+        # creo el objeto disponibilidad
+        Disponibilidad.objects.create(dia='0', horaDesde="10:00",
+                                      horaHasta="13:00", ee=ee)
+        # creo los turnos para una semana
+        creados = self.service.crear_turnos(dias=7)
+        # obtengo los turnos del especialista
+        turnos = Turno.objects.filter(ee=ee).order_by('-fecha')
+        # verifico que se hayan creado correctamente
+        self.assertGreater(creados, 0)
+        # Verificamos la diferencia en minutos de cada turno
+        for i in range(len(turnos) - 1):
+            diff = turnos[i].fecha - turnos[i + 1].fecha
+            minutos = (diff.seconds % 3600) // 60
+            self.assertEqual(minutos, FRECUENCIA)
+
+#===============================================================================
+# CommandTestSuite
+#===============================================================================
+class CommandTestSuite(TestCase):
+    '''
+    Prueba que los comandos funcionen correctamente
+    '''
+    # defino las clases que estaran en la base de datos de prueba
+    fixtures = ['test.json']
+    #===========================================================================
+    # setup
+    #===========================================================================
+    def setup(self):
+        TestCase.setUp(self)
+        
+    #===========================================================================
+    # test_crear_turno
+    #===========================================================================
+    def test_crear_turno(self):
+        '''
+        Verifica que la command de crear turno funcione correctamente. Debe crear
+        solo un turno
+        '''
+        # creo la command
+        receiver = TurnoManager()
+        command = OrdenCrearTurno(receiver=receiver)
+        # seteo los parametros para crear el turno
+        command.fecha = timezone.now()
+        command.ee = EspecialistaEspecialidad.objects.all().first()
+        # cuento la cantidad de turnos antes de ejecutar la command
+        antes = Turno.objects.all().count()
+        # ejecuto la command
+        command.execute()
+        # verifico cuantos turnos hay despues de ejecutar la command
+        despues = Turno.objects.all().count()
+        # verifico que la command me devuelva el turno creado
+        self.assertTrue(command.turno)
+        # verifico que despues tenga un turno mas que antes
+        self.assertEquals(despues, antes + 1)
+    
+    #===========================================================================
+    # test_crear_turno_sin_parametros
+    #===========================================================================
+    def test_crear_turno_sin_parametros(self):
+        '''
+        Verifica que la validacion de la command de crear turno funcione 
+        correctamente. Debe lanzar una error ValueError
+        '''
+        # creo la command
+        receiver = TurnoManager()
+        command = OrdenCrearTurno(receiver)
+        # verifico cuantos turnos hay antes de ejecutar la command
+        antes = Turno.objects.all().count()
+        # espero que lanze la excepcion
+        with self.assertRaises(ValueError):
+            # ejecuto la command
+            command.execute()
+        # verifico cuantos turnos hay despues de ejecutar la command
+        despues = Turno.objects.all().count()
+        # verifico que despues haya la misma cantidad que antes
+        self.assertEquals(despues, antes)
+    
+    #===========================================================================
+    # test_crear_turno_undo
+    #===========================================================================
+    def test_crear_turno_undo(self):
+        '''
+        Verifica que la orden crear turno se pueda deshacer
+        '''
+        # creo el command
+        receiver = TurnoManager()
+        command = OrdenCrearTurno(receiver=receiver)
+        # seteo los parametros para crear el turno
+        command.fecha = timezone.now()
+        command.ee = EspecialistaEspecialidad.objects.all().first()
+        # ejecuto la command
+        command.execute()
+        # obtengo el turno creado
+        turno = command.turno
+        # cuento la cantidad de turnos antes de DESHACER el command
+        antes = Turno.objects.all().count()
+        # deshago el command
+        command.undo()
+        # verifico cuantos turnos hay despues de deshacer el command
+        despues = Turno.objects.all().count()
+        # verifico que despues haya un turno menos
+        self.assertEquals(despues, antes - 1)
+        # verifico que el turno creado no exista mas
+        self.assertFalse(Turno.objects.filter(id=turno.id).exists())
+        
+    #===========================================================================
+    # test_crear_turnos
+    #===========================================================================
+    def test_crear_turnos(self):
+        '''
+        Verifica que la orden de crear turnos funcione correctamente. Debe 
+        crear turnos en un rango de fechas
+        '''
+        # creo el command
+        receiver = TurnoManager()
+        command = OrdenCrearTurnos(receiver=receiver)
+        # seteo los parametros para crear el turno
+        command.fecha_inicio = timezone.now()
+        command.fecha_fin = timezone.now() + timedelta(days=1)
+        # cuento la cantidad de turnos antes de ejecutar el command
+        antes = Turno.objects.all().count()
+        # ejecuto la command
+        command.execute()
+        # verifico cuantos turnos hay despues de ejecutar el command
+        despues = Turno.objects.all().count()
+        # obtengo los turnos creados
+        creados = command.turnos_creados
+        # verifico que la lista no este vacia
+        self.assertTrue(creados)
+        # verifico que despues haya un turno menos
+        self.assertEquals(despues, antes + len (creados))
+
+    #===========================================================================
+    # test_crear_turnos_undo
+    #===========================================================================
+    def test_crear_turnos_undo(self):
+        '''
+        Verifica que la orden crear turnos se pueda deshacer
+        '''
+        # creo el command
+        receiver = TurnoManager()
+        command = OrdenCrearTurnos(receiver=receiver)
+        # seteo los parametros para crear el turno
+        command.fecha_inicio = timezone.now()
+        command.fecha_fin = timezone.now() + timedelta(days=1)
+        # cuento la cantidad de turnos antes de ejecutar el command
+        antes = Turno.objects.all().count()
+        # ejecuto la command
+        command.execute()
+        # obtengo los turnos creados
+        creados = command.turnos_creados
+        # deshago el command
+        command.undo()
+        # verifico cuantos turnos hay despues de DESHACER el command
+        despues = Turno.objects.all().count()
+        # verifico que la lista no este vacia
+        self.assertTrue(creados)
+        # verifico que despues haya un turno menos
+        self.assertEquals(antes, despues)
+        # verifico que los turnos creados no existan en la base de datos
+        for turno in creados:
+            self.assertFalse(Turno.objects.filter(id=turno.id).exists())
