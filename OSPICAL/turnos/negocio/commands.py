@@ -8,6 +8,9 @@ Created on 30/07/2014
 @author: romeroy
 '''
 
+#===============================================================================
+# Command
+#===============================================================================
 class Command():
     '''
     Representa un comando a ejecutarse. Implementa patron command de GOF
@@ -19,10 +22,16 @@ class Command():
         '''Deshace la ejecucion del comando'''
         raise NotImplementedError
     
+#===============================================================================
+# OrdenCrearTurno
+#===============================================================================
 class OrdenCrearTurno(Command):
     '''
     Representa una orden para crear un turno en el sistema
     '''
+    #===========================================================================
+    # __init__
+    #===========================================================================
     def __init__(self, receiver, fecha=None, ee=None):
         '''Constructor.
         
@@ -38,6 +47,9 @@ class OrdenCrearTurno(Command):
         self.receiver = receiver
         self.fecha = fecha
         self.ee = ee
+    #===========================================================================
+    # execute
+    #===========================================================================
     def execute(self):
         '''Ejecuta la creacion del turno.
         
@@ -49,6 +61,9 @@ class OrdenCrearTurno(Command):
                              execute this command")
         
         self.turno = self.receiver.crear_turno(self.fecha, self.ee)
+    #===========================================================================
+    # undo
+    #===========================================================================
     def undo(self):
         'Deshace la creacion del turno'
         self.receiver.borrar_turno(self.turno)

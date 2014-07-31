@@ -546,6 +546,7 @@ class CrearTurnoTest(TestCase):
         turnos = manager.crear_turnos(timezone.now(), 
                                       timezone.now() + timedelta(days=1))
         self.assertGreater(len(turnos), 1)
+        
     def test8Dias(self):
         """Crea una semana de turnos. Debe devolver una lista de turnos creados"""
         DIAS = 8
