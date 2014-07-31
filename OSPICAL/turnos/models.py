@@ -104,9 +104,10 @@ class Turno (models.Model):
               (CANCELADO,'CANCELADO'),
               (NO_RESERVADO,'NO RESERVADO'),)
     # Atributos ~
+    creado = models.DateTimeField(auto_now_add=True)
     fecha = models.DateTimeField()
     estado = models.CharField(max_length=1, choices=ESTADO)
-    sobreturno = models.BooleanField()
+    sobreturno = models.BooleanField(default=False)
     consultorio = models.ForeignKey(Consultorio, null=True)
     ee = models.ForeignKey(EspecialistaEspecialidad)
     def __str__(self):
