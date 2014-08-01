@@ -1,6 +1,7 @@
 # coding=utf-8
+
+
 from datetime import timedelta
-import exceptions
 import logging
 
 from dateutil.relativedelta import relativedelta
@@ -12,7 +13,7 @@ from bussiness import Bussiness
 from models import Turno, Consultorio, EspecialistaEspecialidad, LineaDeReserva, \
     Especialidad, Especialista, Disponibilidad, Afiliado, Reserva
 from negocio.commands import OrdenCrearTurno, OrdenCrearTurnos
-from negocio.exceptions import TurnoNotExistsException, \
+from negocio.excepciones import TurnoNotExistsException, \
     AfiliadoNotExistsException, TurnoReservadoException, ConfirmarReservaException, \
     CancelarReservaException, CancelarTurnoException
 from negocio.managers import TurnoManager, ReservaManager
@@ -146,23 +147,26 @@ class ReservasTestSuite(TestCase):
             self.assertEqual(turno.estado, Turno.DISPONIBLE)
         
     #===========================================================================
-    # test_turno_vacio
+    # test_lista_turnos_vacia
     #===========================================================================
-    def test_turno_vacio(self):
+    def test_lista_turnos_vacia(self):
         """
         Verifica que pasa si se quiere reservar turnos con una lista de turnos 
         vacia.
-        Debe fallar silenciosamente.
+        Debe lanzar una excepcion ValueError
         """
         # obtengo el afiliado
         afiliado = Afiliado.objects.all().first()
         # creo una lista de turnos vacia
         lista_turnos = []
-        # creo la reserva
-        reserva = self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
-        # verifico que crear_reserva me devuelva un objeto nulo sin lanzar 
-        # excepciones
-        self.assertIsNone(reserva)
+        # espero la excepcion por enviar un objeto vacio
+        with self.assertRaises(ValueError):
+            # creo la reserva
+            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+        # espero la excepcion por enviar un objeto nulo
+        with self.assertRaises(ValueError):
+            # creo la reserva
+            self.manager.crear_reserva(afiliado, '12345678', None)
         
     #===========================================================================
     # test_sin_telefono
@@ -219,7 +223,7 @@ class ReservasTestSuite(TestCase):
         a reservar.
         """
         # defino la cantidad de turnos a reservar
-        CANTIDAD = 100
+        CANTIDAD = 250
         # obtengo el afiliado
         afiliado = Afiliado.objects.all().first()
         # defino la lista de turnos
@@ -760,6 +764,7 @@ class CancelarTurnoTest(TestCase):
         cancelados = b.cancelar_turnos(ee.especialista.id, fecha)
         self.assertEquals(len(reservas), len(cancelados))
         self.assertTrue(b._Bussiness__isCancelado(ee.id, fecha))
+        
 #===============================================================================
 # CrearTurnoTestSuite
 #===============================================================================

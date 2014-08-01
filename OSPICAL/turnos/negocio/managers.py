@@ -5,16 +5,17 @@ Created on 30/07/2014
 
 @author: romeroy
 '''
-import logging
+from datetime import datetime, timedelta
+
 from django.db import transaction
 from django.utils import timezone
-# from turnos.models import Turno, Disponibilidad
-from turnos.models import Turno, Disponibilidad, Settings, Reserva, \
-LineaDeReserva, Afiliado
-from datetime import datetime, timedelta
-import exceptions
 
-logger = logging.getLogger(__name__)
+import excepciones
+from turnos.models import Turno, Disponibilidad, Settings, Reserva, \
+    LineaDeReserva, Afiliado
+
+
+# from turnos.models import Turno, Disponibilidad
 #===============================================================================
 # TurnoManager
 #===============================================================================
@@ -76,7 +77,6 @@ class TurnoManager():
         Parametros:
         @param turno: Turno a borrar del sistema
         '''
-        logging.info("Borrando turno %s" % turno)
         return turno.delete()
     
     #===========================================================================
@@ -235,20 +235,15 @@ class ReservaManager:
                                    ya este reservado
         '''
         self.__crear_reserva_validate(afiliado, telefono, turnos)
-        if turnos:
-            reserva = Reserva.objects.create(afiliado=afiliado,
-                                             telefono=telefono)
-            logger.debug("Reserva id:%s" % reserva.id)
-            for turno in turnos:
-                turno.estado = Turno.RESERVADO
-                turno.save()
-                lr = LineaDeReserva.objects.create(turno=turno,
-                                                   reserva=reserva,
-                                                   estado=Turno.RESERVADO)
-                logger.debug("Linea de reserva id:%s" % lr.id)
-            return reserva
-        else:
-            logger.error("La lista de turnos a reservar esta vacia")
+        reserva = Reserva.objects.create(afiliado=afiliado,
+                                         telefono=telefono)
+        for turno in turnos:
+            turno.estado = Turno.RESERVADO
+            turno.save()
+            LineaDeReserva.objects.create(turno=turno,
+                                          reserva=reserva,
+                                          estado=Turno.RESERVADO)
+        return reserva
     
     #===========================================================================
     # __crear_reserva_validate
@@ -278,19 +273,22 @@ class ReservaManager:
         TurnoReservadoException -- En caso que algun turno a reservar
                                    ya este reservado
         '''
+        # valido que la lista de turnos no este vacia
+        if not turnos:
+            raise ValueError("Lista de turnos vacia")
         # valido que ningun parametro sea nulo
-        if not afiliado or not telefono or turnos is None:
+        if not afiliado or not telefono:
             raise ValueError("Invalid parameters")
         # valido que el afiliado exista
         if not Afiliado.objects.filter(id=afiliado.id).exists():
-            raise exceptions.AfiliadoNotExistsException("Afiliado inexistente")
+            raise excepciones.AfiliadoNotExistsException("Afiliado inexistente")
         # valido si los turnos a reservar existen
         for turno in turnos:
             if not Turno.objects.filter(id=turno.id).exists():
-                raise exceptions.TurnoNotExistsException("Turno inexistente")
+                raise excepciones.TurnoNotExistsException("Turno inexistente")
             if not (Turno.objects.filter(id=turno.id, estado=Turno.DISPONIBLE)
                     .exists()):
-                raise exceptions.TurnoReservadoException("Turno reservado")
+                raise excepciones.TurnoReservadoException("Turno reservado")
     
     def get_turnos_reservados(self, afiliado):
         '''
