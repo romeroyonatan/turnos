@@ -1,10 +1,9 @@
 # coding=utf-8
-from datetime import timedelta, datetime
+from datetime import timedelta
 import logging
 
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
-from django.template.defaultfilters import time
 from django.test import TestCase
 from django.utils import timezone
 
@@ -12,12 +11,10 @@ from bussiness import Bussiness, TurnoNotExistsException, \
     AfiliadoNotExistsException, TurnoReservadoException, ConfirmarReservaException, \
     CancelarReservaException, CancelarTurnoException
 from models import Turno, Consultorio, EspecialistaEspecialidad, LineaDeReserva, \
-    HistorialTurno, Especialidad, Especialista, Disponibilidad, Afiliado
-
-from negocio.managers import TurnoManager
-from negocio.service import ReservaTurnosService
+    Especialidad, Especialista, Disponibilidad, Afiliado, Reserva
 from negocio.commands import OrdenCrearTurno, OrdenCrearTurnos
-
+from negocio.managers import TurnoManager, ReservaManager
+from negocio.service import ReservaTurnosService
 from turnos.bussiness import *
 from turnos.models import *
 from turnos.validators import PasswordValidator
@@ -26,136 +23,304 @@ from turnos.validators import PasswordValidator
 logger = logging.getLogger(__name__)
 b = Bussiness()
 
-class ReservarTurnoTest(TestCase):
+#===============================================================================
+# ReservasTestSuite
+#===============================================================================
+class ReservasTestSuite(TestCase):
     """Esta clase agrupa las pruebas de reservar turnos"""
     fixtures = ['test.json']
+    manager = ReservaManager()
     def setUp(self):
         TestCase.setUp(self)
-    def testGetDiasTurnos(self):
-        """Verifica el funcionamiento del algoritmo para la obtencion de turnos disponibles.
-        Debe obtener una lista con todos los turnos disponibles"""
-        # Creando turno
-        Turno.objects.create(fecha=timezone.now() + timedelta(days=1),
-                             estado=Turno.DISPONIBLE,
-                             sobreturno=False,
-                             consultorio=Consultorio.objects.get(id=1),
-                             ee=EspecialistaEspecialidad.objects.get(id=1),
-                             )
-        test = b.getDiaTurnos(1)
-        self.assertGreaterEqual(len(test), 1)
-    def testReservarTurno(self):
-        """Verifica que se reserve un turno de forma correcta"""
-        afiliado_id = 1
-        listaTurnos = [2, 3, 4]
-        reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
-        lineas = LineaDeReserva.objects.filter(reserva=reserva)
+    
+    #===========================================================================
+    # test_reservar_unico_turno
+    #===========================================================================
+    def test_reservar_unico_turno(self):
+        """
+        Verifica que se reserve un turno de forma correcta.
+        """
+        # obtengo el afiliado
+        afiliado = Afiliado.objects.all().first()
+        # creo una lista de turnos con un solo turno (estado=disponible)
+        lista_turnos = [Turno.objects.filter(estado=Turno.DISPONIBLE).first()]
+        # creo la reserva con un numero de telefono cualquiera
+        reserva = self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+        # verifico que el objeto reserva se haya creado correctamente
         self.assertIsNotNone(reserva)
-        self.assertEqual(reserva.afiliado.id, afiliado_id)
-        self.assertEqual(lineas.count(), len(listaTurnos))
-        for turno_id in listaTurnos:
-            turno = Turno.objects.get(id=turno_id)
-            historial = HistorialTurno.objects.latest('id')
+        # obtengo las lineas de reserva (una por cada turno reservado)
+        lineas = LineaDeReserva.objects.filter(reserva=reserva)
+        # verifico que el afiliado coincida en la reserva
+        self.assertEqual(reserva.afiliado.id, afiliado.id)
+        # verifico que la cantidad de lineas de reserva coincida con la
+        # cantidad de turnos a reservar
+        self.assertEqual(lineas.count(), len(lista_turnos))
+        for t in lista_turnos:
+            turno = Turno.objects.get(id=t.id)
+            # verifico que el estado de los turnos sea reservado para que no
+            # puedan ser reservados nuevamente
             self.assertEqual(turno.estado, Turno.RESERVADO)
-            self.assertIsNotNone(historial)
-            self.assertEqual(historial.estadoNuevo, turno.estado)
         for lr in lineas:
-            self.assertEqual(lr.reserva.id, reserva.id)
-            self.assertIn(lr.turno.id, listaTurnos)
+            # verifico que los turnos reservados coincidan con los que queria
+            # reservar
+            self.assertIn(lr.turno, lista_turnos)
+            # verifico que las lineas tengan el estado de reservado
             self.assertEqual(lr.estado, Turno.RESERVADO)
-    def testTurnoInexistente(self):
-        """Verifica que pasa si se quiere reservar un turno que no existe.
-        Deberia lanzar una excepcion"""
-        afiliado_id = 1
-        listaTurnos = [2, 4000]
+    
+    #===========================================================================
+    # test_reservar_turnos
+    #===========================================================================
+    def test_reservar_turnos(self):
+        """
+        Verifica que se reserve una lista de turnos de forma correcta.
+        """
+        # obtengo el afiliado
+        afiliado = Afiliado.objects.all().first()
+        # creo una lista de turnos con todos los turnos disponibles
+        lista_turnos = Turno.objects.filter(estado=Turno.DISPONIBLE)
+        # creo la reserva con un numero de telefono cualquiera
+        reserva = self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+        # verifico que el objeto reserva se haya creado correctamente
+        self.assertIsNotNone(reserva)
+        # obtengo las lineas de reserva (una por cada turno reservado)
+        lineas = LineaDeReserva.objects.filter(reserva=reserva)
+        # verifico que el afiliado coincida en la reserva
+        self.assertEqual(reserva.afiliado.id, afiliado.id)
+        # verifico que la cantidad de lineas de reserva coincida con la
+        # cantidad de turnos a reservar
+        self.assertEqual(lineas.count(), len(lista_turnos))
+        for t in lista_turnos:
+            turno = Turno.objects.get(id=t.id)
+            # verifico que el estado de los turnos sea reservado para que no
+            # puedan ser reservados nuevamente
+            self.assertEqual(turno.estado, Turno.RESERVADO)
+        for lr in lineas:
+            # verifico que los turnos reservados coincidan con los que queria
+            # reservar
+            self.assertIn(lr.turno, lista_turnos)
+            # verifico que las lineas tengan el estado de reservado
+            self.assertEqual(lr.estado, Turno.RESERVADO)
+    
+    #===========================================================================
+    # test_turno_inexistente
+    #===========================================================================
+    def test_turno_inexistente(self):
+        """
+        Verifica que pasa si se quiere reservar un turno que no existe.
+        Deberia lanzar una excepcion
+        """
+        # obtengo el afiliado
+        afiliado = Afiliado.objects.all().first()
+        # creo una lista de turnos con todos los turnos disponibles
+        lista_turnos = list(Turno.objects.filter(estado=Turno.DISPONIBLE))
+        # agrego a la lista de turnos un turno inexistente
+        lista_turnos.append(Turno(id=-2000, estado=Turno.DISPONIBLE))
+        # espero que lanze la excepcion de turno inexistente
         with self.assertRaises(TurnoNotExistsException):
-            b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
-        turno = Turno.objects.get(id=2)
-        self.assertEqual(turno.estado, Turno.DISPONIBLE)
-    def testAfiliadoInexistente(self):
-        """Verifica que pasa si el afiliado no existe. Debe lanzar una excepcion"""
-        afiliado_id = 4000
-        listaTurnos = [2, 3, 4]
+        # creo la reserva
+            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+        # verifico que los turnos sigan en estado disponible (la accion de
+        # reservar debe ser transaccional)
+        for turno in lista_turnos:
+            self.assertEqual(turno.estado, Turno.DISPONIBLE)
+        
+    #===========================================================================
+    # test_afiliado_inexistente
+    #===========================================================================
+    def test_afiliado_inexistente(self):
+        """
+        Verifica que pasa si el afiliado no existe. 
+        Debe lanzar una excepcion.
+        """
+        # creo un afiliado inexistente
+        afiliado = Afiliado(id=-2000)
+        # creo una lista de turnos con todos los turnos disponibles
+        lista_turnos = Turno.objects.filter(estado=Turno.DISPONIBLE)
+        # espero que lanze la excepcion de afiliado inexistente
         with self.assertRaises(AfiliadoNotExistsException):
-            b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
-    def testTurnoVacio(self):
-        """Verifica que pasa si se quiere reservar turnos con una lista de turnos vacia.
-        Deberia fallar silenciosamente"""
-        afiliado_id = 1
-        listaTurnos = []
-        reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        # creo la reserva
+            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+        # verifico que los turnos sigan en estado disponible (la accion de
+        # reservar debe ser transaccional)
+        for turno in lista_turnos:
+            self.assertEqual(turno.estado, Turno.DISPONIBLE)
+        
+    #===========================================================================
+    # test_turno_vacio
+    #===========================================================================
+    def test_turno_vacio(self):
+        """
+        Verifica que pasa si se quiere reservar turnos con una lista de turnos 
+        vacia.
+        Debe fallar silenciosamente.
+        """
+        # obtengo el afiliado
+        afiliado = Afiliado.objects.all().first()
+        # creo una lista de turnos vacia
+        lista_turnos = []
+        # creo la reserva
+        reserva = self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+        # verifico que crear_reserva me devuelva un objeto nulo sin lanzar 
+        # excepciones
         self.assertIsNone(reserva)
-    def testSinTelefono(self):
-        """Verifica que pasa si se quiere reservar un turno sin telefono de contacto Debe lanzar una excepcion"""
-        afiliado_id = 1
-        listaTurnos = [1]
-        with self.assertRaises(Exception):
-            b.reservarTurnos(afiliado_id, None, listaTurnos)
-    def testTurnoReservado(self):
-        """Verifica que pasa si se quiere reservar un turno que esta reservado"""
-        afiliado_id = 1
-        listaTurnos = [2, 3]
-        b.reservarTurnos(afiliado_id, '41234345', [3])
+        
+    #===========================================================================
+    # test_sin_telefono
+    #===========================================================================
+    def test_sin_telefono(self):
+        """
+        Verifica que pasa si se quiere reservar un turno sin telefono de 
+        contacto.
+        Debe lanzar un error ValueError
+        """
+        # obtengo el afiliado
+        afiliado = Afiliado.objects.all().first()
+        # creo una lista de turnos con todos los turnos disponibles
+        lista_turnos = Turno.objects.filter(estado=Turno.DISPONIBLE)
+        # espero la excepcion por enviar un objeto nulo
+        with self.assertRaises(ValueError):
+            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+        # espero la excepcion por enviar una cadena vacia
+        with self.assertRaises(ValueError):
+            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+            
+    #===========================================================================
+    # test_turno_reservado
+    #===========================================================================
+    def test_turno_reservado(self):
+        """
+        Verifica que pasa si se quiere reservar un turno que esta reservado.
+        """
+        # obtengo el afiliado
+        afiliado = Afiliado.objects.all().first()
+        # creo una lista de turnos con un solo turno a reservar
+        lista_turnos = [Turno.objects.filter(estado=Turno.DISPONIBLE).first()]
+        # creo la reserva
+        self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+        # agrego a la lista de turnos, mas turnos sin reservar
+        lista_turnos = (list(Turno.objects.filter(estado=Turno.DISPONIBLE)) + 
+                        lista_turnos) 
+        # espero la excepcion de turno reservado
         with self.assertRaises(TurnoReservadoException):
-            b.reservarTurnos(afiliado_id, '41234345', listaTurnos)
-        turno = Turno.objects.get(id=2)
-        self.assertEqual(turno.estado, Turno.DISPONIBLE)
-    def testPresentismo(self):
-        """Verifica el correcto funcionamiento del algoritmo de presentismo, si el 
-        afiliado esta en regla"""
+            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+        # verifico que los turnos sigan en estado disponible (la accion de
+        # reservar debe ser transaccional)
+        for turno in lista_turnos[:-1]:
+            self.assertEqual(turno.estado, Turno.DISPONIBLE)
+
+    #===========================================================================
+    # test_fatiga
+    #===========================================================================
+    def test_fatiga(self):
+        """
+        Reserva una alta cantidad de turnos para verificar como se comporta el 
+        algoritmo de reserva.
+        Debe reservar los turnos en un tiempo razonable a la cantidad de turnos 
+        a reservar.
+        """
+        # defino la cantidad de turnos a reservar
+        CANTIDAD = 100
+        # obtengo el afiliado
+        afiliado = Afiliado.objects.all().first()
+        # defino la lista de turnos
+        lista_turnos = []
+        # creo turnos y los agrego a la lista
+        for i in range(CANTIDAD):
+            turno_manager = TurnoManager()
+            turno = turno_manager.crear_turno(fecha=timezone.now(),
+                                              ee=(EspecialistaEspecialidad
+                                                    .objects.all().first()))
+            lista_turnos.append(turno)
+            i  # para que no aparezca warning de variable no usada
+        # creo la reserva
+        self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+            
+    #===========================================================================
+    # test_get_turnos_reservados
+    #===========================================================================
+    def test_get_turnos_reservados(self):
+        """
+        Verifica que se obtenga la lista de turnos reservados correctamente.
+        Debe devolver una lista de diccionarios con los turnos reservados.
+        """
+        # creo una lista de afiliados con reserva
+        afiliados_con_reserva = (Afiliado.objects.filter(id__in=
+                      Reserva.objects.all().values_list('afiliado', flat=True)))
+        # verifico que la lista no este vacia
+        self.assertIsNotNone(afiliados_con_reserva)
+        # obtengo los turnos reservados de un afiliado con reservas
+        reservados = (self.manager.
+                      get_turnos_reservados(afiliados_con_reserva.first()))
+        # verifico que la lista de turnos reservados no este vacia
+        self.assertIsNotNone(reservados)
+        # recorro las tuplas devuelta para ver si los datos que contienen
+        # son correctos
+        for reservado in reservados:
+            # obtengo la linea de reserva
+            linea = LineaDeReserva.objects.get(id=reservado['id'])
+            # verifico que la linea de reserva tenga el estado de reservada
+            self.assertEquals(linea.estado, Turno.RESERVADO)
+            # verifico que el especialista sea correcto
+            self.assertEquals(linea.turno.ee.especialista.full_name(),
+                              reservado['especialista'])
+            # verifico que la especialidad sea correcta
+            self.assertEquals(linea.turno.ee.especialidad.descripcion,
+                              reservado['especialidad'])
+            # verifico que el consultorio sea correcto
+            self.assertEquals(linea.turno.consultorio.id,
+                              int(reservado['consultorio']))
+            # verifico que la fecha de reserva sea correcta
+            self.assertEquals(linea.reserva.fecha,
+                              reservado['fecha_reserva'])
+            # verifico que la fecha del turno sea correcta
+            self.assertEquals(linea.turno.fecha,
+                              reservado['fecha_turno'])
+   
+    #===========================================================================
+    # test_get_turnos_reservados_sin_reservas
+    #===========================================================================
+    def test_get_turnos_reservados_sin_reservas(self):
+        """
+        Verifica que pasa si se quiere obtener una lista de reservas de un 
+        afiliado que no realizo nunca una reserva.
+        Debe devolver una lista vacia
+        """
+        # creo una lista de afiliados sin reserva
+        afiliados_sin_reserva = Afiliado.objects.exclude(id__in=
+                      Reserva.objects.all().values_list('afiliado', flat=True))
+        # verifico que las listas reservadas no esten vacias
+        self.assertIsNotNone(afiliados_sin_reserva)
+        # recorro lista de afiliados sin reserva
+        for afiliado in afiliados_sin_reserva:
+            # obtengo los turnos reservados del afiliado sin reservas
+            reservados_vacia = self.manager.get_turnos_reservados(afiliado)
+            # verifico que la lista de reservas este vacia para un afiliado sin
+            # reservas
+            self.assertFalse(reservados_vacia)
+            
+    #===========================================================================
+    # test_presentismo
+    # TODO: test_presentismo - Pasarlo a AfiliadoManager
+    #===========================================================================
+    def test_presentismo(self):
+        """
+        Verifica el correcto funcionamiento del algoritmo de presentismo, si el 
+        afiliado esta en regla.
+        """
         afiliado_id = 1
         p = b.presentismoOK(afiliado_id)
         self.assertTrue(p)
-    def testCrearSobreturno(self):
-        """Verifica que pasa si no hay mas turnos y se deben crear sobreturnos.
-        Se reservan todos los turnos de un dia, luego se consultan los turnos disponibles
-        y debe devolver los turnos con estado SOBRETURNO"""
-        afiliado_id = 1
-        listaTurnos = range(1000, 1100)
-        fecha = timezone.now()
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        for i in listaTurnos:
-            Turno.objects.create(fecha=fecha,
-                                 estado=Turno.DISPONIBLE,
-                                 sobreturno=False,
-                                 consultorio=Consultorio.objects.get(id=1),
-                                 ee=ee,
-                                 id=i,)
-        # Reservamos todos los turnos
-        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
-        # Consultamos turnos disponibles
-        disponibles = b.getTurnosDisponibles(ee.id, fecha)
-        self.assertGreater(len(disponibles), 0)
-        for turno in disponibles:
-            self.assertTrue(turno.sobreturno)
-    def testSinSobreturno(self):
-        """Verifica que pasa si no hay mas sobreturnos para un dia. Se reservan
-        todos los turnos de un dia, luego se crean sobreturnos y tambien se reservan.
-        Se consulta una vez mas por los turnos disponibles y debe devolver una lista vacia"""
-        afiliado_id = 1
-        listaTurnos = range(1000, 1100)
-        fecha = timezone.now()
-        ee = EspecialistaEspecialidad.objects.get(id=1)
-        for i in listaTurnos:
-            Turno.objects.create(fecha=fecha,
-                                 estado=Turno.DISPONIBLE,
-                                 sobreturno=False,
-                                 consultorio=Consultorio.objects.get(id=1),
-                                 ee=ee,
-                                 id=i,)
-        # Reservamos todos los turnos
-        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
-        # Consultamos turnos disponibles, debe devolver sobreturnos
-        disponibles = b.getTurnosDisponibles(ee.id, fecha)
-        # Reservamos los sobreturnos
-        listaTurnos = [turno.id for turno in disponibles]
-        logger.debug("listaTurnos %s" % listaTurnos)
-        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
-        # Consultamos los turnos disponibles de nuevo
-        disponibles = b.getTurnosDisponibles(ee.id, fecha)
-        self.assertEqual(len(disponibles), 0)
-    def testPresentismoNotOK(self):
-        """Verifica el funcionamiento del algoritmo de presentismo con un afiliado que falta mucho.
-        Debe devolver falso, indicando que el afiliado falta mucho a los turnos"""
+    
+    #===========================================================================
+    # test_presentismo_no_ok
+    # TODO: test_presentismo_no_ok - Pasarlo a AfiliadoManager
+    #===========================================================================
+    def test_presentismo_no_ok(self):
+        """
+        Verifica el funcionamiento del algoritmo de presentismo con un afiliado 
+        que falta mucho. Debe devolver falso, indicando que el afiliado falta 
+        mucho a los turnos.
+        """
         cantidad = b.AUSENTES_CANTIDAD
         afiliado_id = 1
         # Creando turnos
@@ -177,10 +342,18 @@ class ReservarTurnoTest(TestCase):
         # Verificando presentismo
         p = b.presentismoOK(afiliado_id)
         self.assertFalse(p)
-    def testPresentismoExpirado(self):
-        """Verifica el funcionamiento del algoritmo de presentismo con faltas anteriores a las 
-        que el sistema debe tener en cuenta. Debe devolver verdadero, dado que el sistema no debe
-        tener en cuenta faltas anteriores"""
+        
+    #===========================================================================
+    # test_presentismo_expirado
+    # TODO: test_presentismo_expirado - Pasarlo a AfiliadoManager
+    #===========================================================================
+    def test_presentismo_expirado(self):
+        """
+        Verifica el funcionamiento del algoritmo de presentismo con faltas 
+        anteriores a las que el sistema debe tener en cuenta. Debe devolver 
+        verdadero, dado que el sistema no debe tener en cuenta faltas 
+        anteriores.
+        """
         cantidad = b.AUSENTES_CANTIDAD
         meses = b.AUSENTES_MESES
         afiliado_id = 1
@@ -205,51 +378,92 @@ class ReservarTurnoTest(TestCase):
         # Verificando presentismo
         p = b.presentismoOK(afiliado_id)
         self.assertTrue(p)
-    def testFatiga(self):
-        """Reserva una alta cantidad de turnos para verificar como se comporta el algoritmo de reserva.
-        Debe reservar los turnos en un tiempo razonable a la cantidad de turnos a reservar"""
+
+        
+    #===========================================================================
+    # test_crear_sobreturno
+    # TODO: test_crear_sobreturno - Pasarlo a TurnoManager
+    #===========================================================================
+    def test_crear_sobreturno(self):
+        """
+        Verifica que pasa si no hay mas turnos y se deben crear sobreturnos.
+        Se reservan todos los turnos de un dia, luego se consultan los turnos 
+        disponibles y debe devolver los turnos con estado SOBRETURNO.
+        """
         afiliado_id = 1
         listaTurnos = range(1000, 1100)
+        fecha = timezone.now()
+        ee = EspecialistaEspecialidad.objects.get(id=1)
         for i in listaTurnos:
-            Turno.objects.create(fecha=timezone.now(),
+            Turno.objects.create(fecha=fecha,
                                  estado=Turno.DISPONIBLE,
                                  sobreturno=False,
                                  consultorio=Consultorio.objects.get(id=1),
-                                 ee=EspecialistaEspecialidad.objects.get(id=1),
+                                 ee=ee,
                                  id=i,)
-        reserva = b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
-        lineas = LineaDeReserva.objects.filter(reserva=reserva)
-        self.assertIsNotNone(reserva)
-        self.assertEqual(reserva.afiliado.id, afiliado_id)
-        self.assertEqual(lineas.count(), len(listaTurnos))
-        for turno_id in listaTurnos:
-            turno = Turno.objects.get(id=turno_id)
-            historial = HistorialTurno.objects.latest('id')
-            self.assertEqual(turno.estado, Turno.RESERVADO)
-            self.assertIsNotNone(historial)
-            self.assertEqual(historial.estadoNuevo, turno.estado)
-        for lr in lineas:
-            self.assertEqual(lr.reserva.id, reserva.id)
-            self.assertIn(lr.turno.id, listaTurnos)
-            self.assertEqual(lr.estado, Turno.RESERVADO)
-    def testGetTurnosReservados(self):
-        """Verifica que se obtenga la lista de turnos reservados correctamente.
-        Debe devolver una lista de diccionarios con los turnos reservados"""
-        afiliado_id = 1
-        afiliado_falla = 2
-        listaTurnos = [2, 3, 4]
+        # Reservamos todos los turnos
         b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
-        reservados = b.get_turnos_reservados(afiliado_id)
-        reservados_falla = b.get_turnos_reservados(afiliado_falla)
-        self.assertIsNotNone(reservados)
-        self.assertFalse(reservados_falla)
-        for reservado in reservados:
-            linea = LineaDeReserva.objects.get(id=reservado['id'])
-            self.assertEquals(linea.estado, Turno.RESERVADO)
-            self.assertEquals(linea.turno.ee.especialista.full_name(), reservado['especialista'])
-            self.assertEquals(linea.turno.ee.especialidad.descripcion, reservado['especialidad'])
-            self.assertEquals(linea.turno.consultorio.id, int(reservado['consultorio']))
-            self.assertEquals(linea.reserva.fecha, reservado['fecha_reserva'])
+        # Consultamos turnos disponibles
+        disponibles = b.getTurnosDisponibles(ee.id, fecha)
+        self.assertGreater(len(disponibles), 0)
+        for turno in disponibles:
+            self.assertTrue(turno.sobreturno)
+            
+    #===========================================================================
+    # test_sin_sobreturno
+    # TODO: test_sin_sobreturno - Pasarlo a TurnoManager
+    #===========================================================================
+    def test_sin_sobreturno(self):
+        """
+        Verifica que pasa si no hay mas sobreturnos para un dia. Se reservan
+        todos los turnos de un dia, luego se crean sobreturnos y tambien se 
+        reservan. Se consulta una vez mas por los turnos disponibles y debe 
+        devolver una lista vacia.
+        """
+        afiliado_id = 1
+        listaTurnos = range(1000, 1100)
+        fecha = timezone.now()
+        ee = EspecialistaEspecialidad.objects.get(id=1)
+        for i in listaTurnos:
+            Turno.objects.create(fecha=fecha,
+                                 estado=Turno.DISPONIBLE,
+                                 sobreturno=False,
+                                 consultorio=Consultorio.objects.get(id=1),
+                                 ee=ee,
+                                 id=i,)
+        # Reservamos todos los turnos
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        # Consultamos turnos disponibles, debe devolver sobreturnos
+        disponibles = b.getTurnosDisponibles(ee.id, fecha)
+        # Reservamos los sobreturnos
+        listaTurnos = [turno.id for turno in disponibles]
+        logger.debug("listaTurnos %s" % listaTurnos)
+        b.reservarTurnos(afiliado_id, '12345678', listaTurnos)
+        # Consultamos los turnos disponibles de nuevo
+        disponibles = b.getTurnosDisponibles(ee.id, fecha)
+        self.assertEqual(len(disponibles), 0)
+    
+        
+    #===========================================================================
+    # testGetDiasTurnos
+    # TODO: pasarlo a TurnoManager
+    #===========================================================================
+    def testGetDiasTurnos(self):
+        """
+        Verifica el funcionamiento del algoritmo para la obtencion de turnos 
+        disponibles.
+        Debe obtener una lista con todos los turnos disponibles.
+        """
+        # Creando turno
+        Turno.objects.create(fecha=timezone.now() + timedelta(days=1),
+                             estado=Turno.DISPONIBLE,
+                             sobreturno=False,
+                             consultorio=Consultorio.objects.get(id=1),
+                             ee=EspecialistaEspecialidad.objects.get(id=1),
+                             )
+        test = b.getDiaTurnos(1)
+        self.assertGreaterEqual(len(test), 1)
+        
 class ConfirmarReservaTest:
     def testConfirmarReserva(self):
         """Verifica que se confirmen las reservas correctamente"""
@@ -1006,16 +1220,13 @@ class ServiceTestSuite(TestCase):
                             EspecialistaEspecialidad.objects.get(id=1))
         # Verificamos que se haya creado
         self.assertTrue(Turno.objects.filter(id=turno1.id).exists())    
-        
         # Creamos un segundo turno para ver si lo deshace
         turno2 = self.service.crear_turno(timezone.now(),
                             EspecialistaEspecialidad.objects.get(id=1))
         # Verificamos que se haya creado
         self.assertTrue(Turno.objects.filter(id=turno2.id).exists())
-        
         # Deshacemos la ultima accion 
         self.service.deshacer()
-        
         # Verificamos que se haya cumplido
         self.assertTrue(Turno.objects.filter(id=turno1.id).exists())
         self.assertFalse(Turno.objects.filter(id=turno2.id).exists())
@@ -1297,25 +1508,21 @@ class CommandTestSuite(TestCase):
         command = OrdenCrearTurnos(receiver)
         # verifico cuantos turnos hay antes de ejecutar la command
         antes = Turno.objects.all().count()
-       
         # espero que lanze la excepcion
         with self.assertRaises(ValueError):
             # ejecuto la command
             command.execute()
-            
         # agrego solo fecha de inicio
         command.fecha_inicio = timezone.now()
         with self.assertRaises(ValueError):
             # ejecuto la command
             command.execute()
-            
         # agrego solo fecha de fin
         command.fecha_inicio = None
         command.fecha_fin = timezone.now()
         with self.assertRaises(ValueError):
             # ejecuto la command
             command.execute()
-        
         # verifico cuantos turnos hay despues de ejecutar la command
         despues = Turno.objects.all().count()
         # verifico que despues haya la misma cantidad que antes
