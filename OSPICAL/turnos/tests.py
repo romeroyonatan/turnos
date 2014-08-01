@@ -1,5 +1,6 @@
 # coding=utf-8
 from datetime import timedelta
+import exceptions
 import logging
 
 from dateutil.relativedelta import relativedelta
@@ -7,16 +8,15 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 
-from bussiness import Bussiness, TurnoNotExistsException, \
-    AfiliadoNotExistsException, TurnoReservadoException, ConfirmarReservaException, \
-    CancelarReservaException, CancelarTurnoException
+from bussiness import Bussiness
 from models import Turno, Consultorio, EspecialistaEspecialidad, LineaDeReserva, \
     Especialidad, Especialista, Disponibilidad, Afiliado, Reserva
 from negocio.commands import OrdenCrearTurno, OrdenCrearTurnos
+from negocio.exceptions import TurnoNotExistsException, \
+    AfiliadoNotExistsException, TurnoReservadoException, ConfirmarReservaException, \
+    CancelarReservaException, CancelarTurnoException
 from negocio.managers import TurnoManager, ReservaManager
 from negocio.service import ReservaTurnosService
-from turnos.bussiness import *
-from turnos.models import *
 from turnos.validators import PasswordValidator
 
 
@@ -179,10 +179,10 @@ class ReservasTestSuite(TestCase):
         lista_turnos = Turno.objects.filter(estado=Turno.DISPONIBLE)
         # espero la excepcion por enviar un objeto nulo
         with self.assertRaises(ValueError):
-            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+            self.manager.crear_reserva(afiliado, None, lista_turnos)
         # espero la excepcion por enviar una cadena vacia
         with self.assertRaises(ValueError):
-            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+            self.manager.crear_reserva(afiliado, '', lista_turnos)
             
     #===========================================================================
     # test_turno_reservado
@@ -298,6 +298,7 @@ class ReservasTestSuite(TestCase):
             # reservas
             self.assertFalse(reservados_vacia)
             
+#------------------------------------------------------------------------------ 
     #===========================================================================
     # test_presentismo
     # TODO: test_presentismo - Pasarlo a AfiliadoManager

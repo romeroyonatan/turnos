@@ -9,9 +9,12 @@ import logging
 from django.db import transaction
 from django.utils import timezone
 # from turnos.models import Turno, Disponibilidad
-from turnos.models import Turno, Disponibilidad, Settings
+from turnos.models import Turno, Disponibilidad, Settings, Reserva, \
+LineaDeReserva, Afiliado
 from datetime import datetime, timedelta
+import exceptions
 
+logger = logging.getLogger(__name__)
 #===============================================================================
 # TurnoManager
 #===============================================================================
@@ -189,3 +192,123 @@ class TurnoManager():
             # especialista)
             desde += timedelta(minutes=disponibilidad.ee.frecuencia_turnos)
         return creados
+    # TODO:testGetDiasTurnos
+
+#===============================================================================
+# ReservaManager
+#===============================================================================
+class ReservaManager:
+    '''
+    Permite administrar las operaciones sobre las reservas de los turnos tales
+    como crear una reserva, cancelarla, confirmarla o modificarla. 
+    Implementa la logica de negocio sobre las reservas
+    '''
+    #===========================================================================
+    # crear_reserva
+    #===========================================================================
+    @transaction.atomic()
+    def crear_reserva(self, afiliado, telefono, turnos):
+        '''
+        Crea una reserva de turnos para un afiliado.
+        
+        Parametros
+        ------------------
+        @param afiliado: Instancia de la clase models.Afiliado al cual se le
+                         asignara la reserva
+        @param telefono: Telefono de contacto del afiliado para comunicarse 
+                         en caso de algun problema con la reserva
+        @param turnos: Lista o tupla de models.Turno a reservar
+        
+        @type afiliado: models.Afiliado
+        @type telefono: __builtin__.string
+        
+        Retorna
+        -----------
+        @return: Objeto reserva con los datos de la misma.
+
+        Excepciones
+        -------------------
+        TurnoNotExistsException -- En caso que algun turno a reserva no exista
+        AfiliadoNotExistsException -- En caso que el afiliado no exista
+        ValueError -- En caso que se pase algun parametro como objeto nulo
+        TurnoReservadoException -- En caso que algun turno a reservar
+                                   ya este reservado
+        '''
+        self.__crear_reserva_validate(afiliado, telefono, turnos)
+        if turnos:
+            reserva = Reserva.objects.create(afiliado=afiliado,
+                                             telefono=telefono)
+            logger.debug("Reserva id:%s" % reserva.id)
+            for turno in turnos:
+                turno.estado = Turno.RESERVADO
+                turno.save()
+                lr = LineaDeReserva.objects.create(turno=turno,
+                                                   reserva=reserva,
+                                                   estado=Turno.RESERVADO)
+                logger.debug("Linea de reserva id:%s" % lr.id)
+            return reserva
+        else:
+            logger.error("La lista de turnos a reservar esta vacia")
+    
+    #===========================================================================
+    # __crear_reserva_validate
+    #===========================================================================
+    def __crear_reserva_validate(self, afiliado, telefono, turnos):
+        '''
+        Valida los parametros para crear una reserva
+        
+        Parametros
+        ------------------
+        @param afiliado: Instancia de la clase models.Afiliado al cual se le
+                         asignara la reserva
+        @param telefono: Telefono de contacto del afiliado para comunicarse 
+                         en caso de algun problema con la reserva
+        @param turnos: Lista o tupla de models.Turno a reservar
+        
+        Retorna
+        -----------
+        @return: Nada si todo esta bien, en caso contrario devuelve una
+                excepcion
+
+        Excepciones
+        -------------------
+        TurnoNotExistsException -- En caso que algun turno a reserva no exista
+        AfiliadoNotExistsException -- En caso que el afiliado no exista
+        ValueError -- En caso que se pase algun parametro como objeto nulo
+        TurnoReservadoException -- En caso que algun turno a reservar
+                                   ya este reservado
+        '''
+        # valido que ningun parametro sea nulo
+        if not afiliado or not telefono or turnos is None:
+            raise ValueError("Invalid parameters")
+        # valido que el afiliado exista
+        if not Afiliado.objects.filter(id=afiliado.id).exists():
+            raise exceptions.AfiliadoNotExistsException("Afiliado inexistente")
+        # valido si los turnos a reservar existen
+        for turno in turnos:
+            if not Turno.objects.filter(id=turno.id).exists():
+                raise exceptions.TurnoNotExistsException("Turno inexistente")
+            if not (Turno.objects.filter(id=turno.id, estado=Turno.DISPONIBLE)
+                    .exists()):
+                raise exceptions.TurnoReservadoException("Turno reservado")
+    
+    def get_turnos_reservados(self, afiliado):
+        '''
+        Obtiene una tupla de diccionarios con los turnos reservados del afiliado
+        
+        Parametros
+        ------------------
+        @param afiliado: Instancia de la clase models.Afiliado al cual se le
+                         desea consultar sus reservas
+        
+        Retorna
+        -----------
+        @return: Tupla de diccionarios con los turnos reservados del afiliado o
+                 None si el afiliado no tiene ninguna reserva
+                 
+                 Cada elemento de la tupla es un diccionario con estas claves:
+                 especialista, especialidad, fecha_reserva, fecha_turno y 
+                 consultorio 
+        '''
+        pass
+    
