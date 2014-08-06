@@ -12,7 +12,7 @@ from django.utils import timezone
 from bussiness import Bussiness
 from models import Turno, Consultorio, EspecialistaEspecialidad, LineaDeReserva, \
     Especialidad, Especialista, Disponibilidad, Afiliado, Reserva
-from negocio.commands import OrdenCrearTurno, OrdenCrearTurnos
+from negocio.commands import OrdenCrearTurno, OrdenCrearTurnos, OrdenReservar
 from negocio.excepciones import TurnoNotExistsException, \
     AfiliadoNotExistsException, TurnoReservadoException, ConfirmarReservaException, \
     CancelarReservaException, CancelarTurnoException
@@ -44,7 +44,7 @@ class ReservasTestSuite(TestCase):
         # obtengo el afiliado
         afiliado = Afiliado.objects.all().first()
         # creo una lista de turnos con un solo turno (estado=disponible)
-        lista_turnos = [Turno.objects.filter(estado=Turno.DISPONIBLE).first()]
+        lista_turnos = Turno.objects.filter(estado=Turno.DISPONIBLE).first(),
         # creo la reserva con un numero de telefono cualquiera
         reserva = self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
         # verifico que el objeto reserva se haya creado correctamente
@@ -145,7 +145,25 @@ class ReservasTestSuite(TestCase):
         # reservar debe ser transaccional)
         for turno in lista_turnos:
             self.assertEqual(turno.estado, Turno.DISPONIBLE)
-        
+    
+    #===========================================================================
+    # test_sin_afiliado
+    #===========================================================================
+    def test_sin_afiliado(self):
+        """
+        Verifica que pasa si el afiliado no existe. 
+        Debe lanzar una excepcion.
+        """
+        # creo una lista de turnos con todos los turnos disponibles
+        lista_turnos = Turno.objects.filter(estado=Turno.DISPONIBLE)
+        # espero que lanze la excepcion
+        with self.assertRaises(ValueError):
+            self.manager.crear_reserva(None, '12345678', lista_turnos)
+        # verifico que los turnos sigan en estado disponible (la accion de
+        # reservar debe ser transaccional)
+        for turno in lista_turnos:
+            self.assertEqual(turno.estado, Turno.DISPONIBLE)
+    
     #===========================================================================
     # test_lista_turnos_vacia
     #===========================================================================
@@ -157,12 +175,10 @@ class ReservasTestSuite(TestCase):
         """
         # obtengo el afiliado
         afiliado = Afiliado.objects.all().first()
-        # creo una lista de turnos vacia
-        lista_turnos = []
         # espero la excepcion por enviar un objeto vacio
         with self.assertRaises(ValueError):
             # creo la reserva
-            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
+            self.manager.crear_reserva(afiliado, '12345678', [])
         # espero la excepcion por enviar un objeto nulo
         with self.assertRaises(ValueError):
             # creo la reserva
@@ -223,7 +239,7 @@ class ReservasTestSuite(TestCase):
         a reservar.
         """
         # defino la cantidad de turnos a reservar
-        CANTIDAD = 250
+        CANTIDAD = 100
         # obtengo el afiliado
         afiliado = Afiliado.objects.all().first()
         # defino la lista de turnos
@@ -1178,7 +1194,7 @@ class ConsultaReservaTest(TestCase):
         self.assertEqual(len(lreservas), 1)
 
 #===============================================================================
-# Test utilizando servicios y comandos
+# Test utilizando servicios
 #===============================================================================
 class ServiceTestSuite(TestCase):
     # defino las clases que estaran en la base de datos de prueba
@@ -1221,6 +1237,8 @@ class ServiceTestSuite(TestCase):
         Crea varios turnos en la aplicacion y deshace la ultima operacion.
         Solo debe deshacer el ultimo turno creado
         ''' 
+        # Deshacemos la nada 
+        self.service.deshacer()
         # Creamos el primer turno
         turno1 = self.service.crear_turno(timezone.now(),
                             EspecialistaEspecialidad.objects.get(id=1))
@@ -1352,7 +1370,23 @@ class ServiceTestSuite(TestCase):
             diff = turnos[i].fecha - turnos[i + 1].fecha
             minutos = (diff.seconds % 3600) // 60
             self.assertEqual(minutos, FRECUENCIA)
-
+    #===========================================================================
+    # test_crear_reserva
+    #===========================================================================
+    def test_crear_reserva(self):
+        '''
+        Verifica que se cree la reserva correctamente
+        '''
+        afiliado = Afiliado.objects.all().first()
+        turnos = Turno.objects.filter(estado=Turno.DISPONIBLE)
+        reserva = self.service.crear_reserva(afiliado, '12345678', turnos)
+        reserva = Reserva.objects.get(id=reserva.id)
+        self.assertTrue(reserva)
+        self.assertEqual(reserva.afiliado, afiliado)
+        for lr in LineaDeReserva.objects.filter(reserva=reserva):
+            self.assertIn(lr.turno, turnos)
+            self.assertEqual(lr.turno.estado, Turno.RESERVADO)
+        
 #===============================================================================
 # CommandTestSuite
 #===============================================================================
@@ -1394,9 +1428,9 @@ class CommandTestSuite(TestCase):
         self.assertEquals(despues, antes + 1)
     
     #===========================================================================
-    # test_crear_turno_sin_parametros
+    # test_crear_turno_validation
     #===========================================================================
-    def test_crear_turno_sin_parametros(self):
+    def test_crear_turno_validation(self):
         '''
         Verifica que la validacion de la command de crear turno funcione 
         correctamente. Debe lanzar una error ValueError
@@ -1442,6 +1476,8 @@ class CommandTestSuite(TestCase):
         self.assertEquals(despues, antes - 1)
         # verifico que el turno creado no exista mas
         self.assertFalse(Turno.objects.filter(id=turno.id).exists())
+        # verifico que pasa si lo llamo de nuevo
+        command.undo()
         
     #===========================================================================
     # test_crear_turnos
@@ -1500,11 +1536,13 @@ class CommandTestSuite(TestCase):
         # verifico que los turnos creados no existan en la base de datos
         for turno in creados:
             self.assertFalse(Turno.objects.filter(id=turno.id).exists())
+        # verifico que pasa si lo llamo de nuevo
+        command.undo()
             
     #===========================================================================
-    # test_crear_turnos_sin_parametros
+    # test_crear_turnos_validation
     #===========================================================================
-    def test_crear_turnos_sin_parametros(self):
+    def test_crear_turnos_validation(self):
         '''
         Verifica que la validacion de la command de crear turnos funcione 
         correctamente. Debe lanzar una error ValueError
@@ -1533,3 +1571,106 @@ class CommandTestSuite(TestCase):
         despues = Turno.objects.all().count()
         # verifico que despues haya la misma cantidad que antes
         self.assertEquals(despues, antes)
+        
+    #===========================================================================
+    # test_crear_reserva
+    #===========================================================================
+    def test_crear_reserva(self):
+        '''
+        Verifica que la orden de crear reserva funcione correctamente
+        '''
+        # creo el command
+        receiver = ReservaManager()
+        command = OrdenReservar(receiver=receiver)
+        # seteo los parametros para reservar turnos turno
+        command.afiliado = Afiliado.objects.all().first()
+        command.telefono = '12345678'
+        # selecciono todos los turnos disponibles
+        command.turnos = Turno.objects.filter(estado=Turno.DISPONIBLE)
+        # cuento la cantidad de reservas antes de ejecutar el command
+        antes = Reserva.objects.all().count()
+        # ejecuto la command
+        command.execute()
+        # verifico cuantos reservas hay despues de ejecutar el command
+        despues = Reserva.objects.all().count()
+        # obtengo la reserva creada
+        reserva = command.reserva
+        # verifico que haya una reserva mas
+        self.assertEquals(despues, antes + 1)
+        # verifico que los turnos esten reservados
+        for lr in LineaDeReserva.objects.filter(reserva=reserva):
+            self.assertEquals(lr.turno.estado, Turno.RESERVADO)
+            self.assertEquals(lr.estado, Turno.RESERVADO)
+    
+    #===========================================================================
+    # test_crear_reserva_undo
+    #===========================================================================
+    def test_crear_reserva_undo(self):
+        '''
+        Verifica que la orden de crear reserva se pueda deshacer
+        '''
+        # creo el command
+        receiver = ReservaManager()
+        command = OrdenReservar(receiver=receiver)
+        # seteo los parametros para reservar turnos turno
+        command.afiliado = Afiliado.objects.all().first()
+        command.telefono = '12345678'
+        # selecciono todos los turnos disponibles
+        turnos = Turno.objects.filter(estado=Turno.DISPONIBLE)
+        command.turnos = turnos
+        # ejecuto la command
+        command.execute()
+        # obtengo la reserva creada
+        reserva = command.reserva
+        # deshago el comando
+        command.undo()
+        # verifico que la reserva creada no exista
+        self.assertFalse(Reserva.objects.filter(id=reserva.id).exists())
+        # verifico que los turnos esten disponibles
+        for turno in turnos:
+            # refresco el objeto desde la base de datos
+            turno = Turno.objects.get(id=turno.id)
+            self.assertEquals(turno.estado, Turno.DISPONIBLE)
+        # verifico que pasa si lo llamo de nuevo
+        command.undo()
+    
+    #===========================================================================
+    # test_crear_reserva_validation
+    #===========================================================================
+    def test_crear_reserva_validation(self):
+        '''
+        Verifica que la validacion del la orden de crear reserva funcione
+        correctamente
+        '''
+        # creo la command
+        receiver = TurnoManager()
+        command = OrdenReservar(receiver)
+        # verifico cuantas reservas hay antes de ejecutar el command
+        antes = Turno.objects.all().count()
+        # espero que lanze la excepcion
+        with self.assertRaises(ValueError):
+            # ejecuto la command
+            command.execute()
+        # agrego solo afiliado
+        command.afiliado = Afiliado.objects.all().first()
+        # espero que lanze la excepcion
+        with self.assertRaises(ValueError):
+            command.execute()
+        # agrego solo telefono
+        command.afiliado = None
+        command.telefono = '12345678'
+        # espero que lanze la excepcion
+        with self.assertRaises(ValueError):
+            command.execute()
+        # agrego solo turnos
+        command.afiliado = None
+        command.telefono = None
+        command.turnos = Turno.objects.all()
+        # espero que lanze la excepcion
+        with self.assertRaises(ValueError):
+            command.execute()
+        # verifico cuantas reservas hay despues de ejecutar el command
+        despues = Turno.objects.all().count()
+        # verifico que despues haya la misma cantidad que antes
+        self.assertEquals(despues, antes)
+        
