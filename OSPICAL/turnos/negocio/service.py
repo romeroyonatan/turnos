@@ -28,6 +28,7 @@ class ReservaTurnosService(object):
         Constructor
         '''
         self.turno_manager = managers.TurnoManager()
+        self.reserva_manager = managers.ReservaManager()
         self.DIAS = int(self.__getSetting('cantidad_dias_crear_turnos', 7))
         
     #===========================================================================
@@ -120,4 +121,47 @@ class ReservaTurnosService(object):
     #===========================================================================
     def deshacer(self):
         '''Deshace la accion del ultimo comando ejecutado'''
-        self.last_command.undo()
+        # verifico que haya un comando en el historial
+        if 'last_command' in self.__dict__:
+            # deshago el ultimo comando
+            self.last_command.undo()
+            
+    #===========================================================================
+    # crear_reserva
+    #===========================================================================
+    def crear_reserva(self, afiliado, telefono, turnos):
+        '''
+        Crea una reserva de turnos para un afiliado.
+        
+        Parametros
+        ------------------
+        @param afiliado: Instancia de la clase models.Afiliado al cual se le
+                         asignara la reserva
+        @param telefono: Telefono de contacto del afiliado para comunicarse 
+                         en caso de algun problema con la reserva
+        @param turnos: Lista o tupla de models.Turno a reservar
+        
+        @type afiliado: models.Afiliado
+        @type telefono: __builtin__.string
+        
+        Retorna
+        -----------
+        @return: Objeto reserva con los datos de la misma.
+
+        Excepciones
+        -------------------
+        TurnoNotExistsException -- En caso que algun turno a reserva no exista
+        AfiliadoNotExistsException -- En caso que el afiliado no exista
+        ValueError -- En caso que se pase algun parametro como objeto nulo
+        TurnoReservadoException -- En caso que algun turno a reservar
+                                   ya este reservado
+        '''
+        # creamos la orden
+        orden = commands.OrdenReservar(self.reserva_manager,
+                                            afiliado,
+                                            telefono,
+                                            turnos)
+        # ejecutamos la orden
+        self.__ejecutar(orden)
+        # devolvemos la reserva
+        return orden.reserva

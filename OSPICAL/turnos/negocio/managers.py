@@ -246,6 +246,25 @@ class ReservaManager:
         return reserva
     
     #===========================================================================
+    # borrar_reserva
+    #===========================================================================
+    @transaction.atomic()
+    def borrar_reserva(self, reserva):
+        '''
+        Borra una reserva.
+        
+        Parametros
+        ------------------
+        @param reserva: Reserva a borrar
+        @type reserva: turnos.models.Reserva
+        '''
+        for linea_reserva in LineaDeReserva.objects.filter(reserva=reserva):
+            linea_reserva.turno.estado = Turno.DISPONIBLE
+            linea_reserva.turno.save()
+            linea_reserva.delete()
+        reserva.delete()
+    
+    #===========================================================================
     # __crear_reserva_validate
     #===========================================================================
     def __crear_reserva_validate(self, afiliado, telefono, turnos):

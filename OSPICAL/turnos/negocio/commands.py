@@ -32,7 +32,7 @@ class OrdenCrearTurno(Command):
     Atributos
     -----------------
     receiver -- Es el manejador que recibe la orden. Debe implementar el
-                metodo 'crear_turno'
+                metodo 'crear_turno' y 'borrar_turno'
     fecha -- Instancia de datetime en el que se creara el turno
     ee -- Especialista para el cual se creara el turno
     turno -- Instancia del turno creado despues de ejecutar el comando
@@ -66,18 +66,24 @@ class OrdenCrearTurno(Command):
         '''
         # verifico que la fecha y el ee esten seteados antes de ejecutar el
         # comando
-        if self.fecha is None or self.ee is None:
+        if self.fecha and self.ee:
+            # mando a crear el turno
+            self.turno = self.receiver.crear_turno(self.fecha, self.ee)
+        else:
+            # lanzo excepcion
             raise ValueError("You must define 'fecha' and 'ee' before \
                              execute this command")
-        # mando a crear el turno
-        self.turno = self.receiver.crear_turno(self.fecha, self.ee)
         return self.turno
     #===========================================================================
     # undo
     #===========================================================================
     def undo(self):
         'Deshace la creacion del turno'
-        self.receiver.borrar_turno(self.turno)
+        # valido que haya un turno creado
+        if 'turno' in self.__dict__ and self.turno:
+            # borro el turno
+            self.receiver.borrar_turno(self.turno)
+            del self.turno
 
 #===============================================================================
 # OrdenCrearTurnos
@@ -90,7 +96,7 @@ class OrdenCrearTurnos(Command):
     Atributos
     -----------------
     receiver -- Es el manejador que recibe la orden. Debe implementar el
-                metodo 'crear_turnos'
+                metodo 'crear_turnos' y 'borrar_turno'
     fecha_inicio -- Fecha en la que se empezara a crear turnos
     fecha_fin -- Fecha en la que se termina de crear turnos
     turnos_creados -- Lista de turnos creados despues de ejecutar el comando
@@ -125,13 +131,13 @@ class OrdenCrearTurnos(Command):
         fecha_fin
         '''
         # verifico que esten seteados la fecha de inicio y la fecha de fin
-        if self.fecha_inicio is None or self.fecha_fin is None:
+        if self.fecha_inicio and self.fecha_fin:
+            self.turnos_creados = self.receiver.crear_turnos(self.fecha_inicio,
+                                                             self.fecha_fin)
+        else:
             raise ValueError("You must define 'fecha_inicio' and 'fecha_fin' \
                               before execute this command")
-        
         # ordeno crear los turnos
-        self.turnos_creados = self.receiver.crear_turnos(self.fecha_inicio,
-                                                         self.fecha_fin)
         return self.turnos_creados
 
     #===========================================================================
@@ -139,5 +145,74 @@ class OrdenCrearTurnos(Command):
     #===========================================================================
     def undo(self):
         'Deshace la creacion de los turnos'
-        for turno in self.turnos_creados:
-            self.receiver.borrar_turno(turno)
+        # valido que haya turnos creados
+        if 'turnos_creados' in self.__dict__ and self.turnos_creados:
+            # borro los turnos
+            for turno in self.turnos_creados:
+                self.receiver.borrar_turno(turno)
+            del self.turnos_creados
+
+#===============================================================================
+# OrdenReservar
+#===============================================================================
+class OrdenReservar(Command):
+    '''
+    Representa una orden para reservar turnos.
+    
+    Atributos
+    -----------------
+    receiver -- Es el manejador que recibe la orden. Debe implementar el
+                metodo 'crear_reserva' y 'borrar_reserva'
+    afiliado -- Instancia de models.Afiliado quien reserva los turnos
+    telefono -- Telefono de contacto del afiliado
+    turnos -- Iterable de turnos (models.Turno) a reservar (lista o tupla)
+    '''
+    #===========================================================================
+    # __init__
+    #===========================================================================
+    def __init__(self, receiver, afiliado=None, telefono=None, turnos=None):
+        '''
+        Contructor.
+        '''
+        self.receiver = receiver
+        self.afiliado = afiliado
+        self.telefono = telefono
+        self.turnos = turnos
+    
+    #===========================================================================
+    # execute
+    #===========================================================================
+    def execute(self):
+        '''
+        Ejecuta la reserva de los turnos.
+        
+        ATENCION:
+        Antes de ejecutar el comando debe estar definida la afiliado, telefono 
+        y turnos
+        '''
+        # valido los parametros
+        if self.afiliado and self.telefono and self.turnos:
+            # reservo los turnos
+            self.reserva = self.receiver.crear_reserva(self.afiliado,
+                                                       self.telefono,
+                                                       self.turnos)
+        else:
+            # lanzo excepcion en caso que falte algun parametro
+            raise ValueError("You must define 'afiliado' and 'telefono' \
+                              'turnos' before execute this command")
+        # devuelvo la instancia de la reserva
+        return self.reserva
+
+    #===========================================================================
+    # undo
+    #===========================================================================
+    def undo(self):
+        '''
+        Borra la reserva del turno.
+        '''
+        # verifico que haya reservado un turno
+        if 'reserva' in self.__dict__ and self.reserva:
+            # borro la reserva
+            self.receiver.borrar_reserva(self.reserva)
+            del self.reserva
+        
