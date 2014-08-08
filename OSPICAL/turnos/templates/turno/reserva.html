@@ -11,7 +11,7 @@
 {% block content %}
 <form action="." method="post" class="pure-form pure-form-aligned pure-g-r">
 	{% csrf_token %}
-	<fieldset title="Datos de turno" class="pure-u-1-2">
+	<fieldset title="Datos de turno" class="pure-u-1">
 		<legend>Datos de turno</legend>
 		
 		<div class="pure-control-group">
@@ -38,12 +38,9 @@
 			{{ form.hora }}
 		</div>
 		
-		<div class="pure-controls">		
-			<input id="id_agregar" type="button" value="Agregar" class="pure-button pure-button-primary"/>
-		</div>
 	</fieldset>
 
-	<fieldset title="Datos personales" class="pure-u-1-2">
+	<fieldset title="Datos personales" class="pure-u-1">
 		<legend>Datos personales</legend>
 		{{ form.afiliado }}
 		<div class="pure-control-group">
@@ -76,17 +73,7 @@
 		
 	</fieldset>
 	
-	<fieldset title="Lista de turnos" class="pure-u-1">
-		{{ form.turnos }}
-		<legend>Lista de turnos a reservar</legend>
-		
-		<div id="list-container" class="pure-g">
-		</div>
-	</fieldset>
-	
-	<div class="pure-u-1-2">
-	</div>
-	<div class="pure-u-1-2">
+	<div class="pure-u-1">
 		<div class="pure-controls">
 		<input type="reset" value="Limpiar" class="pure-button pure-button-primary"/>
 		<input type="submit" value="Reservar" class="pure-button pure-button-primary"/>
