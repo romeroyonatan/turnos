@@ -467,6 +467,7 @@ Mediador.prototype = {
         this.turnos_disponibles.especialista = this.especialistas.seleccionado;
         // cargo los dias que atiende el especialista
         this.__templateCargar(this.dias, this.turnos_disponibles);
+        this.turnos_disponibles.seleccionar(0); // selecciono el primero
     },
 
     /**
