@@ -303,7 +303,7 @@ DNI.prototype.init = function(dom) {
     this.dom = dom;
     // defino el evento blur para que notifique el cambio de estado
     this.dom.blur($.proxy(function() {
-        this.cambioEstado();
+        this.notificar();
     }, this));
 }
 
