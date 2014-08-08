@@ -133,10 +133,11 @@ def crear_turnos(request):
         form = CrearTurnoForm(request.POST)
         if form.is_valid():
             logger.info("<%s> esta creando turnos" % request.user.username)
-            creados = b.crear_turnos(form.cleaned_data['dias'])
+            service = ReservaTurnosService()
+            creados = service.crear_turnos(dias=form.cleaned_data['dias'])
             if creados:
                 messages.success(request, 
-                                 u'%s Turnos creados con éxito' % creados)
+                                 u'%s Turnos creados con éxito' % len(creados))
             else:
                 messages.warning(request, 
                                  u'No se creó ningún turno, puede que ya se \
