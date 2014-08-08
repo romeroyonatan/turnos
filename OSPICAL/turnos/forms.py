@@ -1,38 +1,77 @@
 # coding=utf-8
+import json
+import logging
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, User
+from django.core.exceptions import MultipleObjectsReturned
 from django.db import transaction
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import MultipleObjectsReturned
-from models import *
-from validators import PasswordValidator
-import logging
-import json
-from django.forms.widgets import Widget
+
 from bussiness import Bussiness
+from models import Especialidad, Empleado, Especialista, Consultorio, \
+    Disponibilidad, EspecialistaEspecialidad, Turno, Afiliado
+from validators import PasswordValidator
 
 logger = logging.getLogger(__name__)
+
+#===============================================================================
+# ReservarTurnoForm
+#===============================================================================
 class ReservarTurnoForm(forms.Form):
+    error_messages = {
+        'afiliado_inexistente': "El afiliado ingresado no existe",
+        'turno_inexistente': "El turno seleccionado no existe",
+    }
     dni = forms.IntegerField(widget=forms.TextInput())
     numero = forms.IntegerField(widget=forms.TextInput())
-    nombre = forms.CharField(widget=forms.TextInput(attrs={'disabled':'disabled'}),
-                             required=False)
-    apellido = forms.CharField(widget=forms.TextInput(attrs={'disabled':'disabled'}),
-                               required=False)
+    nombre = forms.CharField(
+                         widget=forms.TextInput(attrs={'disabled':'disabled'}),
+                         required=False)
+    apellido = forms.CharField(
+                         widget=forms.TextInput(attrs={'disabled':'disabled'}),
+                         required=False)
     telefono = forms.CharField()
     especialidad = forms.ModelChoiceField(queryset=Especialidad.objects.all(),
-                                          empty_label="Seleccionar especialidad",
-                                          required=False)
-    especialista = forms.IntegerField(widget=forms.Select(attrs={'disabled':'disabled'}),
-                                      required=False)
+                                        empty_label="Seleccionar especialidad",
+                                        required=False)
+    especialista = forms.IntegerField(
+                            widget=forms.Select(attrs={'disabled':'disabled'}),
+                            required=False)
     dia = forms.IntegerField(widget=forms.Select(attrs={'disabled':'disabled'}),
                              required=False)
-    hora = forms.IntegerField(widget=forms.Select(attrs={'disabled':'disabled'}),
-                              required=False)
-    turnos = forms.CharField(widget=forms.HiddenInput(),required=False)
+    turno = forms.IntegerField(
+                             widget=forms.Select(attrs={'disabled':'disabled'}))
     afiliado = forms.CharField(widget=forms.HiddenInput())
+    
+    #===========================================================================
+    # clean_turno
+    #===========================================================================
+    def clean_turno(self):
+        try:
+            value = self.cleaned_data["turno"]
+            return Turno.objects.get(id=value)
+        except Turno.DoesNotExist:
+            raise forms.ValidationError(
+                self.error_messages['turno_inexistente'],
+                code='turno_inexistente',
+            )
+    
+    #===========================================================================
+    # clean_afiliado
+    #===========================================================================
+    def clean_afiliado(self):
+        try:
+            value = self.cleaned_data["afiliado"]
+            return Afiliado.objects.get(id=value)
+        except Afiliado.DoesNotExist:
+            raise forms.ValidationError(
+                self.error_messages['afiliado_inexistente'],
+                code='afiliado_inexistente',
+            )
+        
 class CrearTurnoForm(forms.Form):
     dias = forms.IntegerField()
 class RegistrarUsuarioForm(UserCreationForm):

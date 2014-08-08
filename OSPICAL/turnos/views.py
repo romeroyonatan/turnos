@@ -17,6 +17,7 @@ from django.template.response import TemplateResponse
 
 from turnos.forms import *
 from turnos.models import *
+from turnos.negocio.service import ReservaTurnosService
 from bussiness import Bussiness
 from decorators import Paginar
 import logging
@@ -43,43 +44,22 @@ def reservar(request):
     if request.method == 'POST':
         form = ReservarTurnoForm(request.POST)
         if form.is_valid():
-            p = __getParametrosReserva(form)
-            bussiness = Bussiness()
-            if not p['turnos']:
-                messages.error(request, 'Debe ingresar al menos un turno a reservar')
+            service = ReservaTurnosService()
+            try:
+                reserva = service.crear_reserva(form.cleaned_data['afiliado'], 
+                                                form.cleaned_data['telefono'],
+                                                [form.cleaned_data['turno']])
+            except Exception, e:
+                messages.error(request, __getExceptionMessage(e))
             else:
-                try:
-                    reserva = bussiness.reservarTurnos(p['afiliado'], 
-                                                       p['telefono'],
-                                                       p['turnos'],
-                                                       empleado=request.user.get_profile())
-                except Exception, e:
-                    messages.error(request, __getExceptionMessage(e))
-                else:
-                    messages.success(request, u'Turno reservado con éxito')
-                    return HttpResponseRedirect(request.path)
+                messages.success(request, u'Turno reservado con éxito')
+                return HttpResponseRedirect(request.path)
     else:
         form = ReservarTurnoForm()
     return render_to_response('turno/reserva.html',
                               locals(),
                               context_instance=RequestContext(request))
 
-def __getTurnos(form):
-    turnos = form.cleaned_data['turnos']
-    lista = []
-    if turnos:
-        lista = json.loads(turnos)
-    if not lista:
-        hora = form.cleaned_data['hora']
-        lista = [hora] if hora else None
-    return lista
-    
-def __getParametrosReserva(form):
-    turnos = __getTurnos(form)
-    afiliado = form.cleaned_data['afiliado']
-    telefono = form.cleaned_data['telefono']
-    return {'turnos':turnos, 'afiliado':afiliado, 'telefono':telefono}
-    
 def __getExceptionMessage(exception):
     logger.error("Ocurrio una excepcion en la vista '%s': %s - %s" % (inspect.stack()[1][3],
                                                                     exception.__class__.__name__,

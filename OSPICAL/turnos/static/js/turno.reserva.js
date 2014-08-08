@@ -272,7 +272,7 @@ TurnosDisponibles.prototype.obtenerElementos = function(milis) {
  * Muestra los elementos en el objeto DOM
  */
 TurnosDisponibles.prototype.cargar = function(especialista, dia) {
-    var options = "";
+    var options = "<option value=''>Seleccionar</option>";
     // cargo los elementos de la lista
     this.obtenerElementos(especialista, dia)
     // Recorro la lista de elementos
@@ -489,7 +489,7 @@ $(document).ready(function() {
     mediador.especialidades.init($("#id_especialidad"));
     mediador.especialistas.init($("#id_especialista"));
     mediador.dias.init($("#id_dia"));
-    mediador.turnos_disponibles.init($("#id_hora"));
+    mediador.turnos_disponibles.init($("#id_turno"));
     mediador.dni.init($('#id_dni'));
     mediador.numero_afiliado.init($('#id_numero'))
     mediador.init(); // inicializa el objeto mediador

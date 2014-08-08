@@ -159,6 +159,7 @@ class ReservasTestSuite(TestCase):
         # espero que lanze la excepcion
         with self.assertRaises(ValueError):
             self.manager.crear_reserva(None, '12345678', lista_turnos)
+            self.manager.crear_reserva(afiliado, '12345678', lista_turnos)
         # verifico que los turnos sigan en estado disponible (la accion de
         # reservar debe ser transaccional)
         for turno in lista_turnos:

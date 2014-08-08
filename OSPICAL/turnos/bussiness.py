@@ -31,7 +31,7 @@ class Bussiness():
         logger.debug("Buscando afiliado %s %s" % (parametro, valor))
         data = self.__busquedaExternaAfiliados(parametro, valor)
         if not data:
-            logger.warn("Afiliado %s %s no encontrado en sistema externo. Buscando en caché local" 
+            logger.warn("Afiliado %s %s no encontrado en sistema externo. Buscando en cache local" 
                         % (parametro, valor))
             data = self.__busquedaLocalAfiliados(parametro, valor)
         logger.debug("Resultado de busqueda de afiliado %s %s: %s" % (parametro, valor, data))
