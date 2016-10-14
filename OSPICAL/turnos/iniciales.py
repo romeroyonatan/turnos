@@ -5,9 +5,6 @@ from datetime import timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User, Permission
 
-a = Afiliado(nombre='Yonatan',apellido='Romero',dni=36542356,numero='000100020003')
-a.save()
-
 b = Afiliado(nombre='Un duplicado',apellido='Perez',dni=12345678,numero='000100020033')
 b.save()
 
